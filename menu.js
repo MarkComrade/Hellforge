@@ -13,21 +13,42 @@ function Menu(){
     //title
     let body= document.getElementsByTagName('body');
     body.innerHTML= "";
-    let menu= document.createElement('div');
-    menu.setAttribute('class','Menutitle');
-    menu.innerHTML= "Hellforge"
-    body[0].appendChild(menu);
+    let menutitle= document.createElement('div');
+    menutitle.setAttribute('class','Menutitle');
+    menutitle.innerHTML= "Hellforge"
+    body[0].appendChild(menutitle);
     //buttons container div
-
-    menufluid.setAttribute('class','menufluid container-fluid');
-    body[0].appendChild(menufluid);
+    let menu= document.createElement('div');
+    menu.setAttribute('class','menufluid container-fluid');
+    body[0].appendChild(menu);
     //row div
     let row1= document.createElement('div');
-    row1.setAttribute('class','row');
-    menufluid.appendChild(row1);
+    row1.setAttribute('class','row d-flex flex-wrap');
+    menu.appendChild(row1);
+    const buttons = [
+        { text: 'New Game', onClick: NewGame },
+        { text: 'Load Game', onClick: Save },
+        { text: 'Admin', onClick: Admin },
+        { text: 'Options', onClick: Options }
+    ];
+    buttons.forEach(({ text, onClick }) => {
+        let col= document.createElement('div');
+        col.setAttribute('class',' col-md-12 mb-3 ');
+        row1.appendChild(col);
+        let button= document.createElement('input');
+        button.setAttribute('type','button');
+        button.setAttribute('value',text);
+        button.setAttribute('class','menuButton');
+        button.addEventListener('click', onClick);
+        col.appendChild(button);
+    });
+    
    
 }
-
+function NewGame() {
+  document.body.innerHTML = "";
+  console.log("New Game!");
+}
 function Save() {
   document.body.innerHTML = "";
   console.log("Game loaded!");
@@ -145,11 +166,11 @@ function checkOrientation() {
 }
 
 function playMenuMusic() {
-    
+    //levettem az autiod hogy ne legyen idegesito 
     if (!audio) {
         audio = new Audio('music/track1.mp3');
         audio.loop = true;
-        audio.volume = 0.1;
+        audio.volume = 0.0;
         audio.play();
     } else if (audio.paused) {
         audio.play();
