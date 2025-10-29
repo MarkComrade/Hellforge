@@ -1,0 +1,110 @@
+* {
+    cursor: url("textures/cursor.png"), auto !important;
+}
+
+body {
+    background:  url('menuImages/mainBackGround.jpeg') no-repeat fixed center; 
+    background-size: cover;
+    overflow: hidden;
+}
+
+@font-face {
+    font-family: pixelFont;
+    src: url(fontStyle/yoster.ttf);
+}
+
+.Menutitle {
+    font-family: pixelFont;
+    font-size: 10vw;
+    color: rgb(99, 13, 13);
+    text-align: center;
+    margin-top: 5vh;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    text-transform: uppercase;
+}
+
+.OrientationWarning {
+    font-family: pixelFont;
+    font-size: 10vw;
+    color: rgb(99, 13, 13);
+    text-align: center;
+    justify-content: center;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    text-transform: uppercase;
+}
+
+.menufluid input[type="button"] {
+    font-family: pixelFont;
+    font-size: 2vw;
+    flex-wrap: wrap;
+    width: 20%;
+    margin-left: 5vw;
+    background-color: #311603;
+    color: rgb(99, 13, 13);
+    border: 4px solid rgb(99, 13, 13);
+    outline: 2px solid #311603;
+    image-rendering: pixelated;
+    padding: 10px 20px;
+
+}
+.menufluid input[type="button"]:hover {
+    background-color: rgb(99, 13, 13);
+    color: #311603;
+    border: 4px solid #311603;
+    outline: 2px solid rgb(99, 13, 13);
+}
+
+.miscButton {
+    font-family: pixelFont;
+    font-size: 2vw;
+    flex-wrap: wrap;
+    width: 20%;
+    margin-left: 5vw;
+    background-color: #311603;
+    color: rgb(99, 13, 13);
+    border: 4px solid rgb(99, 13, 13);
+    outline: 2px solid #311603;
+    image-rendering: pixelated;
+    padding: 10px 20px;
+}
+
+.miscButton:hover {
+    background-color: rgb(99, 13, 13);
+    color: #311603;
+    border: 4px solid #311603;
+    outline: 2px solid rgb(99, 13, 13);
+}
+
+.VolumeSlider {
+  -webkit-appearance: none;
+  width: 30vw;
+  height: 5vh;
+  background: linear-gradient(90deg, #ff4500, #ffae00);
+  border-radius: 5px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 100, 0, 0.5);
+}
+
+
+.VolumeSlider:hover {
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
+  transform: scale(1.03);
+}
+
+.VolumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffae00 0%, #ff4500 70%, #222 100%);
+  box-shadow: 0 0 10px rgba(255, 120, 0, 0.9);
+  transition: all 0.3s ease;
+}
+
+.VolumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 20px rgba(255, 200, 0, 1);
+}
+
+
