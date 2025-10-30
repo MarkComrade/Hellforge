@@ -13,13 +13,23 @@ body {
     src: url(fontStyle/yoster.ttf);
 }
 
-.Menutitle {
+.menuTitle {
     font-family: pixelFont;
-    font-size: 10vw;
+    font-size: 8vw;
+    color: rgb(99, 13, 13);
+    margin-top: 2vh;
+    margin-left: 5vw;
+    text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
+    text-transform: uppercase;
+}
+
+.menuText {
+    font-family: pixelFont;
+    font-size: 2vw;
     color: rgb(99, 13, 13);
     text-align: center;
-    margin-top: 5vh;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    margin-top: 2vh;
+    text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
     text-transform: uppercase;
 }
 
@@ -29,11 +39,11 @@ body {
     color: rgb(99, 13, 13);
     text-align: center;
     justify-content: center;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
 }
 
-.menufluid input[type="button"] {
+.menuFluid input[type="button"] {
     font-family: pixelFont;
     font-size: 2vw;
     flex-wrap: wrap;
@@ -41,70 +51,77 @@ body {
     margin-left: 5vw;
     background-color: #311603;
     color: rgb(99, 13, 13);
-    border: 4px solid rgb(99, 13, 13);
-    outline: 2px solid #311603;
+    border: 0.4vh solid rgb(99, 13, 13);
+    outline: 0.2vh solid #311603;
     image-rendering: pixelated;
-    padding: 10px 20px;
-
+    padding: 1vh 2vh;
+    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000, 0.15vw 0.15vw 0 #000;
+    transition: all 0.2s ease;
 }
-.menufluid input[type="button"]:hover {
-    background-color: rgb(99, 13, 13);
-    color: #311603;
-    border: 4px solid #311603;
-    outline: 2px solid rgb(99, 13, 13);
+.menuFluid input[type="button"]:hover {
+    background-color: rgb(155, 20, 20);
+    color: rgb(99, 13, 13);
+    border: 0.4vh solid #4a2305;
+    outline: 0.2vh solid rgb(155, 20, 20);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
 }
 
 .miscButton {
     font-family: pixelFont;
     font-size: 2vw;
     flex-wrap: wrap;
-    width: 20%;
     margin-left: 5vw;
     background-color: #311603;
     color: rgb(99, 13, 13);
-    border: 4px solid rgb(99, 13, 13);
-    outline: 2px solid #311603;
+    border: 0.4vh solid rgb(99, 13, 13);
+    outline: 0.2vh solid #311603;
     image-rendering: pixelated;
-    padding: 10px 20px;
+    padding: 1vh 2vh;
+    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000, 0.15vw 0.15vw 0 #000;
+    transition: all 0.2s ease;
 }
 
 .miscButton:hover {
-    background-color: rgb(99, 13, 13);
-    color: #311603;
-    border: 4px solid #311603;
-    outline: 2px solid rgb(99, 13, 13);
+    background-color: rgb(155, 20, 20);
+    color: rgb(99, 13, 13);
+    border: 0.4vh solid #4a2305;
+    outline: 0.2vh solid rgb(155, 20, 20);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
 }
 
-.VolumeSlider {
+.volumeSlider {
   -webkit-appearance: none;
   width: 30vw;
   height: 5vh;
-  background: linear-gradient(90deg, #ff4500, #ffae00);
-  border-radius: 5px;
+  background: linear-gradient(90deg, black);
+  border-radius: 0.5vh;
   outline: none;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(255, 100, 0, 0.5);
+  box-shadow: 0 0 1vh rgba(255, 100, 0, 0.5);
 }
 
 
-.VolumeSlider:hover {
-  box-shadow: 0 0 20px rgba(255, 140, 0, 0.8);
+.volumeSlider:hover {
+  box-shadow: 0 0 2vh rgba(255, 140, 0, 0.8);
   transform: scale(1.03);
 }
 
-.VolumeSlider::-webkit-slider-thumb {
+.volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
+  appearance: none;
+  width: 2.5vh;
+  height: 2.5vh;
   border-radius: 50%;
   background: radial-gradient(circle, #ffae00 0%, #ff4500 70%, #222 100%);
-  box-shadow: 0 0 10px rgba(255, 120, 0, 0.9);
+  box-shadow: 0 0 1vh rgba(255, 120, 0, 0.9);
   transition: all 0.3s ease;
 }
 
-.VolumeSlider::-webkit-slider-thumb:hover {
+.volumeSlider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  box-shadow: 0 0 20px rgba(255, 200, 0, 1);
+  box-shadow: 0 0 2vh rgba(255, 200, 0, 1);
 }
 
 
