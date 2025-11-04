@@ -1,5 +1,11 @@
+@font-face {
+    font-family: pixelFont;
+    src: url(fontStyle/yoster.ttf);
+}
+
 * {
     cursor: url("textures/cursor.png"), auto !important;
+    font-family: pixelFont;
 }
 
 body {
@@ -8,13 +14,8 @@ body {
     overflow: hidden;
 }
 
-@font-face {
-    font-family: pixelFont;
-    src: url(fontStyle/yoster.ttf);
-}
 
 .menuTitle {
-    font-family: pixelFont;
     font-size: 8vw;
     color: rgb(99, 13, 13);
     margin-top: 2vh;
@@ -24,18 +25,16 @@ body {
 }
 
 .menuText {
-    font-family: pixelFont;
     font-size: 2vw;
     color: rgb(99, 13, 13);
     text-align: center;
-    margin-top: 2vh;
+    align-self: center;
     text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
     text-transform: uppercase;
 }
 
-.OrientationWarning {
-    font-family: pixelFont;
-    font-size: 10vw;
+.orientationWarning {
+    font-size: 7vw;
     color: rgb(99, 13, 13);
     text-align: center;
     justify-content: center;
@@ -43,35 +42,12 @@ body {
     text-transform: uppercase;
 }
 
-.menuFluid input[type="button"] {
-    font-family: pixelFont;
+.menuButton {
     font-size: 2vw;
+    width: 25vw;
+    align-self: center;
+    height: fit-content;
     flex-wrap: wrap;
-    width: 20%;
-    margin-left: 5vw;
-    background-color: #311603;
-    color: rgb(99, 13, 13);
-    border: 0.4vh solid rgb(99, 13, 13);
-    outline: 0.2vh solid #311603;
-    image-rendering: pixelated;
-    padding: 1vh 2vh;
-    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000, 0.15vw 0.15vw 0 #000;
-    transition: all 0.2s ease;
-}
-.menuFluid input[type="button"]:hover {
-    background-color: rgb(155, 20, 20);
-    color: rgb(99, 13, 13);
-    border: 0.4vh solid #4a2305;
-    outline: 0.2vh solid rgb(155, 20, 20);
-    transform: scale(1.05);
-    transition: all 0.2s ease;
-}
-
-.miscButton {
-    font-family: pixelFont;
-    font-size: 2vw;
-    flex-wrap: wrap;
-    margin-left: 5vw;
     background-color: #311603;
     color: rgb(99, 13, 13);
     border: 0.4vh solid rgb(99, 13, 13);
@@ -82,7 +58,7 @@ body {
     transition: all 0.2s ease;
 }
 
-.miscButton:hover {
+.menuButton:hover {
     background-color: rgb(155, 20, 20);
     color: rgb(99, 13, 13);
     border: 0.4vh solid #4a2305;
@@ -92,36 +68,45 @@ body {
 }
 
 .volumeSlider {
-  -webkit-appearance: none;
-  width: 30vw;
-  height: 5vh;
-  background: linear-gradient(90deg, black);
-  border-radius: 0.5vh;
-  outline: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 1vh rgba(255, 100, 0, 0.5);
+    -webkit-appearance: none;
+    appearance: none;
+    align-self: center;
+    width: 25vw;
+    height: 3vh;
+    background: linear-gradient(90deg, #310000, #630d0d, #961414);
+    border: 0.4vh solid #4a2305;
+    outline: 0.2vh solid rgb(99, 13, 13);
+    image-rendering: pixelated;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 1vh rgba(99, 13, 13, 0.5);
+    cursor: pointer;
 }
 
-
 .volumeSlider:hover {
-  box-shadow: 0 0 2vh rgba(255, 140, 0, 0.8);
-  transform: scale(1.03);
+    box-shadow: 0 0 2vh rgba(155, 20, 20, 0.8);
+    transform: scale(1.03);
 }
 
 .volumeSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 2.5vh;
-  height: 2.5vh;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffae00 0%, #ff4500 70%, #222 100%);
-  box-shadow: 0 0 1vh rgba(255, 120, 0, 0.9);
-  transition: all 0.3s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2vh;
+    height: 3vh;
+    background-color: #ff0000;
+    border: 0.3vh solid rgb(99, 13, 13);
+    box-shadow: -0.2vh 0 0 #000, 0.2vh 0 0 #000, 0 -0.2vh 0 #000, 0 0.2vh 0 #000;
+    image-rendering: pixelated;
+    transition: all 0.2s ease;
 }
 
 .volumeSlider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 2vh rgba(255, 200, 0, 1);
+    transform: scale(1.2);
+    background-color: rgb(155, 20, 20);
+    border-color: #4a2305;
+    box-shadow: -0.3vh 0 0 #000, 0.3vh 0 0 #000, 0 -0.3vh 0 #000, 0 0.3vh 0 #000;
 }
 
-
+#musicControls {
+    margin-top: 5vh;
+    height: 50vh;
+}

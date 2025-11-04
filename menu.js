@@ -1,85 +1,115 @@
+import { NewGame } from './room.js';
 document.addEventListener('DOMContentLoaded', function() {
     checkOrientation();
-      document.addEventListener('click', function startMusicOnce() {
+
+
+    //Start music
+    document.addEventListener('click', function startMusicOnce() {
         playMenuMusic();
         document.removeEventListener('click', startMusicOnce);
     });
- 
+
 });
+
 let audio;
 window.addEventListener("resize", checkOrientation);
 
+//Tool to generate bootstrap grid
+function generateBootStrapGrid(row, col, col_md_value, id)
+{
+    let body = document.getElementsByTagName('body');
+    let contDiv = document.createElement('div');
+    contDiv.setAttribute('class','container-fluid');
+
+    for(let i = 0; i < row; i++) {
+        let rowDiv = document.createElement('div');
+        rowDiv.setAttribute('class','row');
+        contDiv.appendChild(rowDiv);
+
+        for(let j = 0; j < col; j++) {
+            let colDiv = document.createElement('div');
+            colDiv.setAttribute('class',`col-sm-12 col-md-${col_md_value} d-flex justify-content-center`);
+            // Set the ID on the column if provided
+            if (id) {
+                colDiv.setAttribute('id', id);
+            }
+            rowDiv.appendChild(colDiv);
+        }
+    }
+
+    body[0].appendChild(contDiv);
+}
+
+//Menu generation
 function Menu(){
-    let body= document.getElementsByTagName('body');
-    body.innerHTML= "";
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = "";
 
     //Title
-    let menuTitle= document.createElement('div');
-    menuTitle.setAttribute('class','menuTitle');
-    menuTitle.innerHTML= "Hellforge"
+    generateBootStrapGrid(1, 1, 12);
+    let menuTitle = document.createElement('div');
+    menuTitle.setAttribute('class', 'menuTitle mainMenu');  // Added mainMenu class
+    menuTitle.innerHTML = "Hellforge";
+    document.querySelector('.col-md-12').appendChild(menuTitle);
 
-    body[0].appendChild(menuTitle);
-
-    //buttons container div
-    let menu= document.createElement('div');
-    menu.setAttribute('class','menuFluid container-fluid');
-    body[0].appendChild(menu);
-
-    //row div
-    let row= document.createElement('div');
-    row.setAttribute('class','row d-flex flex-wrap');
-    menu.appendChild(row);
-
+    //Buttons
     const buttons = [
-
-        { text: 'New Game', onClick: NewGame },
-        { text: 'Load Game', onClick: Save },
+        { text: 'New Game', onClick: StartGame },
+        { text: 'Load Game', onClick: loadGame },
         { text: 'Admin', onClick: Admin },
         { text: 'Options', onClick: Options }
-
     ];
-    buttons.forEach(({ text, onClick }) => {
 
-        let col= document.createElement('div');
-        col.setAttribute('class',' col-md-12 mb-3 ');
-        row.appendChild(col);
+    generateBootStrapGrid(buttons.length, 1, 12, "menuButtons");
 
-        let button= document.createElement('input');
-        button.setAttribute('type','button');
-        button.setAttribute('value', text);
-        button.setAttribute('class','MenuButton');
-
-        button.addEventListener('click', onClick);
-        col.appendChild(button);
-    });
+    const columns = document.querySelectorAll('.container-fluid:last-child .col-md-12');
     
-   
+    // Add buttons
+    buttons.forEach(({ text, onClick }, index) => {
+        let button = document.createElement('input');
+        button.setAttribute('type', 'button');
+        button.setAttribute('value', text);
+        button.setAttribute('class', 'menuButton');
+        button.setAttribute('style', 'margin-top:5vh;');
+        button.addEventListener('click', onClick);
+        
+        columns[index].appendChild(button);
+    });
 }
-function NewGame() {
+
+//Start game
+function StartGame() {
+    NewGame();
+}
+
+//Load game
+function loadGame() {
   document.body.innerHTML = "";
-  console.log("New Game!");
 }
 
-function Save() {
-  document.body.innerHTML = "";
-  console.log("Game loaded!");
-}
-
-
+//Admin menu
 function Admin() {
   document.body.innerHTML = "";
-  console.log("Admin menu opened!");
 }
 
-
+//Options menu
 function Options() {
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML= "";
 
-    const body = document.body;
-    body.innerHTML = "";
+    // Music controls
+    generateBootStrapGrid(1,1,12,"optionsTitle");
+    let optionsTitle = document.createElement('h1');
+    optionsTitle.setAttribute('class','menuTitle optionsMenu');  // Added optionsMenu class
+    optionsTitle.innerHTML= "Options";
+
+    document.querySelector('.col-md-12').appendChild(optionsTitle);
+
+    generateBootStrapGrid(1,3,4,"musicControls");
 
     const volumeLabel = Object.assign(document.createElement("label"), {
         htmlFor: "volume",
-        innerHTML: "Music control:",
+        innerHTML: "Music controls:",
         className: "menuText"
     });
     
@@ -89,75 +119,47 @@ function Options() {
         min: "0",
         max: "100",
         value: "10",
-        className: "volumeSlider mt-4"
+        className: "volumeSlider"
     });
-
-    //Title container
-
-    let container = document.createElement('div');
-    container.setAttribute('class', 'container-fluid');
-    body.appendChild(container);
-    
-    let row = document.createElement('div');
-    row.setAttribute('class', 'row');
-    container.appendChild(row);
-
-    let col = document.createElement('div');
-    col.setAttribute('class', 'col-12');
-    row.appendChild(col);
-
-    const options = Object.assign(document.createElement("div"), {
-        className: "menuTitle",
-        innerHTML: "Options"
-    });
-    col.appendChild(options);
-
-    //Options container
-    let optionsContainer = document.createElement('div');
-    optionsContainer.setAttribute('class', 'container-fluid');
-    body.appendChild(optionsContainer);
-    
-    //Options container rows
-    let optionsRow = document.createElement('div');
-    optionsRow.setAttribute('class', 'row');
-    optionsRow.classList.add('mt-3', 'justify-content-center');
-    optionsContainer.appendChild(optionsRow);
-
-
-    for(let i = 0; i < 2; i++) {
-        let col = document.createElement('div');
-        col.classList.add('col-6', 'd-flex', 'justify-content-center');
-        optionsRow.appendChild(col);
-    }
-
-    optionsRow.childNodes[0].appendChild(volumeLabel);
-    optionsRow.childNodes[0].appendChild(volume);
-    optionsContainer.appendChild(optionsRow);
 
     volume.addEventListener('input', (e) => {
         if (audio) audio.volume = e.target.value / 100;
     });
 
-    let disableMusic = document.createElement('input');
-    disableMusic.type = 'button';
-    disableMusic.value = 'Disable Music';
-    disableMusic.id = 'disableMusic';
-    disableMusic.classList.add('miscButton');
-    disableMusic.addEventListener('click', stopAudio);
+    const disableMusic = Object.assign(document.createElement('input'), {
+        type: 'button',
+        value: 'Disable Music',
+        id: 'disableMusic',
+        className: 'menuButton'
+    });
 
     disableMusic.addEventListener('click', () => {
-        if(disableMusic.value === 'Disable Music') {
-            disableMusic.value = 'Enable Music';
-            stopAudio();
-        } else {
-            disableMusic.value = 'Disable Music';
-            playMenuMusic();
-        }
-    });    
+        disableMusic.value = disableMusic.value === 'Disable Music' ? 'Enable Music' : 'Disable Music';
+        disableMusic.value === 'Enable Music' ? stopAudio() : playMenuMusic();
+    });
     
-    optionsRow.childNodes[1].appendChild(disableMusic);
+    document.querySelectorAll('.col-md-4')[0].appendChild(volumeLabel);
+    document.querySelectorAll('.col-md-4')[1].appendChild(volume);
+    document.querySelectorAll('.col-md-4')[2].appendChild(disableMusic);
+
+    generateBootStrapGrid(1,1,12,"backToMenu");
+
+    //Back To Menu
+
+    let backButton = document.createElement('input');
+    backButton.setAttribute('type','button');
+    backButton.setAttribute('value','Back to Menu');
+    backButton.setAttribute('class','menuButton');
+
+    backButton.addEventListener('click', Menu);
+
+
+    let backToMenu = document.getElementById("backToMenu");
+    backToMenu.appendChild(backButton);
+
 }
 
+//Check the display size
 function checkOrientation() {
     const body= document.getElementsByTagName('body');
 
@@ -166,7 +168,7 @@ function checkOrientation() {
         body[0].innerHTML= "";
 
         let warning= document.createElement('div');
-        warning.setAttribute('class','OrientationWarning');
+        warning.setAttribute('class','orientationWarning');
         warning.innerHTML= "Please rotate your device to landscape mode or make the window fullscreen to continue.";
         warning.style.position = 'absolute';
         warning.style.top = '50%';
@@ -178,16 +180,23 @@ function checkOrientation() {
     }
     else
     {
-        body[0].innerHTML = "";
-
-        Menu();
+        const mainMenu = document.querySelector('.mainMenu');
+        const optionsMenu = document.querySelector('.optionsMenu');
+        
+        if (mainMenu) {
+            Menu();
+        } else if (optionsMenu) {
+            Options();
+        } else {
+            Menu();
+        }
     }
 
     return true;
 }
 
+//Play music
 function playMenuMusic() {
-    //levettem az autiod hogy ne legyen idegesito 
     if (!audio) {
 
         audio = new Audio('music/track1.mp3');
@@ -202,6 +211,7 @@ function playMenuMusic() {
     }
 }
 
+//Stop music
 function stopAudio() {
     if (audio) {
 
