@@ -29,7 +29,6 @@ function generateBootStrapGrid(row, col, col_md_value, id)
         for(let j = 0; j < col; j++) {
             let colDiv = document.createElement('div');
             colDiv.setAttribute('class',`col-sm-12 col-md-${col_md_value} d-flex justify-content-center`);
-            // Set the ID on the column if provided
             if (id) {
                 colDiv.setAttribute('id', id);
             }
@@ -40,6 +39,22 @@ function generateBootStrapGrid(row, col, col_md_value, id)
     body[0].appendChild(contDiv);
 }
 
+function generateBackToMenu() {
+
+    generateBootStrapGrid(1,1,12,"backToMenu");
+
+    let backButton = document.createElement('input');
+    backButton.setAttribute('type','button');
+    backButton.setAttribute('value','Back to Menu');
+    backButton.setAttribute('class','menuButton');
+
+    backButton.addEventListener('click', Menu);
+
+
+    let backToMenu = document.getElementById("backToMenu");
+    backToMenu.appendChild(backButton);
+}
+
 //Menu generation
 function Menu(){
     let body = document.getElementsByTagName('body');
@@ -48,7 +63,7 @@ function Menu(){
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
-    menuTitle.setAttribute('class', 'menuTitle mainMenu');  // Added mainMenu class
+    menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = "Hellforge";
     document.querySelector('.col-md-12').appendChild(menuTitle);
 
@@ -80,16 +95,39 @@ function Menu(){
 //Start game
 function StartGame() {
     NewGame();
+
+    generateBackToMenu()
 }
 
 //Load game
 function loadGame() {
-  document.body.innerHTML = "";
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = "";
+
+    //Title
+    generateBootStrapGrid(1, 1, 12);
+    let menuTitle = document.createElement('div');
+    menuTitle.setAttribute('class', 'menuTitle loadMenu');
+    menuTitle.innerHTML = "Load Game";
+    document.querySelector('.col-md-12').appendChild(menuTitle);
+
+    generateBackToMenu()
 }
 
 //Admin menu
 function Admin() {
-  document.body.innerHTML = "";
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = "";
+
+    //Title
+    generateBootStrapGrid(1, 1, 12);
+    let menuTitle = document.createElement('div');
+    menuTitle.setAttribute('class', 'menuTitle adminMenu');
+    menuTitle.innerHTML = "Admin Login";
+    document.querySelector('.col-md-12').appendChild(menuTitle);
+
+
+    generateBackToMenu()
 }
 
 //Options menu
@@ -142,20 +180,7 @@ function Options() {
     document.querySelectorAll('.col-md-4')[1].appendChild(volume);
     document.querySelectorAll('.col-md-4')[2].appendChild(disableMusic);
 
-    generateBootStrapGrid(1,1,12,"backToMenu");
-
-    //Back To Menu
-
-    let backButton = document.createElement('input');
-    backButton.setAttribute('type','button');
-    backButton.setAttribute('value','Back to Menu');
-    backButton.setAttribute('class','menuButton');
-
-    backButton.addEventListener('click', Menu);
-
-
-    let backToMenu = document.getElementById("backToMenu");
-    backToMenu.appendChild(backButton);
+    generateBackToMenu()
 
 }
 
