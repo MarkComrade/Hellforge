@@ -1,14 +1,14 @@
-export function NewGame() {
+function newGame() {
     // Clear body
     let body = document.getElementsByTagName('body');
-    body[0].innerHTML = "";
+    body[0].innerHTML = '';
 
     let container = document.createElement('div');
     container.setAttribute('class', 'container');
     container.setAttribute('id', 'map');
     body[0].appendChild(container);
 
-    // 9x9 grid 
+    // 9x9 grid
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
         div.setAttribute('class', 'row');
@@ -33,8 +33,8 @@ export function NewGame() {
     start.dataset.room = true;
     start.style.backgroundColor = 'lightblue';
     //generate room lenght
-    let roomsToGenerate = Math.floor(Math.random() * 3+1) +5 ;
-    console.log("Rooms to generate:", roomsToGenerate);
+    let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + 5;
+    console.log('Rooms to generate:', roomsToGenerate);
 
     // active rooms list
     let activeRooms = [{ x: startX, y: startY }];
@@ -59,7 +59,7 @@ export function NewGame() {
         }
     }
 
-    console.log("aktiv szvabaszam", activeRooms.length);
+    console.log('aktiv szvabaszam', activeRooms.length);
 
     // check if cell is a room
     function checkCell(x, y) {

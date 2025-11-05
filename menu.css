@@ -4,24 +4,29 @@
 }
 
 * {
-    cursor: url("textures/cursor.png"), auto !important;
+    cursor: url('textures/cursor.png'), auto !important;
     font-family: pixelFont;
 }
 
 body {
-    background:  url('menuImages/mainBackGround.jpeg') no-repeat fixed center; 
+    background: url('menuImages/mainBackGround.jpeg') no-repeat fixed center;
     background-size: cover;
     overflow: hidden;
 }
 
-
 .menuTitle {
     font-size: 8vw;
     color: rgb(99, 13, 13);
-    margin-top: 2vh;
     margin-left: 5vw;
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
+}
+
+.mainMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30vh;
 }
 
 .menuText {
@@ -43,28 +48,27 @@ body {
 }
 
 .menuButton {
-    font-size: 2vw;
-    width: 25vw;
+    font-size: 3vw;
     align-self: center;
-    height: fit-content;
     flex-wrap: wrap;
-    background-color: #311603;
     color: rgb(99, 13, 13);
-    border: 0.4vh solid rgb(99, 13, 13);
-    outline: 0.2vh solid #311603;
-    image-rendering: pixelated;
     padding: 1vh 2vh;
-    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000, 0.15vw 0.15vw 0 #000;
+    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000,
+        0.15vw 0.15vw 0 #000;
     transition: all 0.2s ease;
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
 }
 
 .menuButton:hover {
-    background-color: rgb(155, 20, 20);
     color: rgb(99, 13, 13);
-    border: 0.4vh solid #4a2305;
-    outline: 0.2vh solid rgb(155, 20, 20);
     transform: scale(1.05);
     transition: all 0.2s ease;
+    text-decoration: none;
+    text-shadow: -0.15vw -0.15vw 0.3vw rgb(245, 239, 235, 0.3),
+        0.15vw -0.15vw 0.3vw rgba(245, 239, 235, 0.3), -0.15vw 0.15vw 0.3vw rgb(245, 239, 235, 0.3),
+        0.15vw 0.15vw 0.3vw rgb(245, 239, 235, 0.3);
 }
 
 .volumeSlider {
@@ -94,9 +98,6 @@ body {
     height: 3vh;
     background-color: #ff0000;
     border: 0.3vh solid rgb(99, 13, 13);
-    box-shadow: -0.2vh 0 0 #000, 0.2vh 0 0 #000, 0 -0.2vh 0 #000, 0 0.2vh 0 #000;
-    image-rendering: pixelated;
-    transition: all 0.2s ease;
 }
 
 .volumeSlider::-webkit-slider-thumb:hover {
@@ -104,6 +105,38 @@ body {
     background-color: rgb(155, 20, 20);
     border-color: #4a2305;
     box-shadow: -0.3vh 0 0 #000, 0.3vh 0 0 #000, 0 -0.3vh 0 #000, 0 0.3vh 0 #000;
+}
+
+#loginFormContainer .row {
+    margin: 3vh 0;
+    padding: 2vh 0;
+    display: flex;
+    align-items: center;
+}
+
+#loginFormContainer .menuText {
+    margin-right: 2vw;
+    text-align: right;
+    padding-right: 2vw;
+    border-right: 0.2vh solid rgba(99, 13, 13, 0.3);
+}
+
+#loginFormContainer .menuInput {
+    font-size: 1.8vw;
+    padding: 1vh 1.5vw;
+    background: rgba(99, 13, 13, 0.1);
+    border: 0.2vh solid rgb(99, 13, 13);
+    color: rgb(99, 13, 13);
+    text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
+    width: 20vw;
+    transition: all 0.2s ease;
+}
+
+#loginFormContainer .menuInput:focus {
+    background: rgba(99, 13, 13, 0.2);
+    outline: none;
+    transform: scale(1.02);
+    box-shadow: 0 0 1vh rgba(99, 13, 13, 0.5);
 }
 
 #musicControls {
