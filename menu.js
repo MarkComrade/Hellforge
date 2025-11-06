@@ -227,6 +227,78 @@ function LeaderBoard() {
     menuTitle.setAttribute('class', 'menuTitle leaderBoardMenu');
     menuTitle.innerHTML = 'Leaderboard';
     document.querySelector('.col-md-12').appendChild(menuTitle);
+    //Leadboard data
+    let loggedIn = true; //Simulate logged in for demo purposes
+    let leaderboardData = []; // Array to hold leaderboard data
+
+    //Generate test data
+    for (let i = 1; i <= 100; i++) {
+        leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000) });
+    }
+
+    //Sort data by score
+    for (var i = 0; i < leaderboardData.length; i++) {
+        // Last i elements are already in place
+        for (var j = 0; j < leaderboardData.length - i - 1; j++) {
+            // Checking if the item at present iteration
+            // is greater than the next iteration
+            if (leaderboardData[j].score < leaderboardData[j + 1].score) {
+                // If the condition is true
+                // then swap them
+                let temp = leaderboardData[j];
+                leaderboardData[j] = leaderboardData[j + 1];
+                leaderboardData[j + 1] = temp;
+            }
+        }
+    }
+    //Simulate logged user
+    let userIndex = Math.floor(Math.random() * 100);
+    let loggedUser = leaderboardData[userIndex];
+    if (loggedIn) {
+        let top9 = [];
+        //Check if logged user is in top 10
+        if (userIndex < 10) {
+            top9 = leaderboardData.slice(0, 10);
+            generatepiles(top9, loggedUser, true, userIndex);
+        } else {
+            top9 = leaderboardData.slice(0, 9);
+            top9.push(loggedUser);
+            generatepiles(top9, loggedUser, false, userIndex);
+        }
+    } else {
+        //Not logged in, just show top 10
+        generatepiles(leaderboardData.slice(0, 10), null, false, null);
+    }
+    function generatepiles(top9, loggedUser, top9IncludesLoggedUser, userIndex) {
+        console.log(top9);
+        //Generate leaderboard entries
+        generateBootStrapGrid(top9.length, 1, 12, 'leaderboardRows');
+        const leaderboardRows = document.querySelectorAll('.leaderboardRows');
+        top9.forEach((entry, i) => {
+            //Create entry div
+            let entryDiv = document.createElement('div');
+            entryDiv.setAttribute('class', 'leaderboardEntry');
+            //Check if entry is logged user
+            if (loggedIn && entry.name == loggedUser.name) {
+                if (top9IncludesLoggedUser) {
+                    //Logged user is in top 10
+                    entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
+                    entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
+                    console.log('in top 10');
+                } else {
+                    //Logged user is not in top 10
+                    entryDiv.innerHTML = `${userIndex}. ${entry.name} - ${entry.score}`;
+                    entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
+                }
+            } else {
+                //Not logged user or regular entry
+                entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
+                entryDiv.setAttribute('style', 'color: white;');
+            }
+            //Append entry to row
+            leaderboardRows[i].appendChild(entryDiv);
+        });
+    }
 
     generateBackToMenu();
 }
