@@ -9,14 +9,14 @@
 }
 
 body {
-    background: url('menuImages/mainBackGround.jpeg') no-repeat fixed center;
+    background: url('menuImages/mainBackGround-brightened.png') no-repeat fixed center;
     background-size: cover;
     overflow: hidden;
 }
 
 .menuTitle {
     font-size: 8vw;
-    color: rgb(99, 13, 13);
+    color: rgb(220, 40, 40);
     margin-left: 5vw;
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
@@ -31,7 +31,7 @@ body {
 
 .menuText {
     font-size: 2vw;
-    color: rgb(99, 13, 13);
+    color: rgb(220, 40, 40);
     text-align: center;
     align-self: center;
     text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
@@ -40,7 +40,7 @@ body {
 
 .orientationWarning {
     font-size: 7vw;
-    color: rgb(99, 13, 13);
+    color: rgb(220, 40, 40); 
     text-align: center;
     justify-content: center;
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
@@ -51,7 +51,7 @@ body {
     font-size: 3vw;
     align-self: center;
     flex-wrap: wrap;
-    color: rgb(99, 13, 13);
+    color: rgb(220, 40, 40);
     padding: 1vh 2vh;
     text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000,
         0.15vw 0.15vw 0 #000;
@@ -62,13 +62,13 @@ body {
 }
 
 .menuButton:hover {
-    color: rgb(99, 13, 13);
+    color: rgb(255, 80, 80);
     transform: scale(1.05);
     transition: all 0.2s ease;
     text-decoration: none;
-    text-shadow: -0.15vw -0.15vw 0.3vw rgb(245, 239, 235, 0.3),
-        0.15vw -0.15vw 0.3vw rgba(245, 239, 235, 0.3), -0.15vw 0.15vw 0.3vw rgb(245, 239, 235, 0.3),
-        0.15vw 0.15vw 0.3vw rgb(245, 239, 235, 0.3);
+    text-shadow: -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8), -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
 }
 
 .volumeSlider {
@@ -77,33 +77,34 @@ body {
     align-self: center;
     width: 25vw;
     height: 3vh;
-    background: linear-gradient(90deg, #310000, #630d0d, #961414);
-    border: 0.4vh solid #4a2305;
-    outline: 0.2vh solid rgb(99, 13, 13);
+    background: linear-gradient(90deg, #500000, #b02020, #ff3b3b);
+    border: 0.4vh solid #7a2f02;
+    outline: 0.2vh solid rgb(220, 40, 40);
     image-rendering: pixelated;
     transition: all 0.3s ease;
-    box-shadow: 0 0 1vh rgba(99, 13, 13, 0.5);
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
     cursor: pointer;
 }
 
 .volumeSlider:hover {
-    box-shadow: 0 0 2vh rgba(155, 20, 20, 0.8);
+    box-shadow: 0 0 2vh rgba(255, 60, 60, 0.9);
     transform: scale(1.03);
 }
 
 .volumeSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
+    image-rendering: pixelated;
     width: 2vh;
     height: 3vh;
-    background-color: #ff0000;
-    border: 0.3vh solid rgb(99, 13, 13);
+    background-color: #ff5555;
+    border: 0.3vh solid rgb(220, 40, 40);
 }
 
 .volumeSlider::-webkit-slider-thumb:hover {
     transform: scale(1.2);
-    background-color: rgb(155, 20, 20);
-    border-color: #4a2305;
+    background-color: rgb(255, 80, 80);
+    border-color: #7a2f02;
     box-shadow: -0.3vh 0 0 #000, 0.3vh 0 0 #000, 0 -0.3vh 0 #000, 0 0.3vh 0 #000;
 }
 
@@ -118,15 +119,15 @@ body {
     margin-right: 2vw;
     text-align: right;
     padding-right: 2vw;
-    border-right: 0.2vh solid rgba(99, 13, 13, 0.3);
+    border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
 }
 
 .loginFormContainer .menuInput {
     font-size: 1.8vw;
     padding: 1vh 1.5vw;
-    background: rgba(99, 13, 13, 0.1);
-    border: 0.2vh solid rgb(99, 13, 13);
-    color: rgb(99, 13, 13);
+    background: rgba(220, 40, 40, 0.12);
+    border: 0.2vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
     text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
     width: 20vw;
     transition: all 0.2s ease;
@@ -136,7 +137,7 @@ body {
     background: rgba(99, 13, 13, 0.2);
     outline: none;
     transform: scale(1.02);
-    box-shadow: 0 0 1vh rgba(99, 13, 13, 0.5);
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
 }
 
 .musicControls {
