@@ -15,8 +15,7 @@ let audio;
 window.addEventListener('resize', checkOrientation);
 
 //Tool to generate bootstrap grid
-function generateBootStrapGrid(row, col, col_md_value, id) {
-    let body = document.getElementsByTagName('body');
+function generateBootStrapGrid(row, col, col_md_value, className) {
     let contDiv = document.createElement('div');
     contDiv.setAttribute('class', 'container-fluid');
 
@@ -27,18 +26,26 @@ function generateBootStrapGrid(row, col, col_md_value, id) {
 
         for (let j = 0; j < col; j++) {
             let colDiv = document.createElement('div');
-            colDiv.setAttribute(
-                'class',
-                `col-sm-12 col-md-${col_md_value} d-flex justify-content-center`
-            );
-            if (id) {
-                colDiv.setAttribute('id', id);
+            let classes = [
+                `col-sm-12`,
+                `col-md-${col_md_value}`,
+                'd-flex',
+                'justify-content-center'
+            ];
+            if (className) {
+                classes.push(className);
             }
+            colDiv.setAttribute('class', classes.join(' '));
             rowDiv.appendChild(colDiv);
         }
     }
 
-    body[0].appendChild(contDiv);
+    /*
+    ! May require further functionality
+    */
+
+    document.body.appendChild(contDiv);
+    return contDiv;
 }
 
 function generateBackToMenu() {
@@ -51,7 +58,7 @@ function generateBackToMenu() {
 
     backButton.addEventListener('click', Menu);
 
-    let backToMenu = document.getElementById('backToMenu');
+    let backToMenu = document.querySelector('.backToMenu');
     backToMenu.appendChild(backButton);
 }
 
@@ -65,7 +72,7 @@ function Menu() {
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = 'HellForge';
-    document.getElementById('topRow').appendChild(menuTitle);
+    document.querySelector('.topRow').appendChild(menuTitle);
 
     let loggedUser = document.createElement('p');
     loggedUser.setAttribute('class', 'menuTitle menuText');
@@ -76,7 +83,7 @@ function Menu() {
     } else if (isLoggedIn == false && userName == 'Guest') {
         loggedUser.innerHTML = 'Logged in as: Guest';
     }
-    document.getElementById('topRow').nextSibling.appendChild(loggedUser);
+    document.querySelector('.topRow').nextSibling.appendChild(loggedUser);
 
     //Buttons
     const buttons = [
@@ -126,10 +133,10 @@ function Login() {
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle');
     menuTitle.innerHTML = 'Login';
-    document.getElementById('loginMenu').appendChild(menuTitle);
+    document.querySelector('.loginMenu').appendChild(menuTitle);
 
     generateBootStrapGrid(3, 1, 12, 'loginFormContainer');
-    const loginRows = document.querySelectorAll('#loginFormContainer');
+    const loginRows = document.querySelectorAll('.loginFormContainer');
 
     const forms = [
         { label: 'Username:', type: 'text', id: 'usernameInput' },
@@ -172,11 +179,11 @@ function Login() {
     loginButton.setAttribute('type', 'button');
     loginButton.setAttribute('value', 'Login / Register');
     loginButton.setAttribute('class', 'menuButton');
-    document.getElementById('loginButtonRow').appendChild(loginButton);
+    document.querySelector('.loginButtonRow').appendChild(loginButton);
     loginButton.addEventListener('click', function () {
-        let username = document.getElementById('usernameInput').value;
-        let password = document.getElementById('passwordInput').value;
-        let passwordConfirmation = document.getElementById('passwordConfirmationInput').value;
+        let username = document.querySelector('#usernameInput').value;
+        let password = document.querySelector('#passwordInput').value;
+        let passwordConfirmation = document.querySelector('#passwordConfirmationInput').value;
 
         if (username && password && password === passwordConfirmation) {
             userName = username;
@@ -192,7 +199,7 @@ function Login() {
     guestButton.setAttribute('type', 'button');
     guestButton.setAttribute('value', 'Continue as Guest');
     guestButton.setAttribute('class', 'menuButton');
-    document.getElementById('loginButtonRow').nextSibling.appendChild(guestButton);
+    document.querySelector('.loginButtonRow').nextSibling.appendChild(guestButton);
     guestButton.addEventListener('click', function () {
         isLoggedIn = false;
         userName = 'Guest';
@@ -250,7 +257,7 @@ function Options() {
     optionsTitle.setAttribute('class', 'menuTitle optionsMenu');
     optionsTitle.innerHTML = 'Options';
 
-    document.querySelector('.col-md-12').appendChild(optionsTitle);
+    document.querySelector('.optionsTitle').appendChild(optionsTitle);
 
     generateBootStrapGrid(1, 3, 4, 'musicControls');
 
