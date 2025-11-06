@@ -71,6 +71,36 @@ body {
         0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
 }
 
+.logOutButton {
+    font-size: 2vw;
+    align-self: center;
+    vertical-align: middle;
+    flex-wrap: wrap;
+    color: rgb(220, 40, 40);
+    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000,
+        0.15vw 0.15vw 0 #000;
+    transition: all 0.2s ease;
+    background: none;
+    text-decoration: none;
+    background-color: transparent;
+    margin-left: 2.5vw;
+    border: none;
+}
+
+.logOutButton:hover {
+    color: rgb(255, 80, 80);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    text-shadow: -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8), -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
+}
+
+.topRow p {
+    margin: 0px;
+}
+
 .volumeSlider {
     -webkit-appearance: none;
     appearance: none;

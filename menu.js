@@ -68,14 +68,14 @@ function Menu() {
     body[0].innerHTML = '';
 
     //Title
-    generateBootStrapGrid(1, 2, 6, 'topRow');
+    generateBootStrapGrid(1, 3, 6, 'topRow');
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = 'HellForge';
     document.querySelector('.topRow').appendChild(menuTitle);
 
     let loggedUser = document.createElement('p');
-    loggedUser.setAttribute('class', 'menuTitle menuText');
+    loggedUser.setAttribute('class', 'menuText');
     if (isLoggedIn == true) {
         loggedUser.innerHTML = `Logged in as: ${userName}`;
     } else if (isLoggedIn == false && userName == '') {
@@ -88,6 +88,7 @@ function Menu() {
     //Buttons
     const buttons = [
         { text: 'Login', onClick: Login },
+        { text: 'Logout', onClick: Logout },
         { text: 'New Game', onClick: StartGame },
         { text: 'Leaderboard', onClick: LeaderBoard },
         { text: 'Admin', onClick: Admin },
@@ -101,7 +102,7 @@ function Menu() {
     // Add buttons
     buttons.forEach(({ text, onClick }, index) => {
         if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
-            if (text != 'Login') {
+            if (text != 'Login' && text != 'Logout') {
                 let button = document.createElement('input');
                 button.setAttribute('type', 'button');
                 button.setAttribute('value', text);
@@ -109,6 +110,13 @@ function Menu() {
                 button.setAttribute('style', 'margin-top:5vh;');
                 button.addEventListener('click', onClick);
                 columns[index].appendChild(button);
+            } else if (text == 'Logout') {
+                let button = document.createElement('input');
+                button.setAttribute('type', 'button');
+                button.setAttribute('value', text);
+                button.setAttribute('class', 'logOutButton');
+                button.addEventListener('click', onClick);
+                document.querySelectorAll('.topRow')[1].appendChild(button);
             }
         } else {
             if (text == 'Login') {
@@ -207,6 +215,15 @@ function Login() {
     });
 
     generateBackToMenu();
+}
+
+function Logout() {
+    if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
+        isLoggedIn = false;
+        userName = '';
+        userPassword = '';
+        Menu();
+    }
 }
 
 //Start game
