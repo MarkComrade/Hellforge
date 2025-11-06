@@ -40,7 +40,7 @@ body {
 
 .orientationWarning {
     font-size: 7vw;
-    color: rgb(220, 40, 40); 
+    color: rgb(220, 40, 40);
     text-align: center;
     justify-content: center;
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
@@ -108,21 +108,21 @@ body {
     box-shadow: -0.3vh 0 0 #000, 0.3vh 0 0 #000, 0 -0.3vh 0 #000, 0 0.3vh 0 #000;
 }
 
-.loginFormContainer .row {
+#loginFormContainer .row {
     margin: 3vh 0;
     padding: 2vh 0;
     display: flex;
     align-items: center;
 }
 
-.loginFormContainer .menuText {
+#loginFormContainer .menuText {
     margin-right: 2vw;
     text-align: right;
     padding-right: 2vw;
     border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
 }
 
-.loginFormContainer .menuInput {
+#loginFormContainer .menuInput {
     font-size: 1.8vw;
     padding: 1vh 1.5vw;
     background: rgba(220, 40, 40, 0.12);
@@ -133,14 +133,14 @@ body {
     transition: all 0.2s ease;
 }
 
-.loginFormContainer .menuInput:focus {
-    background: rgba(99, 13, 13, 0.2);
+#loginFormContainer .menuInput:focus {
+    background: rgba(220, 40, 40, 0.25);
     outline: none;
     transform: scale(1.02);
     box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
 }
 
-.musicControls {
+#musicControls {
     margin-top: 5vh;
     height: 50vh;
 }
