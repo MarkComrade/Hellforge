@@ -15,7 +15,7 @@ body {
 }
 
 .menuTitle {
-    font-size: 8vw;
+    font-size: 7.5vw;
     color: rgb(220, 40, 40);
     margin-left: 5vw;
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
@@ -26,7 +26,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 30vh;
+    height: 20vh;
 }
 
 .menuText {
@@ -139,8 +139,8 @@ body {
 }
 
 .loginFormContainer .row {
-    margin: 3vh 0;
-    padding: 2vh 0;
+    margin: 2vh 0;
+    padding: 1vh 0;
     display: flex;
     align-items: center;
 }
@@ -154,7 +154,7 @@ body {
 
 .loginFormContainer .menuInput {
     font-size: 1.8vw;
-    padding: 1vh 1.5vw;
+    padding: 1vh 1vw;
     background: rgba(220, 40, 40, 0.12);
     border: 0.2vh solid rgb(220, 40, 40);
     color: rgb(220, 40, 40);
@@ -173,4 +173,11 @@ body {
 .musicControls {
     margin-top: 5vh;
     height: 50vh;
+}
+
+.dungeonImage {
+    width: 15vw;
+    height: auto;
+    border: 0.4vh solid #000000;
+    outline: 0.2vh solid rgb(220, 40, 40);
 }
