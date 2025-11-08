@@ -310,7 +310,7 @@ function Home() {
     backButton.setAttribute('value', 'Back to Dungeon Selection');
     backButton.setAttribute('class', 'menuButton');
     backButton.addEventListener('click', () => {
-        document.body.style.backgroundImage = "url('menuImages/mainBackGround-brightened.jpg')";
+        document.body.style.backgroundImage = "url('menuImages/mainBackGround-brightened.png')";
         StartGame();
     });
 
