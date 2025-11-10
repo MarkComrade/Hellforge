@@ -213,7 +213,96 @@ function Login() {
 function StartGame() {
     newGame();
 
+<<<<<<< Updated upstream
     generateBackToMenu();
+=======
+    //Title
+    generateBootStrapGrid(1, 1, 12);
+    let menuTitle = document.createElement('div');
+    menuTitle.setAttribute('class', 'menuTitle');
+    menuTitle.style = 'font-size: 12vh;';
+    menuTitle.innerHTML = 'Select dungeon';
+    document.querySelector('.col-md-12').appendChild(menuTitle);
+
+    generateBootStrapGrid(1, 4, 3, 'dungeonImagesRow');
+    const dungeonOptions = document.querySelectorAll('.dungeonImagesRow');
+    const dungeons = [ 'Laboratory','Crypt', 'Labyrinth', 'Gates of Hell'];
+
+    dungeons.forEach((dungeon, i) => {
+        let dungeonImg = document.createElement('img');
+        dungeonImg.setAttribute(
+            'src',
+            `menuImages/${dungeon.toLowerCase().replaceAll(' ', '')}.jpg`
+        );
+        dungeonImg.setAttribute('class', 'dungeonImage img-fluid');
+
+        dungeonOptions[i].appendChild(dungeonImg);
+    });
+
+    generateBootStrapGrid(1, 4, 3, 'dungeonButtonsRow');
+    const dungeonButtonsOptions = document.querySelectorAll('.dungeonButtonsRow');
+
+    dungeons.forEach((dungeon, i) => {
+        let dungeonButton = document.createElement('input');
+        dungeonButton.setAttribute('type', 'button');
+        dungeonButton.setAttribute('value', dungeon);
+        dungeonButton.setAttribute('class', 'menuButton');
+
+        dungeonButton.addEventListener('click', () => {
+            alert(`Starting game in ${dungeon}`);
+
+            newGame(dungeon);
+        });
+
+        dungeonButtonsOptions[i].appendChild(dungeonButton);
+    });
+
+    generateBootStrapGrid(1, 2, 6, 'menuButtonsRow');
+
+    const menuButtons = document.querySelector('.menuButtonsRow');
+    let backButton = document.createElement('input');
+    backButton.setAttribute('type', 'button');
+    backButton.setAttribute('value', 'Back to Menu');
+    backButton.setAttribute('class', 'menuButton');
+    backButton.addEventListener('click', Menu);
+
+    let homeButton = document.createElement('input');
+    homeButton.setAttribute('type', 'button');
+    homeButton.setAttribute('value', 'Home');
+    homeButton.setAttribute('class', 'menuButton');
+
+    backButton.addEventListener('click', () => {
+        Menu();
+    });
+    homeButton.addEventListener('click', () => {
+        Home();
+    });
+
+    menuButtons.appendChild(backButton);
+    menuButtons.nextSibling.appendChild(homeButton);
+}
+
+function Home() {
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = '';
+
+    document.body.style.backgroundImage = "url('menuImages/home.jpg')";
+
+    //TODO: Home screen content
+
+    let backButton = document.createElement('input');
+    backButton.setAttribute('type', 'button');
+    backButton.setAttribute('value', 'Back to Dungeon Selection');
+    backButton.setAttribute('class', 'menuButton');
+    backButton.addEventListener('click', () => {
+        document.body.style.backgroundImage = "url('menuImages/mainBackGround-brightened.png')";
+        StartGame();
+    });
+
+    generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
+    let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
+    backToDungeonSelectRow.appendChild(backButton);
+>>>>>>> Stashed changes
 }
 
 //Load game
@@ -232,7 +321,7 @@ function LeaderBoard() {
     let leaderboardData = []; // Array to hold leaderboard data
 
     //Generate test data
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 20; i++) {
         leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000) });
     }
 
@@ -251,8 +340,9 @@ function LeaderBoard() {
             }
         }
     }
+    console.log(leaderboardData);
     //Simulate logged user
-    let userIndex = Math.floor(Math.random() * 100);
+    let userIndex = Math.floor(Math.random() * 20);
     let loggedUser = leaderboardData[userIndex];
     if (loggedIn) {
         let top9 = [];
@@ -270,7 +360,6 @@ function LeaderBoard() {
         generatepiles(leaderboardData.slice(0, 10), null, false, null);
     }
     function generatepiles(top9, loggedUser, top9IncludesLoggedUser, userIndex) {
-        console.log(top9);
         //Generate leaderboard entries
         generateBootStrapGrid(top9.length, 1, 12, 'leaderboardRows');
         const leaderboardRows = document.querySelectorAll('.leaderboardRows');
@@ -284,7 +373,6 @@ function LeaderBoard() {
                     //Logged user is in top 10
                     entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
                     entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
-                    console.log('in top 10');
                 } else {
                     //Logged user is not in top 10
                     entryDiv.innerHTML = `${userIndex}. ${entry.name} - ${entry.score}`;
