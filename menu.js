@@ -213,9 +213,9 @@ function Login() {
 function StartGame() {
     newGame();
 
-<<<<<<< Updated upstream
+
     generateBackToMenu();
-=======
+
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
@@ -302,7 +302,7 @@ function Home() {
     generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
     let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
     backToDungeonSelectRow.appendChild(backButton);
->>>>>>> Stashed changes
+
 }
 
 //Load game
