@@ -231,9 +231,6 @@ function StartGame() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
-
-    generateBackToMenu();
-
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
@@ -244,7 +241,7 @@ function StartGame() {
 
     generateBootStrapGrid(1, 4, 3, 'dungeonImagesRow');
     const dungeonOptions = document.querySelectorAll('.dungeonImagesRow');
-    const dungeons = [ 'Laboratory','Crypt', 'Labyrinth', 'Gates of Hell'];
+    const dungeons = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
 
     dungeons.forEach((dungeon, i) => {
         let dungeonImg = document.createElement('img');
@@ -320,7 +317,6 @@ function Home() {
     generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
     let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
     backToDungeonSelectRow.appendChild(backButton);
-
 }
 
 //Load game
