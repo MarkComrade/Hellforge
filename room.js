@@ -1,4 +1,4 @@
-function newGame() {
+function newGame(dungeon) {
     // Clear body
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';

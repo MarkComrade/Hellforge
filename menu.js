@@ -27,7 +27,7 @@ function generateBootStrapGrid(row, col, col_md_value, className) {
         for (let j = 0; j < col; j++) {
             let colDiv = document.createElement('div');
             let classes = [
-                `col-sm-12`,
+                `col-sm-${col_md_value}`,
                 `col-md-${col_md_value}`,
                 'd-flex',
                 'justify-content-center'
@@ -68,14 +68,14 @@ function Menu() {
     body[0].innerHTML = '';
 
     //Title
-    generateBootStrapGrid(1, 2, 6, 'topRow');
+    generateBootStrapGrid(1, 3, 6, 'topRow');
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = 'HellForge';
     document.querySelector('.topRow').appendChild(menuTitle);
 
     let loggedUser = document.createElement('p');
-    loggedUser.setAttribute('class', 'menuTitle menuText');
+    loggedUser.setAttribute('class', 'menuText');
     if (isLoggedIn == true) {
         loggedUser.innerHTML = `Logged in as: ${userName}`;
     } else if (isLoggedIn == false && userName == '') {
@@ -88,6 +88,7 @@ function Menu() {
     //Buttons
     const buttons = [
         { text: 'Login', onClick: Login },
+        { text: 'Logout', onClick: Logout },
         { text: 'New Game', onClick: StartGame },
         { text: 'Leaderboard', onClick: LeaderBoard },
         { text: 'Admin', onClick: Admin },
@@ -101,7 +102,7 @@ function Menu() {
     // Add buttons
     buttons.forEach(({ text, onClick }, index) => {
         if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
-            if (text != 'Login') {
+            if (text != 'Login' && text != 'Logout') {
                 let button = document.createElement('input');
                 button.setAttribute('type', 'button');
                 button.setAttribute('value', text);
@@ -109,6 +110,13 @@ function Menu() {
                 button.setAttribute('style', 'margin-top:5vh;');
                 button.addEventListener('click', onClick);
                 columns[index].appendChild(button);
+            } else if (text == 'Logout') {
+                let button = document.createElement('input');
+                button.setAttribute('type', 'button');
+                button.setAttribute('value', text);
+                button.setAttribute('class', 'logOutButton');
+                button.addEventListener('click', onClick);
+                document.querySelectorAll('.topRow')[1].appendChild(button);
             }
         } else {
             if (text == 'Login') {
@@ -152,7 +160,7 @@ function Login() {
         const labelCol = document.createElement('div');
         labelCol.setAttribute(
             'class',
-            'col-sm-12 col-md-6 d-flex justify-content-end align-items-center'
+            'col-sm-6 col-md-6 d-flex justify-content-end align-items-center'
         );
         const label = document.createElement('label');
         label.setAttribute('class', 'menuText');
@@ -164,7 +172,7 @@ function Login() {
         const inputCol = document.createElement('div');
         inputCol.setAttribute(
             'class',
-            'col-sm-12 col-md-6 d-flex justify-content-start align-items-center'
+            'col-sm-6 col-md-6 d-flex justify-content-start align-items-center'
         );
         const input = document.createElement('input');
         input.setAttribute('class', 'menuInput');
@@ -209,9 +217,19 @@ function Login() {
     generateBackToMenu();
 }
 
+function Logout() {
+    if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
+        isLoggedIn = false;
+        userName = '';
+        userPassword = '';
+        Menu();
+    }
+}
+
 //Start game
 function StartGame() {
-    newGame();
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = '';
 
 
     generateBackToMenu();
