@@ -241,7 +241,7 @@ function StartGame() {
 
     generateBootStrapGrid(1, 4, 3, 'dungeonImagesRow');
     const dungeonOptions = document.querySelectorAll('.dungeonImagesRow');
-    const dungeons = ['Crypt', 'Labyrinth', 'Crimson Cave', 'Gates of Hell'];
+    const dungeons = ['Crypt', 'Labyrinth', 'labdungeon', 'Gates of Hell'];
 
     dungeons.forEach((dungeon, i) => {
         let dungeonImg = document.createElement('img');
