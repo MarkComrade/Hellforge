@@ -231,6 +231,9 @@ function StartGame() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
+
+    generateBackToMenu();
+
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
@@ -241,7 +244,7 @@ function StartGame() {
 
     generateBootStrapGrid(1, 4, 3, 'dungeonImagesRow');
     const dungeonOptions = document.querySelectorAll('.dungeonImagesRow');
-    const dungeons = ['Crypt', 'Labyrinth', 'Laboratory', 'Gates of Hell'];
+    const dungeons = [ 'Laboratory','Crypt', 'Labyrinth', 'Gates of Hell'];
 
     dungeons.forEach((dungeon, i) => {
         let dungeonImg = document.createElement('img');
@@ -317,6 +320,7 @@ function Home() {
     generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
     let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
     backToDungeonSelectRow.appendChild(backButton);
+
 }
 
 //Load game
@@ -335,7 +339,7 @@ function LeaderBoard() {
     let leaderboardData = []; // Array to hold leaderboard data
 
     //Generate test data
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 20; i++) {
         leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000) });
     }
 
@@ -354,8 +358,9 @@ function LeaderBoard() {
             }
         }
     }
+    console.log(leaderboardData);
     //Simulate logged user
-    let userIndex = Math.floor(Math.random() * 100);
+    let userIndex = Math.floor(Math.random() * 20);
     let loggedUser = leaderboardData[userIndex];
     if (loggedIn) {
         let top9 = [];
@@ -373,7 +378,6 @@ function LeaderBoard() {
         generatepiles(leaderboardData.slice(0, 10), null, false, null);
     }
     function generatepiles(top9, loggedUser, top9IncludesLoggedUser, userIndex) {
-        console.log(top9);
         //Generate leaderboard entries
         generateBootStrapGrid(top9.length, 1, 12, 'leaderboardRows');
         const leaderboardRows = document.querySelectorAll('.leaderboardRows');
@@ -387,7 +391,6 @@ function LeaderBoard() {
                     //Logged user is in top 10
                     entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
                     entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
-                    console.log('in top 10');
                 } else {
                     //Logged user is not in top 10
                     entryDiv.innerHTML = `${userIndex}. ${entry.name} - ${entry.score}`;
