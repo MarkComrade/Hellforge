@@ -272,3 +272,25 @@ leaderboard css dolgok
     width: 60vw;
     left: 20vw;
 }
+
+/* Azok a cellák, amik szobák, de még nem látogatottak */
+.cell[data-room='true'][data-visited='false'] {
+    background-color: #1a3d1a;
+}
+
+/* Azok a cellák, ahol már járt a játékos */
+.cell[data-visited='true'] {
+    background-color: #3ba7ff;
+}
+
+/* Ha cella nem szoba */
+.cell[data-room='false'] {
+    background-color: #000;
+    opacity: 0.3;
+}
+
+/* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
+.cell[data-current='true'] {
+    background-color: #ffcc00;
+    box-shadow: 0 0 10px #ffcc00;
+}
