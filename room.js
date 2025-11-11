@@ -89,70 +89,30 @@ function checkCell(x, y) {
 
 function navigateToRoom(x, y) {
     let body = document.getElementsByTagName('body')[0];
+    const directions = [
+        { name: 'Up', dx: 0, dy: -1 },
+        { name: 'Right', dx: 1, dy: 0 },
+        { name: 'Down', dx: 0, dy: 1 },
+        { name: 'Left', dx: -1, dy: 0 }
+    ];
 
-    let navigateUp = document.createElement('span');
-    navigateUp.setAttribute('id', 'navigateUp');
-    body.appendChild(navigateUp);
-
-    navigateUp.addEventListener('click', function () {
-        if (checkCell(x, y - 1) === true) {
-            console.log('Went Up');
-
-            y -= 1;
-            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-            data.dataset.visited = 'true';
-        } else {
-            console.log('No room available');
-        }
-
-        console.log(`Current position: (${x}, ${y})`);
-    });
-
-    let navigateRight = document.createElement('span');
-    navigateRight.setAttribute('id', 'navigateRight');
-    body.appendChild(navigateRight);
-    navigateRight.addEventListener('click', function () {
-        if (checkCell(x + 1, y) === true) {
-            console.log('Went right');
-            x += 1;
-            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-            data.dataset.visited = 'true';
-        } else {
-            console.log('No room available');
-        }
-
-        console.log(`Current position: (${x}, ${y})`);
-    });
-
-    let navigateDown = document.createElement('span');
-    navigateDown.setAttribute('id', 'navigateDown');
-    body.appendChild(navigateDown);
-    navigateDown.addEventListener('click', function () {
-        if (checkCell(x, y + 1) === true) {
-            console.log('Went down');
-            y += 1;
-            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-            data.dataset.visited = 'true';
-        } else {
-            console.log('No room available');
-        }
-
-        console.log(`Current position: (${x}, ${y})`);
-    });
-
-    let navigateLeft = document.createElement('span');
-    navigateLeft.setAttribute('id', 'navigateLeft');
-    body.appendChild(navigateLeft);
-    navigateLeft.addEventListener('click', function () {
-        if (checkCell(x - 1, y) === true) {
-            console.log('Went left');
-            x -= 1;
-            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-            data.dataset.visited = 'true';
-        } else {
-            console.log('No room available');
-        }
-
-        console.log(`Current position: (${x}, ${y})`);
+    directions.forEach((dir) => {
+        let span = document.createElement('span');
+        span.setAttribute('id', 'navigate' + dir.name);
+        body.appendChild(span);
+        span.addEventListener('click', function () {
+            const newX = x + dir.dx;
+            const newY = y + dir.dy;
+            if (checkCell(newX, newY) === true) {
+                x = newX;
+                y = newY;
+                console.log('Went ' + dir.name);
+                let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+                data.dataset.visited = 'true';
+            } else {
+                console.log('No room available');
+            }
+            console.log(`Current position: (${x}, ${y})`);
+        });
     });
 }
