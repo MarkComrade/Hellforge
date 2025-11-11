@@ -4,7 +4,7 @@ function newGame(dungeon) {
     body[0].innerHTML = '';
 
     let container = document.createElement('div');
-    container.setAttribute('class', 'container');
+    container.setAttribute('class', 'container-fluid');
     container.setAttribute('id', 'map');
     body[0].appendChild(container);
 
@@ -19,8 +19,8 @@ function newGame(dungeon) {
             cell.dataset.col = j + 1;
             cell.dataset.room = false;
             cell.dataset.visited = false;
-            cell.style.width = '50px';
-            cell.style.height = '50px';
+            cell.style.width = '25px';
+            cell.style.height = '25px';
             cell.style.border = '1px solid green';
             div.appendChild(cell);
         }
@@ -33,7 +33,7 @@ function newGame(dungeon) {
     let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
     start.dataset.room = true;
     start.dataset.visited = true;
-    start.style.backgroundColor = 'lightblue';
+
     //generate room lenght
     let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + 5;
     console.log('Rooms to generate:', roomsToGenerate);
@@ -69,7 +69,7 @@ function newGame(dungeon) {
             let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
             if (cell && cell.dataset.room === 'false' && Math.random() < 0.4) {
                 cell.dataset.room = 'true';
-                cell.style.backgroundColor = 'lightblue';
+
                 return true;
             }
         }
@@ -97,8 +97,10 @@ function navigateToRoom(x, y) {
     navigateUp.addEventListener('click', function () {
         if (checkCell(x, y - 1) === true) {
             console.log('Went Up');
-            this.dataset.visited = 'true';
+
             y -= 1;
+            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+            data.dataset.visited = 'true';
         } else {
             console.log('No room available');
         }
@@ -112,8 +114,9 @@ function navigateToRoom(x, y) {
     navigateRight.addEventListener('click', function () {
         if (checkCell(x + 1, y) === true) {
             console.log('Went right');
-            this.dataset.visited = 'true';
             x += 1;
+            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+            data.dataset.visited = 'true';
         } else {
             console.log('No room available');
         }
@@ -127,8 +130,9 @@ function navigateToRoom(x, y) {
     navigateDown.addEventListener('click', function () {
         if (checkCell(x, y + 1) === true) {
             console.log('Went down');
-            this.dataset.visited = 'true';
             y += 1;
+            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+            data.dataset.visited = 'true';
         } else {
             console.log('No room available');
         }
@@ -142,8 +146,9 @@ function navigateToRoom(x, y) {
     navigateLeft.addEventListener('click', function () {
         if (checkCell(x - 1, y) === true) {
             console.log('Went left');
-            this.dataset.visited = 'true';
             x -= 1;
+            let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+            data.dataset.visited = 'true';
         } else {
             console.log('No room available');
         }
