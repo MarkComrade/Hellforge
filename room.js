@@ -18,6 +18,7 @@ function newGame(dungeon) {
             cell.dataset.row = i + 1;
             cell.dataset.col = j + 1;
             cell.dataset.room = false;
+            cell.dataset.visited = false;
             cell.style.width = '50px';
             cell.style.height = '50px';
             cell.style.border = '1px solid green';
@@ -29,8 +30,9 @@ function newGame(dungeon) {
     // start
     let startX = 5;
     let startY = 5;
-    let start = document.querySelector(`#map .cell[data-row="${startX}"][data-col="${startY}"]`);
+    let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
     start.dataset.room = true;
+    start.dataset.visited = true;
     start.style.backgroundColor = 'lightblue';
     //generate room lenght
     let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + 5;
@@ -61,19 +63,10 @@ function newGame(dungeon) {
 
     console.log('aktiv szvabaszam', activeRooms.length);
 
-    // check if cell is a room
-    function checkCell(x, y) {
-        if (x > 0 && x < 10 && y > 0 && y < 10) {
-            let cell = document.querySelector(`#map .cell[data-row="${x}"][data-col="${y}"]`);
-            return cell && cell.dataset.room === 'true';
-        }
-        return false;
-    }
-
     // set cell as room
     function setCell(x, y) {
         if (x > 0 && x < 10 && y > 0 && y < 10) {
-            let cell = document.querySelector(`#map .cell[data-row="${x}"][data-col="${y}"]`);
+            let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
             if (cell && cell.dataset.room === 'false' && Math.random() < 0.4) {
                 cell.dataset.room = 'true';
                 cell.style.backgroundColor = 'lightblue';
@@ -82,4 +75,79 @@ function newGame(dungeon) {
         }
         return false;
     }
+
+    navigateToRoom(startX, startY);
+}
+
+function checkCell(x, y) {
+    if (x > 0 && x < 10 && y > 0 && y < 10) {
+        let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
+        return cell && cell.dataset.room === 'true';
+    }
+    return false;
+}
+
+function navigateToRoom(x, y) {
+    let body = document.getElementsByTagName('body')[0];
+
+    let navigateUp = document.createElement('span');
+    navigateUp.setAttribute('id', 'navigateUp');
+    body.appendChild(navigateUp);
+
+    navigateUp.addEventListener('click', function () {
+        if (checkCell(x, y - 1) === true) {
+            console.log('Went Up');
+            this.dataset.visited = 'true';
+            y -= 1;
+        } else {
+            console.log('No room available');
+        }
+
+        console.log(`Current position: (${x}, ${y})`);
+    });
+
+    let navigateRight = document.createElement('span');
+    navigateRight.setAttribute('id', 'navigateRight');
+    body.appendChild(navigateRight);
+    navigateRight.addEventListener('click', function () {
+        if (checkCell(x + 1, y) === true) {
+            console.log('Went right');
+            this.dataset.visited = 'true';
+            x += 1;
+        } else {
+            console.log('No room available');
+        }
+
+        console.log(`Current position: (${x}, ${y})`);
+    });
+
+    let navigateDown = document.createElement('span');
+    navigateDown.setAttribute('id', 'navigateDown');
+    body.appendChild(navigateDown);
+    navigateDown.addEventListener('click', function () {
+        if (checkCell(x, y + 1) === true) {
+            console.log('Went down');
+            this.dataset.visited = 'true';
+            y += 1;
+        } else {
+            console.log('No room available');
+        }
+
+        console.log(`Current position: (${x}, ${y})`);
+    });
+
+    let navigateLeft = document.createElement('span');
+    navigateLeft.setAttribute('id', 'navigateLeft');
+    body.appendChild(navigateLeft);
+    navigateLeft.addEventListener('click', function () {
+        if (checkCell(x - 1, y) === true) {
+            console.log('Went left');
+            this.dataset.visited = 'true';
+            x -= 1;
+        } else {
+            console.log('No room available');
+        }
+
+        console.log(`Current position: (${x}, ${y})`);
+    });
 }
