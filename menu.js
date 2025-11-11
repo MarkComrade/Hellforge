@@ -231,9 +231,6 @@ function StartGame() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
-
-    generateBackToMenu();
-
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
@@ -244,7 +241,7 @@ function StartGame() {
 
     generateBootStrapGrid(1, 4, 3, 'dungeonImagesRow');
     const dungeonOptions = document.querySelectorAll('.dungeonImagesRow');
-    const dungeons = [ 'Laboratory','Crypt', 'Labyrinth', 'Gates of Hell'];
+    const dungeons = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
 
     dungeons.forEach((dungeon, i) => {
         let dungeonImg = document.createElement('img');
@@ -320,51 +317,43 @@ function Home() {
     generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
     let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
     backToDungeonSelectRow.appendChild(backButton);
-
 }
 
-//Load game
 function LeaderBoard() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
-    //Title
+    // Title
     generateBootStrapGrid(1, 1, 12);
-    let menuTitle = document.createElement('div');
-    menuTitle.setAttribute('class', 'menuTitle leaderBoardMenu');
-    menuTitle.innerHTML = 'Leaderboard';
-    document.querySelector('.col-md-12').appendChild(menuTitle);
-    //Leadboard data
-    let loggedIn = true; //Simulate logged in for demo purposes
-    let leaderboardData = []; // Array to hold leaderboard data
+    let leaderBoardTitle = document.createElement('div');
+    leaderBoardTitle.setAttribute('class', 'menuTitle leaderMenu');
+    leaderBoardTitle.innerHTML = 'LeaderBoard';
+    document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
-    //Generate test data
+    // Tesztadat generálás
+    let loggedIn = true;
+    let leaderboardData = [];
     for (let i = 1; i <= 20; i++) {
         leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000) });
     }
 
-    //Sort data by score
-    for (var i = 0; i < leaderboardData.length; i++) {
-        // Last i elements are already in place
-        for (var j = 0; j < leaderboardData.length - i - 1; j++) {
-            // Checking if the item at present iteration
-            // is greater than the next iteration
+    // Rendezés (bubble sort)
+    for (let i = 0; i < leaderboardData.length; i++) {
+        for (let j = 0; j < leaderboardData.length - i - 1; j++) {
             if (leaderboardData[j].score < leaderboardData[j + 1].score) {
-                // If the condition is true
-                // then swap them
                 let temp = leaderboardData[j];
                 leaderboardData[j] = leaderboardData[j + 1];
                 leaderboardData[j + 1] = temp;
             }
         }
     }
-    console.log(leaderboardData);
-    //Simulate logged user
+
+    // Simulált bejelentkezett user
     let userIndex = Math.floor(Math.random() * 20);
     let loggedUser = leaderboardData[userIndex];
+
     if (loggedIn) {
         let top9 = [];
-        //Check if logged user is in top 10
         if (userIndex < 10) {
             top9 = leaderboardData.slice(0, 10);
             generatepiles(top9, loggedUser, true, userIndex);
@@ -374,35 +363,72 @@ function LeaderBoard() {
             generatepiles(top9, loggedUser, false, userIndex);
         }
     } else {
-        //Not logged in, just show top 10
         generatepiles(leaderboardData.slice(0, 10), null, false, null);
     }
-    function generatepiles(top9, loggedUser, top9IncludesLoggedUser, userIndex) {
-        //Generate leaderboard entries
-        generateBootStrapGrid(top9.length, 1, 12, 'leaderboardRows');
-        const leaderboardRows = document.querySelectorAll('.leaderboardRows');
-        top9.forEach((entry, i) => {
-            //Create entry div
+
+    // Érmehalmok generálása
+    function generatepiles(top9, loggedUser) {
+        const row = document.createElement('div');
+        row.className = 'row justify-content-center';
+
+        const container = document.createElement('div');
+        container.className = 'leadboardContainer container-fluid';
+
+        const maxScore = top9[0].score;
+        const maxCoins = 50;
+
+        top9.forEach((entry) => {
+            // játékos "kártya"
             let entryDiv = document.createElement('div');
-            entryDiv.setAttribute('class', 'leaderboardEntry');
-            //Check if entry is logged user
-            if (loggedIn && entry.name == loggedUser.name) {
-                if (top9IncludesLoggedUser) {
-                    //Logged user is in top 10
-                    entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
-                    entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
-                } else {
-                    //Logged user is not in top 10
-                    entryDiv.innerHTML = `${userIndex}. ${entry.name} - ${entry.score}`;
-                    entryDiv.setAttribute('style', 'font-weight: bold; color: yellow;');
-                }
+            entryDiv.className = 'playerCard text-center p-3 rounded col-sm-1 ';
+
+            // név
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'playerName fw-bold  mt-1';
+            nameDiv.innerText = entry.name;
+
+            // pont
+            const scoreDiv = document.createElement('div');
+            scoreDiv.className = 'playerScore text-light';
+            scoreDiv.innerText = `${entry.score}p`;
+
+            // érme halom
+            const coinStack = document.createElement('div');
+            coinStack.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+
+            if (entry.score == 0) {
+                const noCoinDiv = document.createElement('div');
+                noCoinDiv.className = 'noCoins text-light small';
+                noCoinDiv.innerText = 'No coins';
+                coinStack.appendChild(noCoinDiv);
             } else {
-                //Not logged user or regular entry
-                entryDiv.innerHTML = `${i + 1}. ${entry.name} - ${entry.score}`;
-                entryDiv.setAttribute('style', 'color: white;');
+                const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
+                for (let c = 0; c < coinCount; c++) {
+                    const coin = document.createElement('img');
+                    coin.src = 'menuImages/coing.png';
+                    coin.className = 'coin';
+                    coin.style.bottom = `${c * 0.3}vh`; // csak a dinamikus pozíció marad JS-ben
+                    coinStack.appendChild(coin);
+
+                    // animáció időzítése
+                    setTimeout(() => {
+                        coin.classList.add('coinVisible');
+                    }, c * 80);
+                }
             }
-            //Append entry to row
-            leaderboardRows[i].appendChild(entryDiv);
+
+            // kiemelés, ha a bejelentkezett userről van szó
+            if (loggedIn && entry.name === loggedUser.name) {
+                nameDiv.classList.add('highlightedPlayer');
+            }
+            entryDiv.appendChild(coinStack);
+            entryDiv.appendChild(nameDiv);
+            entryDiv.appendChild(scoreDiv);
+            row.appendChild(entryDiv);
+            container.appendChild(row);
+
+            document.body.appendChild(container);
         });
     }
 
@@ -500,6 +526,7 @@ function checkOrientation() {
         const mainMenu = document.querySelector('.mainMenu');
         const optionsMenu = document.querySelector('.optionsMenu');
         const loginMenu = document.querySelector('.loginMenu');
+        const leaderMenu = document.querySelector('.leaderMenu');
 
         if (mainMenu) {
             Menu();
@@ -507,6 +534,8 @@ function checkOrientation() {
             Options();
         } else if (loginMenu) {
             Login();
+        } else if (leaderMenu) {
+            LeaderBoard();
         } else {
             Menu();
         }
