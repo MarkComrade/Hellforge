@@ -31,8 +31,10 @@ function newGame(dungeon) {
     let startX = 5;
     let startY = 5;
     let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
+    start.dataset.current = 'true';
     start.dataset.room = true;
     start.dataset.visited = true;
+    start.dataset.roomType = 'start';
 
     //generate room lenght
     let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + 5;
@@ -40,6 +42,7 @@ function newGame(dungeon) {
 
     // active rooms list
     let activeRooms = [{ x: startX, y: startY }];
+    let roomTypes = ['combat', 'event', 'loot'];
 
     while (activeRooms.length < roomsToGenerate) {
         // choose random active room
@@ -76,7 +79,48 @@ function newGame(dungeon) {
         return false;
     }
 
+    // active room cells to array
+    let roomCells = activeRooms.map((r) =>
+        document.querySelector(`#map .cell[data-row="${r.y}"][data-col="${r.x}"]`)
+    );
+
+    // start room cut out
+    roomCells = roomCells.filter((c) => c.dataset.roomType !== 'start');
+
+    // furthest room from start to outroom
+    let maxDistance = 0;
+    let outMax = roomCells[0];
+    for (let i = 0; i < roomCells.length; i++) {
+        // Manhattan distance calculation
+        let distance =
+            Math.abs(roomCells[i].dataset.col - startX) +
+            Math.abs(roomCells[i].dataset.row - startY);
+
+        if (distance > maxDistance) {
+            maxDistance = distance;
+            outMax = roomCells[i];
+        }
+    }
+    // cut out outroom
+    let outRoom = outMax;
+    roomCells = roomCells.filter((c) => c !== outRoom);
+    outRoom.dataset.roomType = 'out';
+
+    // 1 shop
+    let shopRoom = roomCells.pop();
+    shopRoom.dataset.roomType = 'shop';
+
+    // other randomtypes
+    let randomTypes = ['combat', 'combat', 'combat', 'combat', 'event', 'loot'];
+
+    roomCells.forEach((cell) => {
+        cell.dataset.roomType = randomTypes[Math.floor(Math.random() * randomTypes.length)];
+    });
+
     navigateToRoom(startX, startY);
+}
+function isAdjacent(a, b) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
 }
 
 function checkCell(x, y) {
@@ -104,11 +148,16 @@ function navigateToRoom(x, y) {
             const newX = x + dir.dx;
             const newY = y + dir.dy;
             if (checkCell(newX, newY) === true) {
+                document.querySelector(
+                    `#map .cell[data-row="${y}"][data-col="${x}"]`
+                ).dataset.current = 'false';
                 x = newX;
                 y = newY;
                 console.log('Went ' + dir.name);
                 let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
                 data.dataset.visited = 'true';
+                data.dataset.current = 'true';
+                console.log(`a szoba típusa: ${data.dataset.roomType}`);
             } else {
                 console.log('No room available');
             }
