@@ -1,15 +1,15 @@
 @font-face {
     font-family: pixelFont;
-    src: url(fontStyle/yoster.ttf);
+    src: url(../fontStyle/yoster.ttf);
 }
 
 * {
-    cursor: url('textures/cursor.png'), auto !important;
+    cursor: url('../textures/cursor.png'), auto !important;
     font-family: pixelFont;
 }
 
 body {
-    background: url('menuImages/mainBackGround-brightened.png') no-repeat fixed center;
+    background: url('../menuImages/mainBackGround-brightened.png') no-repeat fixed center;
     background-size: cover;
     overflow: hidden;
 }

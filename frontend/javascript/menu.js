@@ -247,7 +247,7 @@ function StartGame() {
         let dungeonImg = document.createElement('img');
         dungeonImg.setAttribute(
             'src',
-            `menuImages/${dungeon.toLowerCase().replaceAll(' ', '')}.jpg`
+            `../menuImages/${dungeon.toLowerCase().replaceAll(' ', '')}.jpg`
         );
         dungeonImg.setAttribute('class', 'dungeonImage img-fluid');
 
@@ -301,7 +301,7 @@ function Home() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
-    document.body.style.backgroundImage = "url('menuImages/home.jpg')";
+    document.body.style.backgroundImage = "url('../menuImages/home.jpg')";
 
     //TODO: Home screen content
 
@@ -310,7 +310,7 @@ function Home() {
     backButton.setAttribute('value', 'Back to Dungeon Selection');
     backButton.setAttribute('class', 'menuButton');
     backButton.addEventListener('click', () => {
-        document.body.style.backgroundImage = "url('menuImages/mainBackGround-brightened.png')";
+        document.body.style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
         StartGame();
     });
 
@@ -406,7 +406,7 @@ function LeaderBoard() {
                 const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
                 for (let c = 0; c < coinCount; c++) {
                     const coin = document.createElement('img');
-                    coin.src = 'menuImages/coing.png';
+                    coin.src = '../menuImages/coing.png';
                     coin.className = 'coin';
                     coin.style.bottom = `${c * 0.3}vh`; // csak a dinamikus pozíció marad JS-ben
                     coinStack.appendChild(coin);
