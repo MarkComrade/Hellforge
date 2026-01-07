@@ -2,11 +2,16 @@ function newGame(dungeon) {
     // Clear body
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
+    let mapContainer = document.createElement('div');
+    mapContainer.setAttribute('id', 'mapContainer');
+    mapContainer.setAttribute('class', 'mapContainer');
+
+    body[0].appendChild(mapContainer);
 
     let container = document.createElement('div');
-    container.setAttribute('class', 'container-fluid');
+
     container.setAttribute('id', 'map');
-    body[0].appendChild(container);
+    mapContainer.appendChild(container);
 
     // 9x9 grid
     for (let i = 0; i < 9; i++) {
@@ -19,9 +24,7 @@ function newGame(dungeon) {
             cell.dataset.col = j + 1;
             cell.dataset.room = false;
             cell.dataset.visited = false;
-            cell.style.width = '25px';
-            cell.style.height = '25px';
-            cell.style.border = '1px solid green';
+
             div.appendChild(cell);
         }
         container.appendChild(div);
@@ -118,6 +121,7 @@ function newGame(dungeon) {
     });
 
     navigateToRoom(startX, startY);
+    cutOutMap();
 }
 function isAdjacent(a, b) {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
@@ -130,7 +134,37 @@ function checkCell(x, y) {
     }
     return false;
 }
-
+function cutOutMap() {
+    let cells = document.querySelectorAll('#map .cell[data-room="true"]');
+    let minX = 10,
+        maxX = 0,
+        minY = 10,
+        maxY = 0;
+    cells.forEach((cell) => {
+        let x = parseInt(cell.dataset.col);
+        let y = parseInt(cell.dataset.row);
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+    });
+    let allCells = document.querySelectorAll('#map .cell');
+    console.log('minX:', minX, 'maxX:', maxX, 'minY:', minY, 'maxY:', maxY);
+    let adaptiveSize = Math.max(maxX - minX + 1, maxY - minY + 1);
+    allCells.forEach((cell) => {
+        if (
+            cell.dataset.col < minX ||
+            cell.dataset.col > maxX ||
+            cell.dataset.row < minY ||
+            cell.dataset.row > maxY
+        ) {
+            cell.style.display = 'none';
+        } else {
+            cell.style.width = 23 / adaptiveSize + 'vh';
+            cell.style.height = 23 / adaptiveSize + 'vh';
+        }
+    });
+}
 function navigateToRoom(x, y) {
     let body = document.getElementsByTagName('body')[0];
     const directions = [

@@ -210,7 +210,13 @@ leaderboard css dolgok
     font-size: 1.4vh;
     color: #ddd;
 }
-
+.mapContainer {
+    width: 28vh;
+    height: 28vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .coinStack {
     min-height: 20vh;
     position: relative;
@@ -278,12 +284,6 @@ leaderboard css dolgok
 /* Azok a cellák, ahol már járt a játékos */
 .cell[data-visited='true'] {
     background-color: #3ba7ff;
-}
-
-/* Ha cella nem szoba ez teszi ra az extra keretet */
-.cell[data-room='false'] {
-    background-color: #000;
-    opacity: 0.3;
 }
 
 /* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
