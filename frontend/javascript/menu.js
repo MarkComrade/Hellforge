@@ -68,11 +68,17 @@ function Menu() {
     body[0].innerHTML = '';
 
     //Title
-    generateBootStrapGrid(1, 3, 6, 'topRow');
+    generateBootStrapGrid(1, 2, 8, 'topRow');
+    const topRow = document.querySelectorAll('.topRow');
+    topRow[1].setAttribute('class', 'col-sm-4 col-md-4 d-flex justify-content-center topRow');
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = 'HellForge';
+    let hellForgeLogo = document.createElement('img');
+    hellForgeLogo.setAttribute('src', '../menuImages/hellforgeicon.png');
+    hellForgeLogo.setAttribute('class', 'hellForgeLogo');
     document.querySelector('.topRow').appendChild(menuTitle);
+    document.querySelector('.topRow').appendChild(hellForgeLogo);
 
     let loggedUser = document.createElement('p');
     loggedUser.setAttribute('class', 'menuText');
@@ -406,7 +412,7 @@ function LeaderBoard() {
                 const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
                 for (let c = 0; c < coinCount; c++) {
                     const coin = document.createElement('img');
-                    coin.src = '../menuImages/coing.png';
+                    coin.src = '../textures/items/coing.png';
                     coin.className = 'coin';
                     coin.style.bottom = `${c * 0.3}vh`; // csak a dinamikus pozíció marad JS-ben
                     coinStack.appendChild(coin);
