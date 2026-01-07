@@ -218,7 +218,13 @@ leaderboard css dolgok
     font-size: 1.4vh;
     color: #ddd;
 }
-
+.mapContainer {
+    width: 28vh;
+    height: 28vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .coinStack {
     min-height: 20vh;
     position: relative;
@@ -282,19 +288,10 @@ leaderboard css dolgok
 }
 
 /* Azok a cellák, amik szobák, de még nem látogatottak */
-.cell[data-room='true'][data-visited='false'] {
-    background-color: #1a3d1a;
-}
 
 /* Azok a cellák, ahol már járt a játékos */
 .cell[data-visited='true'] {
     background-color: #3ba7ff;
-}
-
-/* Ha cella nem szoba */
-.cell[data-room='false'] {
-    background-color: #000;
-    opacity: 0.3;
 }
 
 /* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
@@ -302,3 +299,29 @@ leaderboard css dolgok
     background-color: #ffcc00;
     box-shadow: 0 0 10px #ffcc00;
 }
+/*mapcolors
+.cell[data-room-type='start'] {
+    background-color: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+.cell[data-room-type='out'] {
+    background-color: #0400ee;
+    box-shadow: 0 0 10px #0400ee;
+}
+.cell[data-room-type='loot'] {
+    background-color: #b2d213;
+    box-shadow: 0 0 10px #b2d213;
+}
+.cell[data-room-type='combat'] {
+    background-color: #d21313;
+    box-shadow: 0 0 10px #d21313;
+}
+.cell[data-room-type='event'] {
+    background-color: #13b9a6;
+    box-shadow: 0 0 10px #13b9a6;
+}
+.cell[data-room-type='shop'] {
+    background-color: #d3d3d3;
+    box-shadow: 0 0 10px #d3d3d3;
+}
+mapcolors end*/
