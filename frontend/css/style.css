@@ -4,7 +4,7 @@
 }
 
 * {
-    cursor: url('../textures/cursor.png'), auto !important;
+    cursor: url('../textures/misc/cursor.png'), auto !important;
     font-family: pixelFont;
 }
 
@@ -19,6 +19,14 @@ body {
     color: rgb(220, 40, 40);
     text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
+}
+
+.hellForgeLogo {
+    display: flex;
+    align-self: center;
+    width: 10vw;
+    height: 10vw;
+    margin-left: 1vw;
 }
 
 .mainMenu {

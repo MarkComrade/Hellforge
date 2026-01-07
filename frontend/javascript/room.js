@@ -3,6 +3,18 @@ function newGame(dungeon) {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
+    switch (dungeon) {
+        case 'Gates of Hell':
+            body[0].style.backgroundColor = 'black';
+            body[0].style.backgroundImage = "url('../textures/rooms/room_hell.png')";
+            body[0].style.backgroundSize = '98vw 95vh';
+            body[0].style.backgroundRepeat = 'no-repeat';
+            body[0].style.backgroundPosition = 'center';
+            break;
+        default:
+            console.log('Unknown dungeon:', dungeon);
+    }
+
     let container = document.createElement('div');
     container.setAttribute('class', 'container-fluid');
     container.setAttribute('id', 'map');
@@ -76,6 +88,7 @@ function newGame(dungeon) {
         return false;
     }
 
+    addDoorsToRooms();
     navigateToRoom(startX, startY);
 }
 
