@@ -287,6 +287,16 @@ leaderboard css dolgok
     left: 20vw;
 }
 
+.characterInfoDiv,
+.characterStashDiv {
+    border: 0.4vh solid #000000;
+    outline: 0.2vh solid rgb(220, 40, 40);
+    min-height: 70vh;
+    margin-left: 3vw;
+    margin-right: 3vw;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
 .doorUp {
     position: absolute;
     top: 3vh;

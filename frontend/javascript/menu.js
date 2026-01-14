@@ -315,6 +315,26 @@ function Home() {
 
     //TODO: Home screen content
 
+    generateBootStrapGrid(1, 1, 12, 'homeMenuRow');
+    let menuTitle = document.createElement('div');
+    menuTitle.setAttribute('class', 'menuTitle homeMenu');
+    menuTitle.style = 'font-size: 12vh;';
+    menuTitle.innerHTML = 'Home';
+    document.querySelector('.homeMenuRow').appendChild(menuTitle);
+
+    generateBootStrapGrid(1, 2, 6, 'homeUI');
+
+    let homeUI = document.querySelectorAll('.homeUI');
+    homeUI[0].setAttribute(
+        'class',
+        'characterInfoDiv col-sm-3 col-md-3 d-flex flex-column align-items-center'
+    );
+
+    homeUI[1].setAttribute(
+        'class',
+        'characterStashDiv col-sm-7 col-md-7 d-flex flex-column align-items-center'
+    );
+
     let backButton = document.createElement('input');
     backButton.setAttribute('type', 'button');
     backButton.setAttribute('value', 'Back to Dungeon Selection');
@@ -567,6 +587,7 @@ function checkOrientation() {
         const leaderMenu = document.querySelector('.leaderMenu');
         const adminMenu = document.querySelector('.adminMenu');
         const startGameMenu = document.querySelector('.startGameMenu');
+        const homeMenu = document.querySelector('.homeMenu');
 
         if (isInGame == false) {
             body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
@@ -582,6 +603,8 @@ function checkOrientation() {
                 Admin();
             } else if (startGameMenu) {
                 StartGame();
+            } else if (homeMenu) {
+                Home();
             } else {
                 Menu();
             }
@@ -594,7 +617,7 @@ function checkOrientation() {
 //Play music
 function playMenuMusic() {
     if (!audio) {
-        audio = new Audio('music/track1.mp3');
+        audio = new Audio('../music/track1.mp3');
         audio.loop = true;
         audio.volume = 0.0;
 
