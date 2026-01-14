@@ -1,6 +1,7 @@
 function newGame(dungeon) {
     // Clear body
     let body = document.getElementsByTagName('body');
+    body[0].style.height = '100vh';
     body[0].innerHTML = '';
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
@@ -155,6 +156,7 @@ function newGame(dungeon) {
 
     navigateToRoom(startX, startY);
     cutOutMap();
+    createUI();
     generateDoors(dungeon);
 }
 
@@ -291,3 +293,4 @@ function generateDoors(dungeon) {
         currentPosition.appendChild(doorLeft);
     }
 }
+function createUI() {}
