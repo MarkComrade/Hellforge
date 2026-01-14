@@ -224,6 +224,8 @@ leaderboard css dolgok
     display: flex;
     align-items: center;
     justify-content: center;
+    border: solid 0.5vh black;
+    background-color: rgba(0, 0, 0, 0.67);
 }
 .coinStack {
     min-height: 20vh;
@@ -352,38 +354,33 @@ leaderboard css dolgok
 /* Azok a cellák, amik szobák, de még nem látogatottak */
 
 /* Azok a cellák, ahol már járt a játékos */
-.cell[data-visited='true'] {
-    background-color: #3ba7ff;
-}
 
-/* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
-.cell[data-current='true'] {
-    background-color: #ffcc00;
-    box-shadow: 0 0 10px #ffcc00;
-}
-/*mapcolors
-.cell[data-room-type='start'] {
+.cell[data-room-type='start'][data-visited='true'] {
     background-color: #00ff00;
     box-shadow: 0 0 10px #00ff00;
 }
-.cell[data-room-type='out'] {
+.cell[data-room-type='out'][data-visited='true'] {
     background-color: #0400ee;
     box-shadow: 0 0 10px #0400ee;
 }
-.cell[data-room-type='loot'] {
+.cell[data-room-type='loot'][data-visited='true'] {
     background-color: #b2d213;
     box-shadow: 0 0 10px #b2d213;
 }
-.cell[data-room-type='combat'] {
+.cell[data-room-type='combat'][data-visited='true'] {
     background-color: #d21313;
     box-shadow: 0 0 10px #d21313;
 }
-.cell[data-room-type='event'] {
+.cell[data-room-type='event'][data-visited='true'] {
     background-color: #13b9a6;
     box-shadow: 0 0 10px #13b9a6;
 }
-.cell[data-room-type='shop'] {
+.cell[data-room-type='shop'][data-visited='true'] {
     background-color: #d3d3d3;
     box-shadow: 0 0 10px #d3d3d3;
 }
-mapcolors end*/
+/* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
+.cell[data-current='true'][data-visited='true'] {
+    background-color: #ffcc00;
+    box-shadow: 0 0 10px #ffcc00;
+}
