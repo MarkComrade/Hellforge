@@ -12,6 +12,10 @@ isLoggedIn = false;
 userName = '';
 userPassword = '';
 let audio;
+
+// Global flags for in-game orientation handling
+window.isInGame = false;
+window.isGamePaused = false;
 window.addEventListener('resize', checkOrientation);
 
 //Tool to generate bootstrap grid
@@ -240,7 +244,7 @@ function StartGame() {
     //Title
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
-    menuTitle.setAttribute('class', 'menuTitle');
+    menuTitle.setAttribute('class', 'menuTitle startGameMenu');
     menuTitle.style = 'font-size: 12vh;';
     menuTitle.innerHTML = 'Select dungeon';
     document.querySelector('.col-md-12').appendChild(menuTitle);
@@ -515,35 +519,72 @@ function checkOrientation() {
     const body = document.getElementsByTagName('body');
 
     if (!window.matchMedia('(orientation: landscape)').matches) {
-        body[0].innerHTML = '';
-
-        let warning = document.createElement('div');
-        warning.setAttribute('class', 'orientationWarning');
-        warning.innerHTML =
-            'Please rotate your device to landscape mode or make the window fullscreen to continue.';
-        warning.style.position = 'absolute';
-        warning.style.top = '50%';
-        warning.style.left = '50%';
-        warning.style.transform = 'translate(-50%, -50%)';
-
-        body[0].appendChild(warning);
-        return false;
+        // In-game orientation handling
+        if (window.isInGame) {
+            window.isGamePaused = true;
+            if (!document.querySelector('.orientationWarning')) {
+                let warning = document.createElement('div');
+                warning.setAttribute('class', 'orientationWarning');
+                warning.innerHTML =
+                    'Please rotate your device to landscape mode or make the window fullscreen to continue.';
+                warning.style.position = 'absolute';
+                warning.style.top = '50%';
+                warning.style.left = '50%';
+                warning.style.transform = 'translate(-50%, -50%)';
+                warning.style.zIndex = '9999';
+                warning.style.background = 'rgba(0,0,0,0.85)';
+                warning.style.color = '#fff';
+                warning.style.padding = '3vh 5vw';
+                warning.style.borderRadius = '2vh';
+                warning.style.textAlign = 'center';
+                document.body.appendChild(warning);
+            }
+            return false;
+        } else {
+            body[0].innerHTML = '';
+            let warning = document.createElement('div');
+            warning.setAttribute('class', 'orientationWarning');
+            warning.innerHTML =
+                'Please rotate your device to landscape mode or make the window fullscreen to continue.';
+            warning.style.position = 'absolute';
+            warning.style.top = '50%';
+            warning.style.left = '50%';
+            warning.style.transform = 'translate(-50%, -50%)';
+            body[0].appendChild(warning);
+            return false;
+        }
     } else {
+        if (window.isInGame && window.isGamePaused) {
+            window.isGamePaused = false;
+            const warning = document.querySelector('.orientationWarning');
+            if (warning) {
+                warning.remove();
+            }
+        }
         const mainMenu = document.querySelector('.mainMenu');
         const optionsMenu = document.querySelector('.optionsMenu');
         const loginMenu = document.querySelector('.loginMenu');
         const leaderMenu = document.querySelector('.leaderMenu');
+        const adminMenu = document.querySelector('.adminMenu');
+        const startGameMenu = document.querySelector('.startGameMenu');
 
-        if (mainMenu) {
-            Menu();
-        } else if (optionsMenu) {
-            Options();
-        } else if (loginMenu) {
-            Login();
-        } else if (leaderMenu) {
-            LeaderBoard();
-        } else {
-            Menu();
+        if (isInGame == false) {
+            body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
+            if (mainMenu) {
+                Menu();
+            } else if (optionsMenu) {
+                Options();
+            } else if (loginMenu) {
+                Login();
+            } else if (leaderMenu) {
+                LeaderBoard();
+            } else if (adminMenu) {
+                Admin();
+            } else if (startGameMenu) {
+                StartGame();
+            } else {
+                Menu();
+            }
         }
     }
 
