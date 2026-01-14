@@ -6,6 +6,37 @@ function newGame(dungeon) {
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
 
+    switch (dungeon) {
+        case 'Laboratory':
+            body[0].style.backgroundImage = "url('../textures/rooms/room_lab.png')";
+            body[0].style.backgroundSize = '98vw 95vh';
+            body[0].style.backgroundRepeat = 'no-repeat';
+            body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundColor = '#000000';
+            break;
+        case 'Crypt':
+            body[0].style.backgroundImage = "url('../textures/rooms/room_crypt.png')";
+            body[0].style.backgroundSize = '98vw 95vh';
+            body[0].style.backgroundRepeat = 'no-repeat';
+            body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundColor = '#000000';
+            break;
+        case 'Labyrinth':
+            body[0].style.backgroundImage = "url('../textures/rooms/room_labyrinth.png')";
+            body[0].style.backgroundSize = '98vw 95vh';
+            body[0].style.backgroundRepeat = 'no-repeat';
+            body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundColor = '#000000';
+            break;
+        case 'Gates of Hell':
+            body[0].style.backgroundImage = "url('../textures/rooms/room_hell.png')";
+            body[0].style.backgroundSize = '98vw 95vh';
+            body[0].style.backgroundRepeat = 'no-repeat';
+            body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundColor = '#000000';
+            break;
+    }
+
     body[0].appendChild(mapContainer);
 
     let container = document.createElement('div');
@@ -31,6 +62,8 @@ function newGame(dungeon) {
     }
 
     // start
+    isInGame = true;
+
     let startX = 5;
     let startY = 5;
     let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
@@ -122,9 +155,7 @@ function newGame(dungeon) {
 
     navigateToRoom(startX, startY);
     cutOutMap();
-}
-function isAdjacent(a, b) {
-    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
+    generateDoors(dungeon);
 }
 
 function checkCell(x, y) {
@@ -182,20 +213,81 @@ function navigateToRoom(x, y) {
             const newX = x + dir.dx;
             const newY = y + dir.dy;
             if (checkCell(newX, newY) === true) {
-                document.querySelector(
+                const prevCell = document.querySelector(
                     `#map .cell[data-row="${y}"][data-col="${x}"]`
-                ).dataset.current = 'false';
+                );
+                prevCell.dataset.current = 'false';
+                prevCell
+                    .querySelectorAll('img.doorUp, img.doorRight, img.doorDown, img.doorLeft')
+                    .forEach((img) => img.remove());
+
                 x = newX;
                 y = newY;
-                console.log('Went ' + dir.name);
+                console.log('menés ' + dir.name);
                 let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
                 data.dataset.visited = 'true';
                 data.dataset.current = 'true';
                 console.log(`a szoba típusa: ${data.dataset.roomType}`);
+
+                data.querySelectorAll(
+                    'img.doorUp, img.doorRight, img.doorDown, img.doorLeft'
+                ).forEach((img) => img.remove());
+                if (window.currentDungeon) {
+                    generateDoors(window.currentDungeon);
+                } else {
+                    generateDoors();
+                }
             } else {
                 console.log('No room available');
             }
             console.log(`Current position: (${x}, ${y})`);
         });
     });
+}
+
+function generateDoors(dungeon) {
+    const doorTextures = {
+        Laboratory: '../textures/rooms/door_lab.png',
+        Crypt: '../textures/rooms/door_crypt.png',
+        Labyrinth: '../textures/rooms/door_labyrinth.png',
+        'Gates of Hell': '../textures/rooms/door_hell.png'
+    };
+    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
+
+    const currentPosition = document.querySelector('#map .cell[data-current="true"]');
+    const x = parseInt(currentPosition.dataset.col);
+    const y = parseInt(currentPosition.dataset.row);
+
+    // Up
+    if (checkCell(x, y - 1)) {
+        console.log('door up');
+        const doorUp = document.createElement('img');
+        doorUp.src = doorTexture;
+        doorUp.classList.add('doorUp');
+        currentPosition.appendChild(doorUp);
+    }
+    // Right
+    if (checkCell(x + 1, y)) {
+        console.log('door right');
+        const doorRight = document.createElement('img');
+        doorRight.src = doorTexture;
+        doorRight.classList.add('doorRight');
+        currentPosition.appendChild(doorRight);
+    }
+    // Down
+    if (checkCell(x, y + 1)) {
+        console.log('door down');
+        const doorDown = document.createElement('img');
+        doorDown.src = doorTexture;
+        doorDown.classList.add('doorDown');
+        currentPosition.appendChild(doorDown);
+    }
+    // Left
+    if (checkCell(x - 1, y)) {
+        console.log('door left');
+        const doorLeft = document.createElement('img');
+        doorLeft.src = doorTexture;
+        doorLeft.classList.add('doorLeft');
+        currentPosition.appendChild(doorLeft);
+    }
 }
