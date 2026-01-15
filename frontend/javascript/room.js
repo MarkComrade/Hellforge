@@ -79,7 +79,6 @@ function newGame(dungeon) {
 
     // active rooms list
     let activeRooms = [{ x: startX, y: startY }];
-    let roomTypes = ['combat', 'event', 'loot'];
 
     while (activeRooms.length < roomsToGenerate) {
         // choose random active room
@@ -158,6 +157,7 @@ function newGame(dungeon) {
     cutOutMap();
     createUI();
     generateDoors(dungeon);
+    setHP(51);
 }
 
 function checkCell(x, y) {
@@ -293,4 +293,128 @@ function generateDoors(dungeon) {
         currentPosition.appendChild(doorLeft);
     }
 }
-function createUI() {}
+function createUI() {
+    const body = document.body;
+
+    const ui = document.createElement('div');
+    ui.id = 'ui';
+    body.appendChild(ui);
+
+    createTopLeft(ui);
+    createTopRight(ui);
+    createBottomLeft(ui);
+    createBottomRight(ui);
+}
+function createTopLeft(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box top-left';
+    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    box.innerHTML = `
+        <div class="level-number">1</div>
+        <div class="level-text">Level</div>
+    `;
+
+    parent.appendChild(box);
+}
+function createTopRight(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box top-right';
+    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    box.innerHTML = `
+        <img src="../textures/rooms/settings-UI.png" class="ui-icon" title="Inventory">
+        <img src="../textures/rooms/inventory-UI.png" class="ui-icon" title="Settings">
+    `;
+
+    parent.appendChild(box);
+}
+function createBottomRight(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box bottom-right';
+
+    parent.appendChild(box);
+}
+function createBottomLeft(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box bottom-left';
+    box.id = 'hpBox';
+
+    box.innerHTML = `
+        <div class="hp-top">
+            <div class="hp-label">HP</div>
+            <div class="hp-text">
+                <span id="hpValue">100</span> / 100
+            </div>
+        </div>
+
+        <div class="hp-bar">
+            <div class="hp-fill" id="hpFill"></div>
+        </div>
+    `;
+
+    parent.appendChild(box);
+}
+function createBottomLeft(parent) {
+    const box = document.createElement('div');
+    box.setAttribute('class', 'ui-box bottom-left');
+    box.setAttribute('id', 'hpBox');
+
+    /* felső sor */
+    const hpTop = document.createElement('div');
+    hpTop.setAttribute('class', 'hp-top');
+
+    const hpLabel = document.createElement('div');
+    hpLabel.setAttribute('class', 'hp-label');
+    hpLabel.textContent = 'HP';
+
+    const hpText = document.createElement('div');
+    hpText.setAttribute('class', 'hp-text');
+
+    const hpValue = document.createElement('span');
+    hpValue.setAttribute('id', 'hpValue');
+    hpValue.textContent = '100';
+
+    const hpMaxText = document.createTextNode(' / 100');
+
+    hpText.appendChild(hpValue);
+    hpText.appendChild(hpMaxText);
+
+    hpTop.appendChild(hpLabel);
+    hpTop.appendChild(hpText);
+
+    /* HP bar */
+    const hpBar = document.createElement('div');
+    hpBar.setAttribute('class', 'hp-bar');
+
+    const hpFill = document.createElement('div');
+    hpFill.setAttribute('class', 'hp-fill');
+    hpFill.setAttribute('id', 'hpFill');
+
+    hpBar.appendChild(hpFill);
+
+    /* összerakás */
+    box.appendChild(hpTop);
+    box.appendChild(hpBar);
+
+    parent.appendChild(box);
+}
+
+function setHP(currentHP) {
+    const maxHP = 100;
+
+    const hpFill = document.getElementById('hpFill');
+    const hpValue = document.getElementById('hpValue');
+    // Százalékos HP számítás nem lehet kisebb 0-nál és nagyobb mint a maxHP
+    const percent = Math.max(0, Math.min(currentHP, maxHP));
+
+    hpFill.style.width = percent + '%';
+    hpValue.textContent = percent;
+
+    // Színváltás alacsony HP-nál
+    if (percent <= 30) {
+        hpFill.style.background = 'linear-gradient(to right, #ff3333, #ff7777)';
+    } else if (percent <= 50) {
+        hpFill.style.background = 'linear-gradient(to right, #ffaa00, #ffdd55)';
+    } else {
+        hpFill.style.background = 'linear-gradient(to right, #00ff66, #55ff99)';
+    }
+}
