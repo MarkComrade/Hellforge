@@ -346,19 +346,31 @@ leaderboard css dolgok
 /* Azok a cellák, ahol már járt a játékos */
 
 .cell[data-room-type='start'][data-visited='true'] {
-    background-color: #00ff00;
-    box-shadow: 0 0 10px #00ff00;
+    background-image: url('../textures/UI/start-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='out'][data-visited='true'] {
-    background-color: #0400ee;
-    box-shadow: 0 0 10px #0400ee;
+    background-image: url('../textures/UI/out-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='loot'][data-visited='true'] {
-    background-color: #b2d213;
-    box-shadow: 0 0 10px #b2d213;
+    background-image: url('../textures/UI/loot-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='combat'][data-visited='true'] {
-    background-image: url('../textures/rooms/roomMapCombat.png');
+    background-image: url('../textures/UI/combat-UI.png');
     background-size: cover;
     box-sizing: border-box;
     background-repeat: no-repeat;
@@ -366,17 +378,26 @@ leaderboard css dolgok
     background-size: 120% 120%;
 }
 .cell[data-room-type='event'][data-visited='true'] {
-    background-color: #13b9a6;
-    box-shadow: 0 0 10px #13b9a6;
+    background-image: url('../textures/UI/event-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='shop'][data-visited='true'] {
-    background-color: #d3d3d3;
-    box-shadow: 0 0 10px #d3d3d3;
+    background-image: url('../textures/UI/shop-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
-/* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
+/* Az a cella, ahol a játékos éppen tartózkodik */
 .cell[data-current='true'][data-visited='true'] {
     background-color: #ffcc00;
-    box-shadow: 0 0 10px #ffcc00;
+    box-shadow: 0 0 0.5vh #ffcc00;
+    border-radius: 6%;
 }
 
 /* UIIII */

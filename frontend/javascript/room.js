@@ -157,7 +157,7 @@ function newGame(dungeon) {
     cutOutMap();
     createUI();
     generateDoors(dungeon);
-    setHP(51);
+    setHP(35);
 }
 
 function checkCell(x, y) {
@@ -321,8 +321,8 @@ function createTopRight(parent) {
     box.className = 'ui-box top-right';
     // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
     box.innerHTML = `
-        <img src="../textures/rooms/settings-UI.png" class="ui-icon" title="Inventory">
-        <img src="../textures/rooms/inventory-UI.png" class="ui-icon" title="Settings">
+        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory">
+        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings">
     `;
 
     parent.appendChild(box);
