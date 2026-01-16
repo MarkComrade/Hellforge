@@ -547,22 +547,17 @@ function checkOrientation() {
                 warning.setAttribute('class', 'orientationWarning');
                 warning.innerHTML =
                     'Please rotate your device to landscape mode or make the window fullscreen to continue.';
-                warning.style.position = 'fixed';
-                warning.style.top = '0';
-                warning.style.left = '0';
-                warning.style.width = '100vw';
-                warning.style.height = '100vh';
-                warning.style.display = 'flex';
-                warning.style.alignItems = 'center';
-                warning.style.justifyContent = 'center';
+                warning.style.position = 'absolute';
+                warning.style.top = '50%';
+                warning.style.left = '50%';
+                warning.style.transform = 'translate(-50%, -50%)';
                 warning.style.zIndex = '9999';
-                warning.style.background = 'rgba(0,0,0,1)';
-                warning.style.color = 'rgb(220, 40, 40)';
-                warning.style.fontSize = '3vh';
+                warning.style.background = 'rgba(0,0,0,0.85)';
+                warning.style.color = '#fff';
+                warning.style.padding = '3vh 5vw';
+                warning.style.borderRadius = '2vh';
                 warning.style.textAlign = 'center';
-                warning.style.pointerEvents = 'auto';
                 document.body.appendChild(warning);
-                document.body.style.pointerEvents = 'none';
             }
             return false;
         } else {
@@ -571,22 +566,11 @@ function checkOrientation() {
             warning.setAttribute('class', 'orientationWarning');
             warning.innerHTML =
                 'Please rotate your device to landscape mode or make the window fullscreen to continue.';
-            warning.style.position = 'fixed';
-            warning.style.top = '0';
-            warning.style.left = '0';
-            warning.style.width = '100vw';
-            warning.style.height = '100vh';
-            warning.style.display = 'flex';
-            warning.style.alignItems = 'center';
-            warning.style.justifyContent = 'center';
-            warning.style.zIndex = '9999';
-            warning.style.background = 'rgba(0,0,0,1)';
-            warning.style.color = 'rgb(220, 40, 40)';
-            warning.style.fontSize = '3vh';
-            warning.style.textAlign = 'center';
-            warning.style.pointerEvents = 'auto';
+            warning.style.position = 'absolute';
+            warning.style.top = '50%';
+            warning.style.left = '50%';
+            warning.style.transform = 'translate(-50%, -50%)';
             body[0].appendChild(warning);
-            document.body.style.pointerEvents = 'none';
             return false;
         }
     } else {
@@ -595,13 +579,6 @@ function checkOrientation() {
             const warning = document.querySelector('.orientationWarning');
             if (warning) {
                 warning.remove();
-                document.body.style.pointerEvents = '';
-            }
-        } else {
-            const warning = document.querySelector('.orientationWarning');
-            if (warning) {
-                warning.remove();
-                document.body.style.pointerEvents = '';
             }
         }
         const mainMenu = document.querySelector('.mainMenu');
