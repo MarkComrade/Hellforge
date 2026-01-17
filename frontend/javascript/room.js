@@ -73,11 +73,9 @@ function navigateToRoom(x, y) {
                 data.querySelectorAll(
                     'img.doorUp, img.doorRight, img.doorDown, img.doorLeft'
                 ).forEach((img) => img.remove());
-                if (window.currentDungeon) {
-                    generateDoors(window.currentDungeon);
-                } else {
-                    generateDoors();
-                }
+
+                generateDoors(window.currentDungeon);
+                roomEventHandler(data);
             } else {
                 console.log('No room available');
             }
@@ -131,7 +129,37 @@ function generateDoors(dungeon) {
         currentPosition.appendChild(doorLeft);
     }
 }
-//UI functions
+
+function roomEventHandler(room) {
+    //TODO
+
+    switch (room.dataset.roomType) {
+        case 'start':
+            console.log('Spawn room entered');
+            break;
+        case 'combat':
+            console.log('Combat room entered');
+            combatStart();
+            break;
+        case 'loot':
+            console.log('Loot room entered');
+            lootGained();
+            break;
+        case 'shop':
+            console.log('Shop room entered');
+            openShop();
+            break;
+        case 'event':
+            console.log('Event room entered');
+            triggerEvent();
+            break;
+        case 'out':
+            console.log('Exit room entered');
+            document.getElementById('trapDoor').addEventListener('click', function () {});
+            break;
+    }
+}
+
 function createUI() {
     const body = document.body;
 
@@ -160,12 +188,29 @@ function createTopRight(parent) {
     box.className = 'ui-box top-right';
     // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
     box.innerHTML = `
-        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory">
-        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings">
+        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory id='openInventory">
+        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings id='openSettings">
     `;
+    /*
+    document.getElementById('openInventory').addEventListener('click', function () {
+        openInventory();
+    });
+
+    document.getElementById('openSettings').addEventListener('click', function () {
+        openSettings();
+    });*/
 
     parent.appendChild(box);
 }
+
+function openInventory() {
+    //TODO
+}
+
+function openSettings() {
+    //TODO
+}
+
 function createBottomRight(parent) {
     const box = document.createElement('div');
     box.className = 'ui-box bottom-right';
