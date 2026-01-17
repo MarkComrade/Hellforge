@@ -245,7 +245,7 @@ leaderboard css dolgok
 }
 
 .characterImage {
-    width: 12vw;
+    width: 8vw;
     height: auto;
     border: 0.4vh solid #000000;
     outline: 0.2vh solid rgb(220, 40, 40);
@@ -262,7 +262,7 @@ leaderboard css dolgok
 
 .itemImage {
     width: 4vw;
-    height: 4vh;
+    height: auto;
     margin: 0.5vh;
 }
 
@@ -322,10 +322,41 @@ leaderboard css dolgok
 .characterStashDiv {
     border: 0.4vh solid #000000;
     outline: 0.2vh solid rgb(220, 40, 40);
-    min-height: 70vh;
     margin-left: 3vw;
     margin-right: 3vw;
     background-color: rgba(0, 0, 0, 0.5);
+}
+
+.equipmentRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    height: 25%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5vh 0.5vw;
+}
+
+.equipmentLeft {
+    width: 7vw;
+    min-width: 7vw;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
+}
+
+.equipmentRight {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 1vw;
 }
 
 .doorUp {

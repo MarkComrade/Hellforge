@@ -321,7 +321,7 @@ function Home() {
     generateBootStrapGrid(1, 1, 12, 'homeMenuRow');
     let menuTitle = document.createElement('div');
     menuTitle.setAttribute('class', 'menuTitle homeMenu');
-    menuTitle.style = 'font-size: 12vh;';
+    menuTitle.style = 'font-size: 8vh;';
     menuTitle.innerHTML = 'Home';
     document.querySelector('.homeMenuRow').appendChild(menuTitle);
 
@@ -401,6 +401,26 @@ function Home() {
         'class',
         'characterStashDiv col-sm-7 col-md-7 d-flex flex-column align-items-center'
     );
+
+    equipmentSlots.forEach(({ slot, img }) => {
+        let rowDiv = document.createElement('div');
+        rowDiv.setAttribute('class', 'equipmentRow');
+
+        let leftBox = document.createElement('div');
+        leftBox.setAttribute('class', 'equipmentLeft');
+
+        let slotImg = document.createElement('img');
+        slotImg.setAttribute('src', img);
+        slotImg.setAttribute('class', 'itemImage');
+        leftBox.appendChild(slotImg);
+
+        let rightBox = document.createElement('div');
+        rightBox.setAttribute('class', 'equipmentRight');
+
+        rowDiv.appendChild(leftBox);
+        rowDiv.appendChild(rightBox);
+        homeUI[1].appendChild(rowDiv);
+    });
 
     let backButton = document.createElement('input');
     backButton.setAttribute('type', 'button');
