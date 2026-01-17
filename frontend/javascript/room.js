@@ -21,7 +21,7 @@ function cutOutMap() {
         if (y > maxY) maxY = y;
     });
     let allCells = document.querySelectorAll('#map .cell');
-    console.log('minX:', minX, 'maxX:', maxX, 'minY:', minY, 'maxY:', maxY);
+
     let adaptiveSize = Math.max(maxX - minX + 1, maxY - minY + 1);
     allCells.forEach((cell) => {
         if (
@@ -37,7 +37,7 @@ function cutOutMap() {
         }
     });
 }
-function navigateToRoom(x, y) {
+function navigateToRoom(x, y, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
     const directions = [
         { name: 'Up', dx: 0, dy: -1 },
@@ -64,18 +64,17 @@ function navigateToRoom(x, y) {
 
                 x = newX;
                 y = newY;
-                console.log('menés ' + dir.name);
+
                 let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
                 data.dataset.visited = 'true';
                 data.dataset.current = 'true';
-                console.log(`a szoba típusa: ${data.dataset.roomType}`);
 
                 data.querySelectorAll(
                     'img.doorUp, img.doorRight, img.doorDown, img.doorLeft'
                 ).forEach((img) => img.remove());
 
                 generateDoors(window.currentDungeon);
-                roomEventHandler(data);
+                roomEventHandler(data, dungeonLevel);
             } else {
                 console.log('No room available');
             }
@@ -98,7 +97,6 @@ function generateDoors(dungeon) {
 
     // Up
     if (checkCell(x, y - 1)) {
-        console.log('door up');
         const doorUp = document.createElement('img');
         doorUp.src = doorTexture;
         doorUp.classList.add('doorUp');
@@ -106,7 +104,6 @@ function generateDoors(dungeon) {
     }
     // Right
     if (checkCell(x + 1, y)) {
-        console.log('door right');
         const doorRight = document.createElement('img');
         doorRight.src = doorTexture;
         doorRight.classList.add('doorRight');
@@ -114,7 +111,6 @@ function generateDoors(dungeon) {
     }
     // Down
     if (checkCell(x, y + 1)) {
-        console.log('door down');
         const doorDown = document.createElement('img');
         doorDown.src = doorTexture;
         doorDown.classList.add('doorDown');
@@ -122,7 +118,6 @@ function generateDoors(dungeon) {
     }
     // Left
     if (checkCell(x - 1, y)) {
-        console.log('door left');
         const doorLeft = document.createElement('img');
         doorLeft.src = doorTexture;
         doorLeft.classList.add('doorLeft');
@@ -130,7 +125,7 @@ function generateDoors(dungeon) {
     }
 }
 
-function roomEventHandler(room) {
+function roomEventHandler(room, dungeonLevel) {
     //TODO
 
     switch (room.dataset.roomType) {
@@ -154,30 +149,32 @@ function roomEventHandler(room) {
             triggerEvent();
             break;
         case 'out':
-            console.log('Exit room entered');
-            document.getElementById('trapDoor').addEventListener('click', function () {});
+            console.log('dungeonblefvfaef' + dungeonLevel);
+            dungeonLevel++;
+            document.getElementById('level-number').textContent = dungeonLevel;
+            newLevel(window.currentDungeon, dungeonLevel, 100);
             break;
     }
 }
 
-function createUI() {
+function createUI(dungeonLevel) {
     const body = document.body;
 
     const ui = document.createElement('div');
     ui.id = 'ui';
     body.appendChild(ui);
 
-    createTopLeft(ui);
+    createTopLeft(ui, dungeonLevel);
     createTopRight(ui);
     createBottomLeft(ui);
     createBottomRight(ui);
 }
-function createTopLeft(parent) {
+function createTopLeft(parent, dungeonLevel) {
     const box = document.createElement('div');
     box.className = 'ui-box top-left';
     // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
     box.innerHTML = `
-        <div class="level-number">1</div>
+        <div id="level-number" class="level-number">${dungeonLevel}</div>
         <div class="level-text">Level</div>
     `;
 

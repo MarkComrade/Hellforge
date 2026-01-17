@@ -30,9 +30,9 @@ function newGame(dungeon) {
             body[0].style.backgroundColor = '#000000';
             break;
     }
-    dungeonLevel = 1;
+    let dungeonLevel = 1;
     let currentHP = 100;
-    newLevel(dungeon, 4 + dungeonLevel, currentHP);
+    newLevel(dungeon, dungeonLevel, currentHP);
 }
 function newLevel(dungeon, dungeonLevel, currentHP) {
     // Clear body
@@ -100,7 +100,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
             activeRooms.push({ x: dir.x, y: dir.y });
         }
     }
-    console.log('aktiv szvabaszam', activeRooms.length);
+
     // active room cells to array
     let roomCells = activeRooms.map((r) =>
         document.querySelector(`#map .cell[data-row="${r.y}"][data-col="${r.x}"]`)
@@ -139,9 +139,9 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
         cell.dataset.roomType = randomTypes[Math.floor(Math.random() * randomTypes.length)];
     });
 
-    navigateToRoom(startX, startY);
+    navigateToRoom(startX, startY, dungeonLevel);
     cutOutMap();
-    createUI();
+    createUI(dungeonLevel);
     generateDoors(dungeon);
     setHP(currentHP);
 }
