@@ -416,33 +416,160 @@ leaderboard css dolgok
 /* Azok a cellák, amik szobák, de még nem látogatottak */
 
 /* Azok a cellák, ahol már járt a játékos */
-
+.cell[data-room='true'][data-visited='false'] {
+    background-image: url('../textures/UI/undiscovered-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
 .cell[data-room-type='start'][data-visited='true'] {
-    background-color: #00ff00;
-    box-shadow: 0 0 10px #00ff00;
+    background-image: url('../textures/UI/start-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='out'][data-visited='true'] {
-    background-color: #0400ee;
-    box-shadow: 0 0 10px #0400ee;
+    background-image: url('../textures/UI/out-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='loot'][data-visited='true'] {
-    background-color: #b2d213;
-    box-shadow: 0 0 10px #b2d213;
+    background-image: url('../textures/UI/loot-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='combat'][data-visited='true'] {
-    background-color: #d21313;
-    box-shadow: 0 0 10px #d21313;
+    background-image: url('../textures/UI/combat-UI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='event'][data-visited='true'] {
-    background-color: #13b9a6;
-    box-shadow: 0 0 10px #13b9a6;
+    background-image: url('../textures/UI/event-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
 .cell[data-room-type='shop'][data-visited='true'] {
-    background-color: #d3d3d3;
-    box-shadow: 0 0 10px #d3d3d3;
+    background-image: url('../textures/UI/shop-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
 }
-/* Aktuális pozíció kiemelése, ha hozzáadsz pl. data-current="true"-t */
+/* Az a cella, ahol a játékos éppen tartózkodik */
 .cell[data-current='true'][data-visited='true'] {
     background-color: #ffcc00;
-    box-shadow: 0 0 10px #ffcc00;
+    box-shadow: 0 0 0.5vh #ffcc00;
+    border-radius: 6%;
+}
+
+/* UIIII */
+#ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Alap UI felepitese */
+.ui-box {
+    position: absolute;
+    color: #00ff66;
+    border: 0.3vh solid #00ff66;
+    padding: 1.2vh;
+    background: rgba(0, 0, 0, 0.65);
+    pointer-events: auto;
+    box-sizing: border-box;
+}
+.top-left {
+    top: 28vh;
+    left: 2vh;
+    width: 9vh;
+    height: 9vh;
+    text-align: center;
+}
+
+.level-number {
+    font-size: 5vh;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.level-text {
+    font-size: 1.6vh;
+    margin-top: 0.3vh;
+}
+.top-right {
+    top: 2vh;
+    right: 2vh;
+    display: flex;
+    gap: 1.2vh;
+}
+
+.ui-icon {
+    width: 5vh;
+    height: 5vh;
+    cursor: pointer;
+}
+.bottom-left {
+    bottom: 2vh;
+    left: 2vh;
+    width: 35vh;
+    padding: 1.2vh;
+}
+
+/* Felső sor: HP + szám */
+.hp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.8vh;
+    margin-bottom: 0.6vh;
+}
+
+.hp-label {
+    font-weight: bold;
+}
+
+/* Szám */
+.hp-text {
+    font-size: 1.6vh;
+}
+
+/* HP bar */
+.hp-bar {
+    width: 100%;
+    height: 2.2vh;
+    border: 0.3vh solid #00ff66;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.hp-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, #00ff66, #55ff99);
+    transition: width 0.4s ease, background 0.3s ease;
+}
+
+.bottom-right {
+    bottom: 3vh;
+    right: 3vh;
+    width: 22vh;
+    font-size: 1.8vh;
 }
