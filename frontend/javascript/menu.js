@@ -634,17 +634,11 @@ function checkOrientation() {
                 warning.setAttribute('class', 'orientationWarning');
                 warning.innerHTML =
                     'Please rotate your device to landscape mode or make the window fullscreen to continue.';
-                warning.style.position = 'absolute';
-                warning.style.top = '50%';
-                warning.style.left = '50%';
-                warning.style.transform = 'translate(-50%, -50%)';
-                warning.style.zIndex = '9999';
-                warning.style.background = 'rgba(0,0,0,0.85)';
-                warning.style.color = '#fff';
-                warning.style.padding = '3vh 5vw';
-                warning.style.borderRadius = '2vh';
-                warning.style.textAlign = 'center';
-                document.body.appendChild(warning);
+                warning.style.position = 'fixed';
+                warning.style.inset = '0';
+                warning.style.transform = 'none';
+                warning.style.backgroundColor = 'rgba(0, 0, 0, 1)';
+                body[0].appendChild(warning);
             }
             return false;
         } else {
@@ -653,10 +647,9 @@ function checkOrientation() {
             warning.setAttribute('class', 'orientationWarning');
             warning.innerHTML =
                 'Please rotate your device to landscape mode or make the window fullscreen to continue.';
-            warning.style.position = 'absolute';
-            warning.style.top = '50%';
-            warning.style.left = '50%';
-            warning.style.transform = 'translate(-50%, -50%)';
+            warning.style.position = 'fixed';
+            warning.style.inset = '0';
+            warning.style.transform = 'none';
             body[0].appendChild(warning);
             return false;
         }
