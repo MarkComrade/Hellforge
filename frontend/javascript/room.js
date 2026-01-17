@@ -333,26 +333,7 @@ function createBottomRight(parent) {
 
     parent.appendChild(box);
 }
-function createBottomLeft(parent) {
-    const box = document.createElement('div');
-    box.className = 'ui-box bottom-left';
-    box.id = 'hpBox';
 
-    box.innerHTML = `
-        <div class="hp-top">
-            <div class="hp-label">HP</div>
-            <div class="hp-text">
-                <span id="hpValue">100</span> / 100
-            </div>
-        </div>
-
-        <div class="hp-bar">
-            <div class="hp-fill" id="hpFill"></div>
-        </div>
-    `;
-
-    parent.appendChild(box);
-}
 function createBottomLeft(parent) {
     const box = document.createElement('div');
     box.setAttribute('class', 'ui-box bottom-left');

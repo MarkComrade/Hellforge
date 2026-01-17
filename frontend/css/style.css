@@ -344,7 +344,14 @@ leaderboard css dolgok
 /* Azok a cellák, amik szobák, de még nem látogatottak */
 
 /* Azok a cellák, ahol már járt a játékos */
-
+.cell[data-room='true'][data-visited='false'] {
+    background-image: url('../textures/UI/undiscovered-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
 .cell[data-room-type='start'][data-visited='true'] {
     background-image: url('../textures/UI/start-MapUI.png');
     background-size: cover;
