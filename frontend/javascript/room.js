@@ -149,10 +149,34 @@ function roomEventHandler(room, dungeonLevel) {
             triggerEvent();
             break;
         case 'out':
-            console.log('dungeonblefvfaef' + dungeonLevel);
-            dungeonLevel++;
-            document.getElementById('level-number').textContent = dungeonLevel;
-            newLevel(window.currentDungeon, dungeonLevel, 100);
+            let trapdoor = document.createElement('img');
+            trapdoor.src = '../textures/rooms/trapdoor.png';
+            trapdoor.id = 'trapDoor';
+            room.appendChild(trapdoor);
+
+            trapdoor.addEventListener('click', () => {
+                let exitButton = document.createElement('button');
+                exitButton.id = 'exitButton';
+                exitButton.className = 'menuButton';
+                exitButton.textContent = 'Exit the dungeon';
+                document.body.appendChild(exitButton);
+                exitButton.addEventListener('click', () => {
+                    isInGame = false;
+                    //exitDungeon();
+                    Menu();
+                });
+
+                let continueButton = document.createElement('button');
+                continueButton.id = 'continueButton';
+                continueButton.className = 'menuButton';
+                continueButton.textContent = 'Continue dungeon';
+                document.body.appendChild(continueButton);
+                continueButton.addEventListener('click', () => {
+                    dungeonLevel++;
+                    document.getElementById('level-number').textContent = dungeonLevel;
+                    newLevel(window.currentDungeon, dungeonLevel, 100);
+                });
+            });
             break;
     }
 }
