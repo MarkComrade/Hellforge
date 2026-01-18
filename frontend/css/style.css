@@ -17,7 +17,11 @@ body {
 .menuTitle {
     font-size: 7.5vw;
     color: rgb(220, 40, 40);
-    text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
+    text-shadow:
+        -0.3vw -0.3vw 0 #000,
+        0.3vw -0.3vw 0 #000,
+        -0.3vw 0.3vw 0 #000,
+        0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
 }
 
@@ -41,16 +45,22 @@ body {
     color: rgb(220, 40, 40);
     text-align: center;
     align-self: center;
-    text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
     text-transform: uppercase;
 }
 
 .orientationWarning {
     font-size: 7vw;
     color: rgb(220, 40, 40);
-    text-align: center;
-    justify-content: center;
-    text-shadow: -0.3vw -0.3vw 0 #000, 0.3vw -0.3vw 0 #000, -0.3vw 0.3vw 0 #000, 0.3vw 0.3vw 0 #000;
+    text-shadow:
+        -0.3vw -0.3vw 0 #000,
+        0.3vw -0.3vw 0 #000,
+        -0.3vw 0.3vw 0 #000,
+        0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
 }
 
@@ -60,7 +70,10 @@ body {
     flex-wrap: wrap;
     color: rgb(220, 40, 40);
     padding: 1vh 2vh;
-    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000,
+    text-shadow:
+        -0.15vw -0.15vw 0 #000,
+        0.15vw -0.15vw 0 #000,
+        -0.15vw 0.15vw 0 #000,
         0.15vw 0.15vw 0 #000;
     transition: all 0.2s ease;
     text-decoration: none;
@@ -73,8 +86,10 @@ body {
     transform: scale(1.05);
     transition: all 0.2s ease;
     text-decoration: none;
-    text-shadow: -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
-        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8), -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+    text-shadow:
+        -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
         0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
 }
 
@@ -84,7 +99,10 @@ body {
     vertical-align: middle;
     flex-wrap: wrap;
     color: rgb(220, 40, 40);
-    text-shadow: -0.15vw -0.15vw 0 #000, 0.15vw -0.15vw 0 #000, -0.15vw 0.15vw 0 #000,
+    text-shadow:
+        -0.15vw -0.15vw 0 #000,
+        0.15vw -0.15vw 0 #000,
+        -0.15vw 0.15vw 0 #000,
         0.15vw 0.15vw 0 #000;
     transition: all 0.2s ease;
     background: none;
@@ -99,8 +117,10 @@ body {
     transform: scale(1.05);
     transition: all 0.2s ease;
     text-decoration: none;
-    text-shadow: -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
-        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8), -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+    text-shadow:
+        -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
         0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
 }
 
@@ -142,7 +162,11 @@ body {
     transform: scale(1.2);
     background-color: rgb(255, 80, 80);
     border-color: #7a2f02;
-    box-shadow: -0.3vh 0 0 #000, 0.3vh 0 0 #000, 0 -0.3vh 0 #000, 0 0.3vh 0 #000;
+    box-shadow:
+        -0.3vh 0 0 #000,
+        0.3vh 0 0 #000,
+        0 -0.3vh 0 #000,
+        0 0.3vh 0 #000;
 }
 
 .loginFormContainer .row {
@@ -165,7 +189,11 @@ body {
     background: rgba(220, 40, 40, 0.12);
     border: 0.2vh solid rgb(220, 40, 40);
     color: rgb(220, 40, 40);
-    text-shadow: -0.1vw -0.1vw 0 #000, 0.1vw -0.1vw 0 #000, -0.1vw 0.1vw 0 #000, 0.1vw 0.1vw 0 #000;
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
     width: 20vw;
     transition: all 0.2s ease;
 }
@@ -205,7 +233,9 @@ leaderboard css dolgok
     align-items: center;
     justify-content: flex-end;
     position: relative;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .playerName {
@@ -339,6 +369,15 @@ leaderboard css dolgok
     transform: rotate(270deg);
 }
 
+#trapDoor {
+    position: absolute;
+    width: 10vw;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 /* Azok a cellák, amik szobák, de még nem látogatottak */
 
 /* Azok a cellák, ahol már járt a játékos */
@@ -372,8 +411,61 @@ leaderboard css dolgok
     background-color: #13b9a6;
     box-shadow: 0 0 10px #13b9a6;
 }
-.cell[data-room-type='shop'] {
-    background-color: #d3d3d3;
-    box-shadow: 0 0 10px #d3d3d3;
+.top-right {
+    top: 2vh;
+    right: 2vh;
+    display: flex;
+    gap: 1.2vh;
 }
-mapcolors end*/
+
+.ui-icon {
+    width: 5vh;
+    height: 5vh;
+    cursor: pointer;
+}
+.bottom-left {
+    bottom: 2vh;
+    left: 2vh;
+    width: 35vh;
+    padding: 1.2vh;
+}
+
+/* Felső sor: HP + szám */
+.hp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.8vh;
+    margin-bottom: 0.6vh;
+}
+
+.hp-label {
+    font-weight: bold;
+}
+
+/* Szám */
+.hp-text {
+    font-size: 1.6vh;
+}
+
+/* HP bar */
+.hp-bar {
+    width: 100%;
+    height: 2.2vh;
+    border: 0.3vh solid #00ff66;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.hp-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, #00ff66, #55ff99);
+}
+
+.bottom-right {
+    bottom: 3vh;
+    right: 3vh;
+    width: 22vh;
+    font-size: 1.8vh;
+}

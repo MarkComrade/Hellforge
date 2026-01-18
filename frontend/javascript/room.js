@@ -291,3 +291,181 @@ function generateDoors(dungeon) {
         currentPosition.appendChild(doorLeft);
     }
 }
+
+function roomEventHandler(room) {
+    //TODO: functions for room events
+
+    switch (room.dataset.roomType) {
+        case 'start':
+            console.log('Spawn room entered');
+            break;
+        case 'combat':
+            console.log('Combat room entered');
+            combatStart();
+            break;
+        case 'loot':
+            console.log('Loot room entered');
+            lootGained();
+            break;
+        case 'shop':
+            console.log('Shop room entered');
+            openShop();
+            break;
+        case 'event':
+            console.log('Event room entered');
+            triggerEvent();
+            break;
+        case 'out':
+            console.log('Exit room entered');
+
+            let trapDoor = document.createElement('img');
+            trapDoor.src = '../textures/rooms/trapdoor.png';
+            trapDoor.id = 'trapDoor';
+            room.appendChild(trapDoor);
+
+            document.getElementById('trapDoor').addEventListener('click', function () {
+                let exitButton = document.createElement('button');
+                exitButton.id = 'exitButton';
+                exitButton.setAttribute('class', 'menuButton');
+                exitButton.textContent = 'Exit Dungeon';
+                document.body.appendChild(exitButton);
+                exitButton.addEventListener('click', function () {
+                    exitDungeon();
+                });
+
+                let continueButton = document.createElement('button');
+                continueButton.id = 'continueButton';
+                continueButton.setAttribute('class', 'menuButton');
+                continueButton.textContent = 'Continue Exploring';
+                document.body.appendChild(continueButton);
+                continueButton.addEventListener('click', function () {
+                    newGame(window.currentDungeon);
+                });
+            });
+            break;
+    }
+}
+
+function createUI() {
+    const body = document.body;
+
+    const ui = document.createElement('div');
+    ui.id = 'ui';
+    body.appendChild(ui);
+
+    createTopLeft(ui);
+    createTopRight(ui);
+    createBottomLeft(ui);
+    createBottomRight(ui);
+}
+function createTopLeft(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box top-left';
+    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    box.innerHTML = `
+        <div class="level-number">1</div>
+        <div class="level-text">Level</div>
+    `;
+
+    parent.appendChild(box);
+}
+function createTopRight(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box top-right';
+    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    box.innerHTML = `
+        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory id='openInventory">
+        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings id='openSettings">
+    `;
+    /*
+    document.getElementById('openInventory').addEventListener('click', function () {
+        openInventory();
+    });
+
+    document.getElementById('openSettings').addEventListener('click', function () {
+        openSettings();
+    });*/
+
+    parent.appendChild(box);
+}
+
+function openInventory() {
+    //TODO
+}
+
+function openSettings() {
+    //TODO
+}
+
+function createBottomRight(parent) {
+    const box = document.createElement('div');
+    box.className = 'ui-box bottom-right';
+
+    parent.appendChild(box);
+}
+
+function createBottomLeft(parent) {
+    const box = document.createElement('div');
+    box.setAttribute('class', 'ui-box bottom-left');
+    box.setAttribute('id', 'hpBox');
+
+    /* felső sor */
+    const hpTop = document.createElement('div');
+    hpTop.setAttribute('class', 'hp-top');
+
+    const hpLabel = document.createElement('div');
+    hpLabel.setAttribute('class', 'hp-label');
+    hpLabel.textContent = 'HP';
+
+    const hpText = document.createElement('div');
+    hpText.setAttribute('class', 'hp-text');
+
+    const hpValue = document.createElement('span');
+    hpValue.setAttribute('id', 'hpValue');
+    hpValue.textContent = '100';
+
+    const hpMaxText = document.createTextNode(' / 100');
+
+    hpText.appendChild(hpValue);
+    hpText.appendChild(hpMaxText);
+
+    hpTop.appendChild(hpLabel);
+    hpTop.appendChild(hpText);
+
+    /* HP bar */
+    const hpBar = document.createElement('div');
+    hpBar.setAttribute('class', 'hp-bar');
+
+    const hpFill = document.createElement('div');
+    hpFill.setAttribute('class', 'hp-fill');
+    hpFill.setAttribute('id', 'hpFill');
+
+    hpBar.appendChild(hpFill);
+
+    /* összerakás */
+    box.appendChild(hpTop);
+    box.appendChild(hpBar);
+
+    parent.appendChild(box);
+}
+
+function setHP(currentHP) {
+    const maxHP = 100;
+
+    const hpFill = document.getElementById('hpFill');
+    const hpValue = document.getElementById('hpValue');
+    // Százalékos HP számítás nem lehet kisebb 0-nál és nagyobb mint a maxHP
+    const percent = Math.max(0, Math.min(currentHP, maxHP));
+
+    hpFill.style.width = percent + '%';
+    hpValue.textContent = percent;
+
+    // Színváltás alacsony HP-nál
+    if (percent <= 30) {
+        hpFill.style.background = 'linear-gradient(to right, #ff3333, #ff7777)';
+    } else if (percent <= 50) {
+        hpFill.style.background = 'linear-gradient(to right, #ffaa00, #ffdd55)';
+    } else {
+        hpFill.style.background = 'linear-gradient(to right, #00ff66, #55ff99)';
+    }
+}
