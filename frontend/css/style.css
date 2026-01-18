@@ -611,6 +611,9 @@ leaderboard css dolgok
     height: 100%;
     width: 100%;
     background: linear-gradient(to right, #00ff66, #55ff99);
+    transition:
+        width 0.4s ease,
+        background 0.3s ease;
 }
 
 .bottom-right {
