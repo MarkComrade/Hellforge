@@ -70,6 +70,8 @@ function generateBackToMenu() {
 function Menu() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
+    body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
+    body[0].style.backgroundSize = 'cover';
 
     //Title
     generateBootStrapGrid(1, 2, 8, 'topRow');

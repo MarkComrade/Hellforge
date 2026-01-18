@@ -460,6 +460,20 @@ leaderboard css dolgok
     transform: translate(-50%, -50%);
 }
 
+#exitButton {
+    position: absolute;
+    background-color: rgb(0, 0, 0, 0.6);
+    left: 15vw;
+    width: 30vw;
+}
+
+#continueButton {
+    position: absolute;
+    background-color: rgb(0, 0, 0, 0.6);
+    right: 15vw;
+    width: 30vw;
+}
+
 /* Azok a cellák, amik szobák, de még nem látogatottak */
 
 /* Azok a cellák, ahol már járt a játékos */
