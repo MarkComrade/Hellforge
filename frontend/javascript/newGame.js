@@ -75,7 +75,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     start.dataset.roomType = 'start';
 
     //generate room lenght
-    let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + dungeonLevel + 4;
+    let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + dungeonLevel / 2 + 4;
     console.log('Rooms to generate:', roomsToGenerate);
 
     // active rooms list
