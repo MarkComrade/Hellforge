@@ -33,6 +33,7 @@ function cutOutMap() {
             cell.style.display = 'none';
         } else {
             cell.style.width = 23 / adaptiveSize + 'vh';
+
             cell.style.height = 23 / adaptiveSize + 'vh';
         }
     });
@@ -197,8 +198,12 @@ function createTopLeft(parent, dungeonLevel) {
     const box = document.createElement('div');
     box.className = 'ui-box top-left';
     // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    let levelNumber = dungeonLevel;
+    if (dungeonLevel > 19) {
+        levelNumber = 'HELL';
+    }
     box.innerHTML = `
-        <div id="level-number" class="level-number">${dungeonLevel}</div>
+        <div id="level-number" class="level-number">${levelNumber}</div>
         <div class="level-text">Level</div>
     `;
 
