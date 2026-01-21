@@ -50,7 +50,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     // 9x9 grid
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
-        div.setAttribute('class', 'row');
+        div.setAttribute('class', 'row g-0');
         for (let j = 0; j < 9; j++) {
             let cell = document.createElement('div');
             cell.setAttribute('class', 'cell');
@@ -75,7 +75,10 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     start.dataset.roomType = 'start';
 
     //generate room lenght
-    let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + dungeonLevel / 2 + 4;
+    //let roomsToGenerate = Math.floor(Math.random() * 3 + 1 + dungeonLevel / 2 + 4);
+    roomsToGenerate = 20;
+    roomsToGenerate = Math.min(roomsToGenerate, 20);
+
     console.log('Rooms to generate:', roomsToGenerate);
 
     // active rooms list
