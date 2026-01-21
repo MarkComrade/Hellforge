@@ -161,9 +161,7 @@ function roomEventHandler(room, dungeonLevel) {
                 exitButton.textContent = 'Exit the dungeon';
                 document.body.appendChild(exitButton);
                 exitButton.addEventListener('click', () => {
-                    isInGame = false;
-                    //exitDungeon();
-                    Menu();
+                    exitDungeon();
                 });
 
                 let continueButton = document.createElement('button');

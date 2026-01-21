@@ -696,6 +696,37 @@ function checkOrientation() {
     return true;
 }
 
+function exitDungeon() {
+    isInGame = false;
+    let body = document.getElementsByTagName('body');
+    body[0].innerHTML = '';
+    body[0].style.backgroundImage = "url('../menuImages/exitdungeon.png')";
+    body[0].style.backgroundSize = 'cover';
+
+    generateBootStrapGrid(1, 1, 12, 'exitDungeonMenu');
+    let row = document.querySelector('.exitDungeonMenu');
+    let exitDungeonDiv = document.createElement('div');
+    exitDungeonDiv.setAttribute('class', 'exitDungeonDiv');
+    row.appendChild(exitDungeonDiv);
+
+    let exitMessage = document.createElement('h2');
+    exitMessage.setAttribute('class', 'menuText');
+    exitMessage.style.marginTop = '5vh';
+    exitMessage.style.textAlign = 'center';
+    exitMessage.innerHTML = 'You have escaped the dungeon';
+    exitDungeonDiv.appendChild(exitMessage);
+
+    let statistics = document.createElement('p');
+    statistics.setAttribute('class', 'menuText');
+    statistics.style.marginTop = '5vh';
+    statistics.innerHTML = 'Statistics:';
+    exitDungeonDiv.appendChild(statistics);
+
+    generateBackToMenu();
+    let backToMenu = document.querySelector('.backToMenu');
+    backToMenu.setAttribute('value', 'Continue');
+}
+
 //Play music
 function playMenuMusic() {
     if (!audio) {
