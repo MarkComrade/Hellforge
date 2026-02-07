@@ -494,7 +494,7 @@ function LeaderBoard() {
         container.className = 'leadboardContainer container-fluid';
 
         const maxScore = top9[0].score;
-        const maxCoins = 50;
+        const maxCoins = 150;
 
         top9.forEach((entry) => {
             // játékos "kártya"
@@ -512,23 +512,56 @@ function LeaderBoard() {
             scoreDiv.innerText = `${entry.score}p`;
 
             // érme halom
-            const coinStack = document.createElement('div');
-            coinStack.className =
-                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-
+            let coinStackRow = document.createElement('div');
+            coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
+            const coinStack1 = document.createElement('div');
+            coinStack1.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            const coinStack2 = document.createElement('div');
+            coinStack2.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            const coinStack3= document.createElement('div');
+            coinStack3.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            let coinStackPosition1=0;
+            let coinStackPosition2=0;
+            let coinStackPosition3=0;
             if (entry.score == 0) {
                 const noCoinDiv = document.createElement('div');
                 noCoinDiv.className = 'noCoins text-light small';
                 noCoinDiv.innerText = 'No coins';
-                coinStack.appendChild(noCoinDiv);
+                coinStack2.appendChild(noCoinDiv);
             } else {
                 const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
                 for (let c = 0; c < coinCount; c++) {
+                    
+
+                    const whichStack = Math.floor(Math.random() * 7) + 1;
+
                     const coin = document.createElement('img');
                     coin.src = '../textures/items/coing.png';
                     coin.className = 'coin';
-                    coin.style.bottom = `${c * 0.3}vh`; // csak a dinamikus pozíció marad JS-ben
-                    coinStack.appendChild(coin);
+               
+                    switch (whichStack) {
+                        case 1:
+                        case 2:
+                            coinStack1.appendChild(coin);
+                            coin.style.bottom = `${coinStackPosition1 * 0.3}vh`; 
+                            coinStackPosition1++;
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+
+                            coinStack2.appendChild(coin);
+                            coin.style.bottom = `${coinStackPosition2 * 0.3}vh`; 
+                            coinStackPosition2++;
+                            break;
+                        case 5:
+                        case 6:
+                            coinStack3.appendChild(coin);
+                            coin.style.bottom = `${coinStackPosition3 * 0.3}vh`; 
+                            coinStackPosition3++;
+                            break;
+                    }
+                   
 
                     // animáció időzítése
                     setTimeout(() => {
@@ -541,7 +574,10 @@ function LeaderBoard() {
             if (loggedIn && entry.name === loggedUser.name) {
                 nameDiv.classList.add('highlightedPlayer');
             }
-            entryDiv.appendChild(coinStack);
+            coinStackRow.appendChild(coinStack1);
+            coinStackRow.appendChild(coinStack2);
+            coinStackRow.appendChild(coinStack3);
+            entryDiv.appendChild(coinStackRow);
             entryDiv.appendChild(nameDiv);
             entryDiv.appendChild(scoreDiv);
             row.appendChild(entryDiv);
