@@ -268,7 +268,17 @@ leaderboard css dolgok
 .coinStack {
     min-height: 20vh;
     position: relative;
+    width: 2.6vh;
 }
+.coinStackRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5vw;
+    margin-top: 1vh;
+    width: 8vh;
+}   
 
 .noCoins {
     font-size: 1.2vh;
@@ -312,8 +322,8 @@ leaderboard css dolgok
     position: absolute;
     image-rendering: pixelated;
     opacity: 0;
-    transform: translateY(-3vh);
-    transition: all 0.3s ease-out;
+    transform: translateY(-30vh);
+    transition: all 0.15s ease-out;
 }
 
 .coinVisible {
