@@ -127,6 +127,18 @@ function generateDoors(dungeon) {
 
 function roomEventHandler(room, dungeonLevel) {
     //TODO
+    if (room.dataset.roomType !== 'out') {
+        let trapdoor = document.getElementById('trapDoor');
+        let exitButton = document.getElementById('exitButton');
+        let continueButton = document.getElementById('continueButton');
+        if (trapdoor || exitButton || continueButton) {
+            trapdoor.remove();
+            exitButton.remove();
+            continueButton.remove();
+        }
+    }
+
+    console.log(`Entered room type: ${room.dataset.roomType}`);
 
     switch (room.dataset.roomType) {
         case 'start':
