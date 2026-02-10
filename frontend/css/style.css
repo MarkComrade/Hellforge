@@ -683,6 +683,18 @@ leaderboard css dolgok
     z-index: 10000;
 }
 
+.settingsOverlay {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    gap: 2vh;
+}
+
 .inventoryRow {
     display: flex;
     flex-direction: row;
@@ -695,7 +707,7 @@ leaderboard css dolgok
     flex-direction: column;
     width: 10vh;
     height: 10vh;
-    border: 0.3vh solid #00ff66;
+    border: 0.3vh solid rgb(220, 40, 40);
     background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;

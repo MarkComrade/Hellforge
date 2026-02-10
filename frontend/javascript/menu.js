@@ -276,8 +276,6 @@ function StartGame() {
         dungeonButton.setAttribute('class', 'menuButton');
 
         dungeonButton.addEventListener('click', () => {
-            alert(`Starting game in ${dungeon}`);
-
             newGame(dungeon);
         });
 
@@ -736,7 +734,7 @@ function checkOrientation() {
     return true;
 }
 
-function exitDungeon() {
+function exitDungeon(abandoned) {
     isInGame = false;
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
@@ -753,7 +751,14 @@ function exitDungeon() {
     exitMessage.setAttribute('class', 'menuText');
     exitMessage.style.marginTop = '5vh';
     exitMessage.style.textAlign = 'center';
-    exitMessage.innerHTML = 'You have escaped the dungeon';
+
+    if (abandoned === true) {
+        exitMessage.innerHTML = 'You have escaped the dungeon, but at what cost?';
+        //Implement punishment for abandoning the dungeon prematurely (e.g. lose gold, lose character level, etc.)
+    } else {
+        exitMessage.innerHTML = 'You have escaped the dungeon';
+    }
+
     exitDungeonDiv.appendChild(exitMessage);
 
     let statistics = document.createElement('p');
@@ -818,7 +823,53 @@ function openInventory() {
         inventoryOverlay.remove();
     });
 
+    inventoryOverlay.appendChild(closeButton);
     body.appendChild(inventoryOverlay);
 }
 
-function openSettings() {}
+function openSettings() {
+    let body = document.getElementsByTagName('body')[0];
+    const settingsOverlay = document.createElement('div');
+    settingsOverlay.setAttribute('class', 'settingsOverlay');
+
+    const volumeLabel = Object.assign(document.createElement('label'), {
+        htmlFor: 'settingsVolume',
+        innerHTML: 'Music volume:',
+        className: 'menuText'
+    });
+
+    const volumeSlider = Object.assign(document.createElement('input'), {
+        type: 'range',
+        id: 'settingsVolume',
+        min: '0',
+        max: '100',
+        value: audio ? Math.round(audio.volume * 100).toString() : '10',
+        className: 'volumeSlider'
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+        if (audio) audio.volume = e.target.value / 100;
+    });
+
+    const closeButton = Object.assign(document.createElement('input'), {
+        type: 'button',
+        value: 'Close Settings',
+        className: 'menuButton'
+    });
+
+    closeButton.addEventListener('click', () => {
+        settingsOverlay.remove();
+    });
+
+    settingsOverlay.appendChild(volumeLabel);
+    settingsOverlay.appendChild(volumeSlider);
+    settingsOverlay.appendChild(closeButton);
+    body.appendChild(settingsOverlay);
+}
+
+function abandonDungeon() {
+    if (confirm('Are you sure you want to abandon the dungeon? Your progress will not be saved.')) {
+        let abandoned = true;
+        exitDungeon(abandoned);
+    }
+}
