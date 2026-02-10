@@ -12,6 +12,7 @@ body {
     background: url('../menuImages/mainBackGround-brightened.png') no-repeat fixed center;
     background-size: cover;
     overflow: hidden;
+    touch-action: none;
 }
 
 .menuTitle {
@@ -410,6 +411,7 @@ leaderboard css dolgok
     -o-transform: rotate(0deg);
     -ms-transform: rotate(0deg);
     transform: rotate(0deg);
+    user-select: none;
 }
 
 .doorRight {
@@ -423,6 +425,7 @@ leaderboard css dolgok
     -o-transform: rotate(90deg);
     -ms-transform: rotate(90deg);
     transform: rotate(90deg);
+    user-select: none;
 }
 
 .doorDown {
@@ -436,6 +439,7 @@ leaderboard css dolgok
     -o-transform: rotate(180deg);
     -ms-transform: rotate(180deg);
     transform: rotate(180deg);
+    user-select: none;
 }
 
 .doorLeft {
@@ -449,6 +453,7 @@ leaderboard css dolgok
     -o-transform: rotate(270deg);
     -ms-transform: rotate(270deg);
     transform: rotate(270deg);
+    user-select: none;
 }
 
 #trapDoor {
@@ -654,4 +659,35 @@ leaderboard css dolgok
     right: 3vh;
     width: 22vh;
     font-size: 1.8vh;
+}
+
+.inventoryOverlay {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.inventoryRow {
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+    margin-bottom: 1vh;
+}
+
+.inventoryCell {
+    display: flex;
+    flex-direction: column;
+    width: 10vh;
+    height: 10vh;
+    border: 0.3vh solid #00ff66;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
