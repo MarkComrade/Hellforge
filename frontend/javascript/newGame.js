@@ -75,8 +75,8 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     start.dataset.roomType = 'start';
 
     //generate room lenght
-    //let roomsToGenerate = Math.floor(Math.random() * 3 + 1 + dungeonLevel / 2 + 4);
-    roomsToGenerate = 20;
+    let roomsToGenerate = Math.floor(Math.random() * 3 + 1 + dungeonLevel / 2 + 4);
+
     roomsToGenerate = Math.min(roomsToGenerate, 20);
 
     console.log('Rooms to generate:', roomsToGenerate);
@@ -178,13 +178,21 @@ function createTopLeft(parent, dungeonLevel) {
     box.className = 'ui-box top-left';
     // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
     let levelNumber = dungeonLevel;
+
+    const levelBox = document.createElement('div');
+    levelBox.className = 'level-number';
     if (dungeonLevel > 19) {
         levelNumber = 'HELL';
+        levelBox.style.fontSize = '1.5vh';
     }
-    box.innerHTML = `
-        <div id="level-number" class="level-number">${levelNumber}</div>
-        <div class="level-text">Level</div>
-    `;
+
+    levelBox.textContent = levelNumber;
+    levelBox.setAttribute('id', 'level-number');
+    const levelText = document.createElement('div');
+    levelText.className = 'level-text';
+    levelText.textContent = 'Level';
+    box.appendChild(levelBox);
+    box.appendChild(levelText);
 
     parent.appendChild(box);
 }

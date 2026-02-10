@@ -279,7 +279,7 @@ leaderboard css dolgok
     gap: 0.5vw;
     margin-top: 1vh;
     width: 8vh;
-}   
+}
 
 .noCoins {
     font-size: 1.2vh;
@@ -600,7 +600,7 @@ leaderboard css dolgok
 }
 
 .level-number {
-    font-size: 5vh;
+    font-size: 3vh;
     font-weight: bold;
     line-height: 1;
 }
