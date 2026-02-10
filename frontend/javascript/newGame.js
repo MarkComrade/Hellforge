@@ -194,6 +194,7 @@ function createTopRight(parent) {
     box.innerHTML = `
         <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory" id="openSettings">
         <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings" id="openInventory">
+        <img src="../textures/UI/abandon.png" class="ui-icon" title="Abandon" id="abandonDungeon">
     `;
 
     parent.appendChild(box);
@@ -204,14 +205,10 @@ function createTopRight(parent) {
     document.getElementById('openSettings').addEventListener('click', () => {
         openSettings();
     });
-}
 
-function openInventory() {
-    //TODO
-}
-
-function openSettings() {
-    //TODO
+    document.getElementById('abandonDungeon').addEventListener('click', () => {
+        abandonDungeon();
+    });
 }
 
 function createBottomRight(parent) {
