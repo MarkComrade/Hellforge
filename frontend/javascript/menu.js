@@ -541,7 +541,7 @@ function LeaderBoard() {
                         case 1:
                         case 2:
                             coinStack1.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition1 * 0.3}vh`; 
+                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`; 
                             coinStackPosition1++;
                             break;
                         case 3:
@@ -549,13 +549,13 @@ function LeaderBoard() {
                         case 5:
 
                             coinStack2.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition2 * 0.3}vh`; 
+                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`; 
                             coinStackPosition2++;
                             break;
                         case 5:
                         case 6:
                             coinStack3.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition3 * 0.3}vh`; 
+                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`; 
                             coinStackPosition3++;
                             break;
                     }
