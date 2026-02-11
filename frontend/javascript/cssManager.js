@@ -1,4 +1,4 @@
-const SCREENS = {
+/*const SCREENS = {
     menu: ['menu'],
     login: ['menu'],
     settings: ['menu', 'overlays', 'dungeon', 'navigation', 'map', 'ui'],
@@ -23,3 +23,4 @@ function loadScreen(screen) {
         document.head.appendChild(link);
     });
 }
+*/

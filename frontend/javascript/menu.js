@@ -68,7 +68,6 @@ function generateBackToMenu() {
 
 //Menu generation
 function Menu() {
-    loadScreen('menu');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
     body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
@@ -147,7 +146,6 @@ function Menu() {
 
 //Login menu
 function Login() {
-    loadScreen('login');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -242,7 +240,6 @@ function Logout() {
 
 //Start game
 function StartGame() {
-    loadScreen('menu');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -311,7 +308,6 @@ function StartGame() {
 }
 
 function Home() {
-    loadScreen('character');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -441,7 +437,6 @@ function Home() {
 }
 
 function LeaderBoard() {
-    loadScreen('leaderboard');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -609,7 +604,6 @@ function Admin() {
 
 //Options menu
 function Options() {
-    loadScreen('settings');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -740,7 +734,6 @@ function checkOrientation() {
 }
 
 function exitDungeon(abandoned) {
-    loadScreen('menu');
     isInGame = false;
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
@@ -803,7 +796,6 @@ function stopAudio() {
 //Ingame menu handling
 
 function openInventory() {
-    loadScreen('inventory');
     let body = document.getElementsByTagName('body')[0];
 
     const playerInventory = document.createElement('div');
@@ -828,7 +820,6 @@ function openInventory() {
     closeButton.setAttribute('value', 'Close Inventory');
     closeButton.setAttribute('class', 'menuButton');
     closeButton.addEventListener('click', () => {
-        loadScreen('dungeon');
         inventoryOverlay.remove();
     });
 
@@ -837,7 +828,6 @@ function openInventory() {
 }
 
 function openSettings() {
-    loadScreen('settings');
     let body = document.getElementsByTagName('body')[0];
     const settingsOverlay = document.createElement('div');
     settingsOverlay.setAttribute('class', 'settingsOverlay');
@@ -868,7 +858,6 @@ function openSettings() {
     });
 
     closeButton.addEventListener('click', () => {
-        loadScreen('dungeon');
         settingsOverlay.remove();
     });
 
