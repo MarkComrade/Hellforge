@@ -1,4 +1,5 @@
 function newGame(dungeon) {
+    loadScreen('dungeon');
     let body = document.getElementsByTagName('body');
     switch (dungeon) {
         case 'Laboratory':

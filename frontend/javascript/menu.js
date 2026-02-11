@@ -68,6 +68,7 @@ function generateBackToMenu() {
 
 //Menu generation
 function Menu() {
+    loadScreen('menu');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
     body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
@@ -146,6 +147,7 @@ function Menu() {
 
 //Login menu
 function Login() {
+    loadScreen('login');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -240,6 +242,7 @@ function Logout() {
 
 //Start game
 function StartGame() {
+    loadScreen('menu');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -308,6 +311,7 @@ function StartGame() {
 }
 
 function Home() {
+    loadScreen('character');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -437,6 +441,7 @@ function Home() {
 }
 
 function LeaderBoard() {
+    loadScreen('leaderboard');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -513,14 +518,17 @@ function LeaderBoard() {
             let coinStackRow = document.createElement('div');
             coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
             const coinStack1 = document.createElement('div');
-            coinStack1.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            coinStack1.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
             const coinStack2 = document.createElement('div');
-            coinStack2.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            const coinStack3= document.createElement('div');
-            coinStack3.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            let coinStackPosition1=0;
-            let coinStackPosition2=0;
-            let coinStackPosition3=0;
+            coinStack2.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            const coinStack3 = document.createElement('div');
+            coinStack3.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            let coinStackPosition1 = 0;
+            let coinStackPosition2 = 0;
+            let coinStackPosition3 = 0;
             if (entry.score == 0) {
                 const noCoinDiv = document.createElement('div');
                 noCoinDiv.className = 'noCoins text-light small';
@@ -529,37 +537,33 @@ function LeaderBoard() {
             } else {
                 const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
                 for (let c = 0; c < coinCount; c++) {
-                    
-
                     const whichStack = Math.floor(Math.random() * 7) + 1;
 
                     const coin = document.createElement('img');
                     coin.src = '../textures/items/coing.png';
                     coin.className = 'coin';
-               
+
                     switch (whichStack) {
                         case 1:
                         case 2:
                             coinStack1.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`; 
+                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`;
                             coinStackPosition1++;
                             break;
                         case 3:
                         case 4:
                         case 5:
-
                             coinStack2.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`; 
+                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`;
                             coinStackPosition2++;
                             break;
                         case 5:
                         case 6:
                             coinStack3.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`; 
+                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`;
                             coinStackPosition3++;
                             break;
                     }
-                   
 
                     // animáció időzítése
                     setTimeout(() => {
@@ -605,6 +609,7 @@ function Admin() {
 
 //Options menu
 function Options() {
+    loadScreen('settings');
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -735,6 +740,7 @@ function checkOrientation() {
 }
 
 function exitDungeon(abandoned) {
+    loadScreen('menu');
     isInGame = false;
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
@@ -743,6 +749,7 @@ function exitDungeon(abandoned) {
 
     generateBootStrapGrid(1, 1, 12, 'exitDungeonMenu');
     let row = document.querySelector('.exitDungeonMenu');
+    row.parentElement.style.justifyContent = 'center';
     let exitDungeonDiv = document.createElement('div');
     exitDungeonDiv.setAttribute('class', 'exitDungeonDiv');
     row.appendChild(exitDungeonDiv);
@@ -796,6 +803,7 @@ function stopAudio() {
 //Ingame menu handling
 
 function openInventory() {
+    loadScreen('inventory');
     let body = document.getElementsByTagName('body')[0];
 
     const playerInventory = document.createElement('div');
@@ -820,6 +828,7 @@ function openInventory() {
     closeButton.setAttribute('value', 'Close Inventory');
     closeButton.setAttribute('class', 'menuButton');
     closeButton.addEventListener('click', () => {
+        loadScreen('dungeon');
         inventoryOverlay.remove();
     });
 
@@ -828,6 +837,7 @@ function openInventory() {
 }
 
 function openSettings() {
+    loadScreen('settings');
     let body = document.getElementsByTagName('body')[0];
     const settingsOverlay = document.createElement('div');
     settingsOverlay.setAttribute('class', 'settingsOverlay');
@@ -858,6 +868,7 @@ function openSettings() {
     });
 
     closeButton.addEventListener('click', () => {
+        loadScreen('dungeon');
         settingsOverlay.remove();
     });
 
