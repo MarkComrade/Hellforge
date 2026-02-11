@@ -568,7 +568,7 @@ function LeaderBoard() {
                     // animáció időzítése
                     setTimeout(() => {
                         coin.classList.add('coinVisible');
-                    }, c * 80);
+                    }, c * 35);
                 }
             }
 
