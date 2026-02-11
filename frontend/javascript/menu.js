@@ -535,27 +535,27 @@ function LeaderBoard() {
                     const whichStack = Math.floor(Math.random() * 7) + 1;
 
                     const coin = document.createElement('img');
-                    coin.src = '../textures/items/coing.png';
                     coin.className = 'coin';
+                    coin.src = '../textures/items/coing.png';
 
                     switch (whichStack) {
                         case 1:
                         case 2:
-                            coinStack1.appendChild(coin);
                             coin.style.bottom = `${coinStackPosition1 * 0.38}vh`;
+                            coinStack1.appendChild(coin);
                             coinStackPosition1++;
                             break;
                         case 3:
                         case 4:
                         case 5:
-                            coinStack2.appendChild(coin);
                             coin.style.bottom = `${coinStackPosition2 * 0.38}vh`;
+                            coinStack2.appendChild(coin);
                             coinStackPosition2++;
                             break;
                         case 5:
                         case 6:
-                            coinStack3.appendChild(coin);
                             coin.style.bottom = `${coinStackPosition3 * 0.38}vh`;
+                            coinStack3.appendChild(coin);
                             coinStackPosition3++;
                             break;
                     }
