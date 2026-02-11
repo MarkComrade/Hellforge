@@ -5,16 +5,13 @@
 }
 
 .playerCard {
-    width: 3vh;
+    width: 15vh;
     min-height: 30vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
     position: relative;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
 }
 
 .playerName {
@@ -43,27 +40,23 @@
     flex-direction: row;
     align-items: flex-end;
     justify-content: center;
-    gap: 1vw;
+
     margin-top: 1vh;
     flex-wrap: nowrap;
 }
 
-.noCoins {
-    font-size: 1.2vh;
-    color: #ccc;
-}
-
 .coin {
-    width: 4vh;
-    height: 4vh;
+    width: 5.5vh;
+    height: 5.5vh;
     position: absolute;
-    image-rendering: pixelated;
     opacity: 0;
+    transform: translateY(-20vh);
     transition: all 0.15s ease-out;
 }
 
 .coinVisible {
     opacity: 1;
+    transform: translateY(0);
 }
 
 .highlightedPlayer {

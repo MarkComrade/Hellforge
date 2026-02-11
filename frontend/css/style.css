@@ -242,9 +242,6 @@ leaderboard css dolgok
     align-items: center;
     justify-content: flex-end;
     position: relative;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
 }
 
 .playerName {
@@ -320,10 +317,8 @@ leaderboard css dolgok
 .coin {
     width: 4vh;
     height: 4vh;
-    position: absolute;
-    image-rendering: pixelated;
     opacity: 0;
-    transform: translateY(-30vh);
+
     transition: all 0.15s ease-out;
 }
 
