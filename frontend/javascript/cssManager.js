@@ -1,13 +1,13 @@
 const SCREENS = {
     menu: ['menu'],
     login: ['menu'],
-    settings: ['menu', 'overlays'],
+    settings: ['menu', 'overlays', 'dungeon', 'navigation', 'map', 'ui'],
     leaderboard: ['menu', 'leaderboard'],
     character: ['character', 'overlays'],
     dungeon: ['dungeon', 'navigation', 'map', 'ui', 'overlays', 'character'],
     combat: ['dungeon', 'ui', 'overlays', 'character'],
     map: ['map', 'ui', 'overlays', 'navigation'],
-    inventory: ['character', 'overlays']
+    inventory: ['character', 'overlays', 'dungeon', 'navigation', 'map', 'ui']
 };
 
 function loadScreen(screen) {
