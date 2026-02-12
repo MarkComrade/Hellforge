@@ -1,0 +1,15 @@
+<h1 align="center">LOCK IN</h1>
+
+Steidl:
+<br>
+LEADERBOARD
+<br>
+MAP
+<br>
+
+Badó:
+<br>
+SQL Adatbázis
+<br>
+Login
+<>
