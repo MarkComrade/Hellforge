@@ -10,6 +10,7 @@ function LeaderBoard() {
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
     // Tesztadat generálás
+
     let loggedIn = true;
     let leaderboardData = [];
     for (let i = 1; i <= 20; i++) {

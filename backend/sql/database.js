@@ -13,12 +13,14 @@ const pool = mysql.createPool({
 
 //!SQL Queries
 async function selectall() {
-    const query = 'SELECT * FROM exampletable;';
+    const query = 'SELECT * FROM hellforge_db.users;';
     const [rows] = await pool.execute(query);
     return rows;
 }
+
 //!Export
 module.exports = {
     pool,
-    selectall
+    selectall,
+    registerUser
 };
