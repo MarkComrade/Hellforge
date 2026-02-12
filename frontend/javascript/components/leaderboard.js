@@ -9,45 +9,58 @@ function LeaderBoard() {
     leaderBoardTitle.innerHTML = 'LeaderBoard';
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
-    // Tesztadat generálás
+    // Fetch leaderboard data from API
+    // Simulate logged-in user (in real app, get from session/auth)
+    const loggedInUsername = 'test_player_' + (Math.floor(Math.random() * 13) + 1); // Random player 1-13
 
-    let loggedIn = true;
-    let leaderboardData = [];
-    for (let i = 1; i <= 20; i++) {
-        leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000000) });
-    }
+    fetch(`/api/leaderboard?username=${loggedInUsername}`)
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Leaderboard data:', data); // Debug log
+            let loggedIn = true;
+            let top10 = data.top10 || [];
+            let userData = data.user;
 
-    // Rendezés (bubble sort)
-    for (let i = 0; i < leaderboardData.length; i++) {
-        for (let j = 0; j < leaderboardData.length - i - 1; j++) {
-            if (leaderboardData[j].score < leaderboardData[j + 1].score) {
-                let temp = leaderboardData[j];
-                leaderboardData[j] = leaderboardData[j + 1];
-                leaderboardData[j + 1] = temp;
+            if (top10.length === 0) {
+                console.warn('No leaderboard data received');
+                return;
             }
-        }
-    }
 
-    // Simulált bejelentkezett user
-    let userIndex = Math.floor(Math.random() * 20);
-    let loggedUser = leaderboardData[userIndex];
+            if (loggedIn && userData) {
+                let displayData = [];
 
-    if (loggedIn) {
-        let top9 = [];
-        if (userIndex < 10) {
-            top9 = leaderboardData.slice(0, 10);
-            generatepiles(top9, loggedUser, true, userIndex);
-        } else {
-            top9 = leaderboardData.slice(0, 9);
-            top9.push(loggedUser);
-            generatepiles(top9, loggedUser, false, userIndex);
-        }
-    } else {
-        generatepiles(leaderboardData.slice(0, 10), null, false, null);
-    }
+                // Check if user is in top 10
+                const isInTop10 = top10.some((player) => player.name === userData.name);
+
+                if (isInTop10) {
+                    // User is in top 10, show all top 10
+                    displayData = top10;
+                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
+                } else {
+                    // User is outside top 10, show top 9 + user at the end
+                    displayData = top10.slice(0, 9);
+                    displayData.push(userData);
+                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
+                }
+            } else {
+                generatepiles(top10, null, false, null);
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching leaderboard:', error);
+            // Fallback: generate test data
+            let leaderboardData = [];
+            for (let i = 1; i <= 20; i++) {
+                leaderboardData.push({
+                    name: `Player${i}`,
+                    score: Math.floor(Math.random() * 1000000)
+                });
+            }
+            generatepiles(leaderboardData.slice(0, 10), null, false, null);
+        });
 
     // Érmehalmok generálása
-    function generatepiles(top9, loggedUser) {
+    function generatepiles(top9, loggedUser, loggedIn, userIndex) {
         const row = document.createElement('div');
         row.className = 'row justify-content-center';
 

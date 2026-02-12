@@ -1,5 +1,5 @@
 //!Module-ok importálása
-const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolat
+const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolatpla
 const express = require('express'); //?npm install express
 const session = require('express-session'); //?npm install express-session
 const path = require('path');
