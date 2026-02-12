@@ -1,5 +1,3 @@
-// Global flags for in-game orientation handling
-window.isInGame = false;
 window.isGamePaused = false;
 window.addEventListener('resize', checkOrientation);
 
@@ -55,7 +53,7 @@ function checkOrientation() {
         const startGameMenu = document.querySelector('.startGameMenu');
         const homeMenu = document.querySelector('.homeMenu');
 
-        if (isInGame == false) {
+        if (window.isInGame === false) {
             body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
             if (mainMenu) {
                 Menu();

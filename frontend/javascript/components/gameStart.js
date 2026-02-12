@@ -94,7 +94,7 @@ function Home() {
     );
 
     let userNameText = document.createElement('h2');
-    userNameText.innerHTML = 'User:' + userName;
+    userNameText.innerHTML = 'User: Player';
     userNameText.setAttribute('class', 'menuText');
     homeUI[0].appendChild(userNameText);
 

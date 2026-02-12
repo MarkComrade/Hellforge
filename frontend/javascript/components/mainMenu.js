@@ -1,35 +1,36 @@
-//Menu generation
-function Menu() {
+async function Menu() {
+    let isLoggedIn = false;
+    let userName = 'Guest';
+    try {
+        const session = await getMethodFetch('/api/loginAuthApi/session');
+        isLoggedIn = session.isLoggedIn;
+        userName = session.userName || 'Guest';
+    } catch (error) {
+        console.error('Session check hiba:', error);
+    }
+
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
     body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
     body[0].style.backgroundSize = 'cover';
 
-    //Title
     generateBootStrapGrid(1, 2, 8, 'topRow');
     const topRow = document.querySelectorAll('.topRow');
-    topRow[1].setAttribute('class', 'col-sm-4 col-md-4 d-flex justify-content-center topRow');
+    topRow[1].setAttribute(
+        'class',
+        'col-sm-4 col-md-4 d-flex justify-content-center align-items-center topRow'
+    );
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
     menuTitle.innerHTML = 'HellForge';
-    let hellForgeLogo = document.createElement('img');
-    hellForgeLogo.setAttribute('src', '../menuImages/hellforgeicon.png');
-    hellForgeLogo.setAttribute('class', 'hellForgeLogo');
     document.querySelector('.topRow').appendChild(menuTitle);
-    document.querySelector('.topRow').appendChild(hellForgeLogo);
 
-    let loggedUser = document.createElement('p');
-    loggedUser.setAttribute('class', 'menuText');
-    if (isLoggedIn == true) {
-        loggedUser.innerHTML = `Logged in as: ${userName}`;
-    } else if (isLoggedIn == false && userName == '') {
-        loggedUser.innerHTML = 'Not logged in';
-    } else if (isLoggedIn == false && userName == 'Guest') {
-        loggedUser.innerHTML = 'Logged in as: Guest';
-    }
-    document.querySelector('.topRow').nextSibling.appendChild(loggedUser);
+    let userNameDisplay = document.createElement('span');
+    userNameDisplay.setAttribute('class', 'menuText');
+    userNameDisplay.setAttribute('style', 'margin-right: 1vw;');
+    userNameDisplay.innerHTML = userName;
+    topRow[1].appendChild(userNameDisplay);
 
-    //Buttons
     const buttons = [
         { text: 'Login', onClick: Login },
         { text: 'Logout', onClick: Logout },
@@ -43,35 +44,34 @@ function Menu() {
 
     const columns = document.querySelectorAll('.container-fluid:last-child .col-md-12');
 
-    // Add buttons
     buttons.forEach(({ text, onClick }, index) => {
-        if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
-            if (text != 'Login' && text != 'Logout') {
-                let button = document.createElement('input');
-                button.setAttribute('type', 'button');
-                button.setAttribute('value', text);
-                button.setAttribute('class', 'menuButton');
-                button.setAttribute('style', 'margin-top:5vh;');
-                button.addEventListener('click', onClick);
-                columns[index].appendChild(button);
-            } else if (text == 'Logout') {
-                let button = document.createElement('input');
-                button.setAttribute('type', 'button');
-                button.setAttribute('value', text);
-                button.setAttribute('class', 'logOutButton');
-                button.addEventListener('click', onClick);
-                document.querySelectorAll('.topRow')[1].appendChild(button);
-            }
-        } else {
-            if (text == 'Login') {
-                let button = document.createElement('input');
-                button.setAttribute('type', 'button');
-                button.setAttribute('value', text);
-                button.setAttribute('class', 'menuButton');
-                button.setAttribute('style', 'margin-top:15vh; font-size:10vh;');
-                button.addEventListener('click', onClick);
-                columns[index].appendChild(button);
-            }
+        if (text == 'Login' && isLoggedIn) return;
+
+        if (text == 'Logout' && !isLoggedIn) return;
+
+        if (text != 'Login' && text != 'Logout') {
+            let button = document.createElement('input');
+            button.setAttribute('type', 'button');
+            button.setAttribute('value', text);
+            button.setAttribute('class', 'menuButton');
+            button.setAttribute('style', 'margin-top:5vh;');
+            button.addEventListener('click', onClick);
+            columns[index].appendChild(button);
+        } else if (text == 'Login') {
+            let button = document.createElement('input');
+            button.setAttribute('type', 'button');
+            button.setAttribute('value', text);
+            button.setAttribute('class', 'menuButton');
+            button.setAttribute('style', 'margin-top:5vh;');
+            button.addEventListener('click', onClick);
+            columns[index].appendChild(button);
+        } else if (text == 'Logout') {
+            let button = document.createElement('input');
+            button.setAttribute('type', 'button');
+            button.setAttribute('value', text);
+            button.setAttribute('class', 'logOutButton');
+            button.addEventListener('click', onClick);
+            topRow[1].appendChild(button);
         }
     });
 }

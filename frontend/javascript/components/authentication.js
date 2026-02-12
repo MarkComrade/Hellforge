@@ -1,8 +1,3 @@
-isLoggedIn = false;
-userName = '';
-userPassword = '';
-
-//Login menu
 function Login() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
@@ -10,16 +5,15 @@ function Login() {
     generateBootStrapGrid(1, 1, 12, 'loginMenu');
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle');
-    menuTitle.innerHTML = 'Login';
+    menuTitle.innerHTML = 'Login / Register';
     document.querySelector('.loginMenu').appendChild(menuTitle);
 
-    generateBootStrapGrid(3, 1, 12, 'loginFormContainer');
+    generateBootStrapGrid(2, 1, 12, 'loginFormContainer');
     const loginRows = document.querySelectorAll('.loginFormContainer');
 
     const forms = [
         { label: 'Username:', type: 'text', id: 'usernameInput' },
-        { label: 'Password:', type: 'password', id: 'passwordInput' },
-        { label: 'Password again:', type: 'password', id: 'passwordConfirmationInput' }
+        { label: 'Password:', type: 'password', id: 'passwordInput' }
     ];
 
     forms.forEach((form, i) => {
@@ -52,24 +46,68 @@ function Login() {
         row.appendChild(inputCol);
     });
 
-    generateBootStrapGrid(1, 2, 6, 'loginButtonRow');
+    generateBootStrapGrid(1, 3, 4, 'authButtonRow');
+    const buttonContainers = document.querySelectorAll('.authButtonRow');
+
     let loginButton = document.createElement('input');
     loginButton.setAttribute('type', 'button');
-    loginButton.setAttribute('value', 'Login / Register');
+    loginButton.setAttribute('value', 'Login');
     loginButton.setAttribute('class', 'menuButton');
-    document.querySelector('.loginButtonRow').appendChild(loginButton);
-    loginButton.addEventListener('click', function () {
+    buttonContainers[0].appendChild(loginButton);
+    loginButton.addEventListener('click', async function () {
         let username = document.querySelector('#usernameInput').value;
         let password = document.querySelector('#passwordInput').value;
-        let passwordConfirmation = document.querySelector('#passwordConfirmationInput').value;
 
-        if (username && password && password === passwordConfirmation) {
-            userName = username;
-            userPassword = password;
-            isLoggedIn = true;
-            Menu();
+        if (username && password) {
+            try {
+                const result = await postFetch('/api/loginAuthApi/login', {
+                    username,
+                    password
+                });
+
+                if (result.success) {
+                    alert(result.message);
+                    Menu();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Hiba történt a bejelentkezés során');
+                console.error(error);
+            }
         } else {
-            alert('Please fill in all fields correctly.');
+            alert('Kérlek töltsd ki az összes mezőt!');
+        }
+    });
+
+    let registerButton = document.createElement('input');
+    registerButton.setAttribute('type', 'button');
+    registerButton.setAttribute('value', 'Register');
+    registerButton.setAttribute('class', 'menuButton');
+    buttonContainers[1].appendChild(registerButton);
+    registerButton.addEventListener('click', async function () {
+        let username = document.querySelector('#usernameInput').value;
+        let password = document.querySelector('#passwordInput').value;
+
+        if (username && password) {
+            try {
+                const result = await postFetch('/api/loginAuthApi/register', {
+                    username,
+                    password
+                });
+
+                if (result.success) {
+                    alert(result.message);
+                    Menu();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('Hiba történt a regisztráció során');
+                console.error(error);
+            }
+        } else {
+            alert('Kérlek töltsd ki az összes mezőt!');
         }
     });
 
@@ -77,21 +115,26 @@ function Login() {
     guestButton.setAttribute('type', 'button');
     guestButton.setAttribute('value', 'Continue as Guest');
     guestButton.setAttribute('class', 'menuButton');
-    document.querySelector('.loginButtonRow').nextSibling.appendChild(guestButton);
-    guestButton.addEventListener('click', function () {
-        isLoggedIn = false;
-        userName = 'Guest';
-        Menu();
+    buttonContainers[2].appendChild(guestButton);
+    guestButton.addEventListener('click', async function () {
+        try {
+            await postFetch('/api/loginAuthApi/guest', {});
+            Menu();
+        } catch (error) {
+            console.error(error);
+            Menu();
+        }
     });
 
     generateBackToMenu();
 }
 
-function Logout() {
-    if (isLoggedIn == true || (isLoggedIn == false && userName == 'Guest')) {
-        isLoggedIn = false;
-        userName = '';
-        userPassword = '';
+async function Logout() {
+    try {
+        await postFetch('/api/loginAuthApi/logout', {});
+        Menu();
+    } catch (error) {
+        console.error('Hiba a kijelentkezés során:', error);
         Menu();
     }
 }

@@ -33,6 +33,8 @@ router.get('/', (request, response) => {
 app.use('/', router);
 const endpoints = require('./api/api.js');
 app.use('/api', endpoints);
+const login = require('./api/loginAuthApi.js');
+app.use('/api/loginAuthApi', login);
 
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez
