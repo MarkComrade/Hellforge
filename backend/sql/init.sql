@@ -36,6 +36,22 @@ CREATE TABLE `weapons`(
     `attack_multiplier` DOUBLE NOT NULL
 );
 
+CREATE TABLE `admin`(
+    `adminId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` INT NOT NULL,
+    `password` INT NOT NULL
+);
+ALTER TABLE
+    `player_inventory` ADD CONSTRAINT `player_inventory_armor_foreign` FOREIGN KEY(`armor`) REFERENCES `armors`(`armorId`);
+ALTER TABLE
+    `player_inventory` ADD CONSTRAINT `player_inventory_ranged_foreign` FOREIGN KEY(`ranged`) REFERENCES `weapons`(`weaponId`);
+ALTER TABLE
+    `player_inventory` ADD CONSTRAINT `player_inventory_helmet_foreign` FOREIGN KEY(`helmet`) REFERENCES `armors`(`armorId`);
+ALTER TABLE
+    `player_inventory` ADD CONSTRAINT `player_inventory_playerid_foreign` FOREIGN KEY(`playerId`) REFERENCES `user`(`userId`);
+ALTER TABLE
+    `player_inventory` ADD CONSTRAINT `player_inventory_melee_foreign` FOREIGN KEY(`melee`) REFERENCES `weapons`(`weaponId`);
+
 INSERT INTO `armors` (`type`, `name`, `img_path`, `tier`, `price`, `defense_multiplier`) VALUES
     ('Helmet', 'Rusty Helmet', '../textures/items/armour/helmet_rusty.png', 1, 5, 1),
     ('Armor', 'Rusty Chestplate', '../textures/items/armour/armour_rusty.png', 1, 10, 1),
@@ -64,19 +80,28 @@ INSERT INTO `weapons` (`type`, `name`, `img_path`, `tier`, `price`, `attack_mult
     ('Melee', 'Hellish Sword', '../textures/items/weapons/sword_hellish.png', 6, 2100, 3.6),
     ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 1600, 3.2);
 
-CREATE TABLE `admin`(
-    `adminId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name` INT NOT NULL,
-    `password` INT NOT NULL
-);
-ALTER TABLE
-    `player_inventory` ADD CONSTRAINT `player_inventory_armor_foreign` FOREIGN KEY(`armor`) REFERENCES `armors`(`armorId`);
-ALTER TABLE
-    `player_inventory` ADD CONSTRAINT `player_inventory_ranged_foreign` FOREIGN KEY(`ranged`) REFERENCES `weapons`(`weaponId`);
-ALTER TABLE
-    `player_inventory` ADD CONSTRAINT `player_inventory_helmet_foreign` FOREIGN KEY(`helmet`) REFERENCES `armors`(`armorId`);
-ALTER TABLE
-    `player_inventory` ADD CONSTRAINT `player_inventory_playerid_foreign` FOREIGN KEY(`playerId`) REFERENCES `user`(`userId`);
-ALTER TABLE
-    `player_inventory` ADD CONSTRAINT `player_inventory_melee_foreign` FOREIGN KEY(`melee`) REFERENCES `weapons`(`weaponId`);
+INSERT INTO `user` (`name`, `password`) VALUES
+    ('test_player_1', 'password1'),
+    ('test_player_2', 'password2'),
+    ('test_player_3', 'password3'),
+    ('test_player_4', 'password4'),
+    ('test_player_5', 'password5'),
+    ('test_player_6', 'password6'),
+    ('test_player_7', 'password7'),
+    ('test_player_8', 'password8'),
+    ('test_player_9', 'password9'),
+    ('test_player_10', 'password10');
 
+INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, `ranged`) VALUES
+    (1, 100, 1, 2, 1, 2),
+    (2, 250, 3, 4, 3, 4),
+    (3, 500, 5, 6, 5, 6),
+    (4, 800, 7, 8, 7, 8),
+    (5, 1200, 9, 10, 9, 10),
+    (6, 2000, 11, 12, 11, 12),
+    (7, 150, 1, 2, 3, 4),
+    (8, 300, 3, 4, 5, 6),
+    (9, 650, 5, 6, 7, 8),
+    (10, 950, 7, 8, 9, 10);
+
+INSERT INTO `admin` (`name`, `password`) VALUES ('admin1', 'adminpass1'), ('admin2', 'adminpass2');
