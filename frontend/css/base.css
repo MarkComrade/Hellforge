@@ -6,6 +6,10 @@
 * {
     cursor: url('../textures/misc/cursor.png'), auto !important;
     font-family: pixelFont;
+
+}
+*:not(input){
+    user-select: none;
 }
 
 body {

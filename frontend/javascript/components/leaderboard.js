@@ -6,6 +6,7 @@ function LeaderBoard() {
     generateBootStrapGrid(1, 1, 12);
     let leaderBoardTitle = document.createElement('div');
     leaderBoardTitle.setAttribute('class', 'menuTitle leaderMenu');
+    leaderBoardTitle.style.userSelect = 'none';
     leaderBoardTitle.innerHTML = 'LeaderBoard';
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
