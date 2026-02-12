@@ -513,14 +513,17 @@ function LeaderBoard() {
             let coinStackRow = document.createElement('div');
             coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
             const coinStack1 = document.createElement('div');
-            coinStack1.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            coinStack1.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
             const coinStack2 = document.createElement('div');
-            coinStack2.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            const coinStack3= document.createElement('div');
-            coinStack3.className ='coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            let coinStackPosition1=0;
-            let coinStackPosition2=0;
-            let coinStackPosition3=0;
+            coinStack2.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            const coinStack3 = document.createElement('div');
+            coinStack3.className =
+                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+            let coinStackPosition1 = 0;
+            let coinStackPosition2 = 0;
+            let coinStackPosition3 = 0;
             if (entry.score == 0) {
                 const noCoinDiv = document.createElement('div');
                 noCoinDiv.className = 'noCoins text-light small';
@@ -529,42 +532,38 @@ function LeaderBoard() {
             } else {
                 const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
                 for (let c = 0; c < coinCount; c++) {
-                    
-
                     const whichStack = Math.floor(Math.random() * 7) + 1;
 
                     const coin = document.createElement('img');
-                    coin.src = '../textures/items/coing.png';
                     coin.className = 'coin';
-               
+                    coin.src = '../textures/items/coing.png';
+
                     switch (whichStack) {
                         case 1:
                         case 2:
+                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`;
                             coinStack1.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`; 
                             coinStackPosition1++;
                             break;
                         case 3:
                         case 4:
                         case 5:
-
+                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`;
                             coinStack2.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`; 
                             coinStackPosition2++;
                             break;
                         case 5:
                         case 6:
+                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`;
                             coinStack3.appendChild(coin);
-                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`; 
                             coinStackPosition3++;
                             break;
                     }
-                   
 
                     // animáció időzítése
                     setTimeout(() => {
                         coin.classList.add('coinVisible');
-                    }, c * 80);
+                    }, c * 35);
                 }
             }
 
@@ -743,6 +742,7 @@ function exitDungeon(abandoned) {
 
     generateBootStrapGrid(1, 1, 12, 'exitDungeonMenu');
     let row = document.querySelector('.exitDungeonMenu');
+    row.parentElement.style.justifyContent = 'center';
     let exitDungeonDiv = document.createElement('div');
     exitDungeonDiv.setAttribute('class', 'exitDungeonDiv');
     row.appendChild(exitDungeonDiv);

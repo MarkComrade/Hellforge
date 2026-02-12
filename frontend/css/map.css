@@ -1,0 +1,82 @@
+/* Map and grid styles */
+.mapContainer {
+    width: 26vh;
+    height: 26vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid 0.5vh black;
+    background-color: rgba(0, 0, 0, 0.67);
+}
+
+/* Cells that are rooms but not yet visited */
+.cell[data-room='true'][data-visited='false'] {
+    background-image: url('../textures/UI/undiscovered-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+/* Visited cells by room type */
+.cell[data-room-type='start'][data-visited='true'] {
+    background-image: url('../textures/UI/start-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.cell[data-room-type='out'][data-visited='true'] {
+    background-image: url('../textures/UI/out-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.cell[data-room-type='loot'][data-visited='true'] {
+    background-image: url('../textures/UI/loot-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.cell[data-room-type='combat'][data-visited='true'] {
+    background-image: url('../textures/UI/combat-UI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.cell[data-room-type='event'][data-visited='true'] {
+    background-image: url('../textures/UI/event-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+.cell[data-room-type='shop'][data-visited='true'] {
+    background-image: url('../textures/UI/shop-MapUI.png');
+    background-size: cover;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 120% 120%;
+}
+
+/* Current player position */
+.cell[data-current='true'][data-visited='true'] {
+    background-color: #ffcc00;
+    box-shadow: 0 0 0.5vh #ffcc00;
+    border-radius: 6%;
+}

@@ -183,16 +183,22 @@ function createTopLeft(parent, dungeonLevel) {
     levelBox.className = 'level-number';
     if (dungeonLevel > 19) {
         levelNumber = 'HELL';
-        levelBox.style.fontSize = '1.5vh';
+        levelBox.style.fontSize = '2.5vh';
+        levelBox.style.justifyContent='center';
+    
+    }
+    else{
+        const levelText = document.createElement('div');
+        levelText.className = 'level-text';
+        levelText.textContent = 'Level';
+        box.appendChild(levelText);
     }
 
     levelBox.textContent = levelNumber;
     levelBox.setAttribute('id', 'level-number');
-    const levelText = document.createElement('div');
-    levelText.className = 'level-text';
-    levelText.textContent = 'Level';
+    
     box.appendChild(levelBox);
-    box.appendChild(levelText);
+    
 
     parent.appendChild(box);
 }
