@@ -1,0 +1,99 @@
+/* Game UI elements */
+#ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ui-box {
+    position: absolute;
+    color: rgb(220, 40, 40);
+    border: 0.3vh solid rgb(220, 40, 40);
+    padding: 1.2vh;
+    background: rgba(0, 0, 0, 0.65);
+    pointer-events: auto;
+    box-sizing: border-box;
+     display : flex;
+    align-items : center;
+    justify-content :center;
+    flex-direction: column;
+}
+
+.top-left {
+    top: 28vh;
+    left: 2vh;
+    width: 9vh;
+    height: 9vh;
+    text-align: center;
+}
+
+.level-number {
+    font-size: 3vh;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.level-text {
+    font-size: 1.6vh;
+    margin-top: 0.3vh;
+}
+
+.top-right {
+    top: 2vh;
+    right: 2vh;
+    display: flex;
+    gap: 1.2vh;
+}
+
+.ui-icon {
+    width: 5vh;
+    height: 5vh;
+    cursor: pointer;
+}
+
+.bottom-left {
+    bottom: 2vh;
+    left: 2vh;
+    width: 35vh;
+    padding: 1.2vh;
+}
+
+.hp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.8vh;
+    margin-bottom: 0.6vh;
+}
+
+.hp-label {
+    font-weight: bold;
+}
+
+.hp-text {
+    font-size: 1.6vh;
+}
+
+.hp-bar {
+    width: 100%;
+    height: 2.2vh;
+    border: 0.3vh solid rgb(220, 40, 40);
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.hp-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, #00ff66, #55ff99);
+    transition:
+        width 0.4s ease,
+        background 0.3s ease;
+}
+
+.bottom-right {
+    bottom: 3vh;
+    right: 3vh;
+    width: 22vh;
+    font-size: 1.8vh;
+}
