@@ -1,4 +1,5 @@
 //!Module-ok importálása
+const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolat
 const express = require('express'); //?npm install express
 const session = require('express-session'); //?npm install express-session
 const path = require('path');
@@ -38,7 +39,12 @@ app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa 
 app.listen(port, ip, () => {
     console.log(`Szerver elérhetősége: http://${ip}:${port}`);
 });
-
-//?Szerver futtatása terminalból: npm run dev
-//?Szerver leállítása (MacBook és Windows): Control + C
-//?Terminal ablak tartalmának törlése (MacBook): Command + K
+//!Database test
+pool.query('SELECT 1')
+    .then(() => {
+        console.log('Sikeres adatbázis kapcsolat!');
+    })
+    .catch((err) => {
+        console.error('Hiba az adatbázis kapcsolat során:', err);
+        process.exit(1);
+    });
