@@ -6,7 +6,6 @@ function LeaderBoard() {
     generateBootStrapGrid(1, 1, 12);
     let leaderBoardTitle = document.createElement('div');
     leaderBoardTitle.setAttribute('class', 'menuTitle leaderMenu');
-    leaderBoardTitle.style.userSelect = 'none';
     leaderBoardTitle.innerHTML = 'LeaderBoard';
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
@@ -14,7 +13,7 @@ function LeaderBoard() {
     let loggedIn = true;
     let leaderboardData = [];
     for (let i = 1; i <= 20; i++) {
-        leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000) });
+        leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000000) });
     }
 
     // Rendezés (bubble sort)
@@ -115,8 +114,8 @@ function LeaderBoard() {
                             coinStack2.appendChild(coin);
                             coinStackPosition2++;
                             break;
-                        case 5:
                         case 6:
+                        case 7:
                             coin.style.bottom = `${coinStackPosition3 * 0.38}vh`;
                             coinStack3.appendChild(coin);
                             coinStackPosition3++;
