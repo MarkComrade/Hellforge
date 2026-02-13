@@ -55,9 +55,31 @@ async function registerUser(username, password) {
             password
         ]);
 
+        await pool.query('INSERT INTO player_inventory (playerId) VALUES (?)', [result.insertId]);
+
         return { success: true, userId: result.insertId, message: 'Sikeres regisztráció' };
     } catch (error) {
         return { success: false, message: 'Hiba történt a regisztráció során' };
+    }
+}
+
+async function loginAdmin(username, password) {
+    try {
+        const [rows] = await pool.query('SELECT * FROM admin WHERE name = ?', [username]);
+
+        if (rows.length === 0) {
+            return { success: false, message: 'A felhasználónév nem létezik' };
+        }
+
+        const admin = rows[0];
+
+        if (admin.password !== password) {
+            return { success: false, message: 'Helytelen jelszó' };
+        }
+
+        return { success: true, adminId: admin.adminId, message: 'Sikeres bejelentkezés' };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a bejelentkezés során' };
     }
 }
 
@@ -65,5 +87,6 @@ async function registerUser(username, password) {
 module.exports = {
     pool,
     loginUser,
-    registerUser
+    registerUser,
+    loginAdmin
 };

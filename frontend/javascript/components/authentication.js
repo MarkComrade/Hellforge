@@ -1,4 +1,4 @@
-function Login() {
+async function Login() {
     let body = document.getElementsByTagName('body');
     body[0].innerHTML = '';
 
@@ -60,13 +60,13 @@ function Login() {
 
         if (username && password) {
             try {
-                const result = await postFetch('/api/loginAuthApi/login', {
+                const result = await postFetch('/api/loginAuthApi/loginUser', {
                     username,
                     password
                 });
 
                 if (result.success) {
-                    alert(result.message);
+                    console.log(result.message);
                     Menu();
                 } else {
                     alert(result.message);
@@ -91,13 +91,13 @@ function Login() {
 
         if (username && password) {
             try {
-                const result = await postFetch('/api/loginAuthApi/register', {
+                const result = await postFetch('/api/loginAuthApi/registerUser', {
                     username,
                     password
                 });
 
                 if (result.success) {
-                    alert(result.message);
+                    console.log(result.message);
                     Menu();
                 } else {
                     alert(result.message);

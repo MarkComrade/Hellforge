@@ -64,7 +64,11 @@ function checkOrientation() {
             } else if (leaderMenu) {
                 LeaderBoard();
             } else if (adminMenu) {
-                Admin();
+                if (window.isAdmin) {
+                    adminTools();
+                } else {
+                    Admin();
+                }
             } else if (startGameMenu) {
                 StartGame();
             } else if (homeMenu) {

@@ -1,10 +1,14 @@
 async function Menu() {
-    let isLoggedIn = false;
-    let userName = 'Guest';
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         isLoggedIn = session.isLoggedIn;
-        userName = session.userName || 'Guest';
+        if (isLoggedIn && session.userName) {
+            userName = session.userName;
+        } else if (isLoggedIn && session.isAdmin) {
+            userName = 'Admin';
+        } else if (!isLoggedIn) {
+            userName = 'Guest';
+        }
     } catch (error) {
         console.error('Session check hiba:', error);
     }
