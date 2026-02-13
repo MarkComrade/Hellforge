@@ -11,11 +11,11 @@ CREATE TABLE `user`(
 );
 CREATE TABLE `player_inventory`(
     `playerId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `gold` INT NOT NULL,
-    `helmet` INT NOT NULL,
-    `armor` INT NOT NULL,
-    `melee` INT NOT NULL,
-    `ranged` INT NOT NULL
+    `gold` INT NOT NULL DEFAULT 0,
+    `helmet` INT UNSIGNED NOT NULL DEFAULT 1,
+    `armor` INT UNSIGNED NOT NULL DEFAULT 2,
+    `melee` INT UNSIGNED NOT NULL DEFAULT 1,
+    `ranged` INT UNSIGNED NOT NULL DEFAULT 2
 );
 CREATE TABLE `armors`(
     `armorId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -38,8 +38,8 @@ CREATE TABLE `weapons`(
 
 CREATE TABLE `admin`(
     `adminId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name` INT NOT NULL,
-    `password` INT NOT NULL
+    `name` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL
 );
 ALTER TABLE
     `player_inventory` ADD CONSTRAINT `player_inventory_armor_foreign` FOREIGN KEY(`armor`) REFERENCES `armors`(`armorId`);

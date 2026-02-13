@@ -20,10 +20,11 @@ const upload = multer({ storage: storage });
 
 //!Endpoints:
 
-router.post('/login', async (request, response) => {
+router.post('/loginUser', async (request, response) => {
     const { username, password } = request.body;
     try {
         const result = await database.loginUser(username, password);
+
         if (result.success) {
             request.session.isLoggedIn = true;
             request.session.userId = result.userId;
@@ -35,7 +36,7 @@ router.post('/login', async (request, response) => {
     }
 });
 
-router.post('/register', async (request, response) => {
+router.post('/registerUser', async (request, response) => {
     const { username, password } = request.body;
     try {
         const result = await database.registerUser(username, password);
@@ -54,12 +55,14 @@ router.get('/session', (request, response) => {
     if (request.session.isLoggedIn) {
         response.json({
             isLoggedIn: true,
+            isAdmin: request.session.isAdmin || false,
             userId: request.session.userId,
             userName: request.session.userName
         });
     } else {
         response.json({
             isLoggedIn: false,
+            isAdmin: false,
             userName: request.session.userName || ''
         });
     }
@@ -79,6 +82,22 @@ router.post('/guest', (request, response) => {
     request.session.isLoggedIn = false;
     request.session.userName = 'Guest';
     response.json({ success: true, userName: 'Guest' });
+});
+
+router.post('/loginAdmin', async (request, response) => {
+    const { username, password } = request.body;
+    try {
+        const result = await database.loginAdmin(username, password);
+        if (result.success) {
+            request.session.isLoggedIn = true;
+            request.session.isAdmin = true;
+            request.session.adminId = result.userId;
+            request.session.adminName = username;
+        }
+        response.json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
 });
 
 module.exports = router;
