@@ -43,7 +43,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     // Clear body
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
-    body[0].innerHTML = '';
+    clearBody();
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');

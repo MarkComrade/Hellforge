@@ -1,7 +1,7 @@
 function exitDungeon(abandoned) {
     isInGame = false;
     let body = document.getElementsByTagName('body');
-    body[0].innerHTML = '';
+    clearBody();
     body[0].style.backgroundImage = "url('../menuImages/exitdungeon.png')";
     body[0].style.backgroundSize = 'cover';
 
@@ -18,10 +18,10 @@ function exitDungeon(abandoned) {
     exitMessage.style.textAlign = 'center';
 
     if (abandoned === true) {
-        exitMessage.innerHTML = 'You have escaped the dungeon, but at what cost?';
+        exitMessage.textContent = 'You have escaped the dungeon, but at what cost?';
         //Implement punishment for abandoning the dungeon prematurely (e.g. lose gold, lose character level, etc.)
     } else {
-        exitMessage.innerHTML = 'You have escaped the dungeon';
+        exitMessage.textContent = 'You have escaped the dungeon';
     }
 
     exitDungeonDiv.appendChild(exitMessage);
@@ -29,7 +29,7 @@ function exitDungeon(abandoned) {
     let statistics = document.createElement('p');
     statistics.setAttribute('class', 'menuText');
     statistics.style.marginTop = '5vh';
-    statistics.innerHTML = 'Statistics:';
+    statistics.textContent = 'Statistics:';
     exitDungeonDiv.appendChild(statistics);
 
     generateBackToMenu();

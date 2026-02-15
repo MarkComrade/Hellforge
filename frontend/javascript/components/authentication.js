@@ -1,11 +1,10 @@
 async function Login() {
-    let body = document.getElementsByTagName('body');
-    body[0].innerHTML = '';
+    clearBody();
 
     generateBootStrapGrid(1, 1, 12, 'loginMenu');
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle');
-    menuTitle.innerHTML = 'Login / Register';
+    menuTitle.textContent = 'Login / Register';
     document.querySelector('.loginMenu').appendChild(menuTitle);
 
     generateBootStrapGrid(2, 1, 12, 'loginFormContainer');
@@ -28,7 +27,7 @@ async function Login() {
         );
         const label = document.createElement('label');
         label.setAttribute('class', 'menuText');
-        label.innerHTML = form.label;
+        label.textContent = form.label;
         label.setAttribute('for', form.id);
         labelCol.appendChild(label);
         row.appendChild(labelCol);
