@@ -3,7 +3,7 @@ function newGame(dungeon) {
     let body = document.getElementsByTagName('body');
     switch (dungeon) {
         case 'Laboratory':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_lab.png')";
+            body[0].style.backgroundImage = "url('../textures/rooms/room_laboratory.png')";
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';

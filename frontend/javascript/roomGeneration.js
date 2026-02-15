@@ -86,7 +86,7 @@ function navigateToRoom(x, y, dungeonLevel) {
 function generateDoors(dungeon) {
     console.log(dungeon);
     const doorTextures = {
-        Laboratory: '../textures/rooms/door_lab.png',
+        Laboratory: '../textures/rooms/door_laboratory.png',
         Crypt: '../textures/rooms/door_crypt.png',
         Labyrinth: '../textures/rooms/door_labyrinth.png',
         'Gates of Hell': '../textures/rooms/door_hell.png'
