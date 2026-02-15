@@ -74,7 +74,7 @@ function navigateToRoom(x, y, dungeonLevel) {
                     'img.doorUp, img.doorRight, img.doorDown, img.doorLeft'
                 ).forEach((img) => img.remove());
 
-                generateDoors(window.currentDungeon);
+                generateDoors(sessionStorage.getItem('currentDungeon'));
                 roomEventHandler(data, dungeonLevel);
             } else {
                 console.log('No room available');
@@ -84,13 +84,15 @@ function navigateToRoom(x, y, dungeonLevel) {
     });
 }
 function generateDoors(dungeon) {
+    console.log(dungeon);
     const doorTextures = {
         Laboratory: '../textures/rooms/door_lab.png',
         Crypt: '../textures/rooms/door_crypt.png',
         Labyrinth: '../textures/rooms/door_labyrinth.png',
         'Gates of Hell': '../textures/rooms/door_hell.png'
     };
-    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
+
+    const doorTexture = doorTextures[dungeon];
 
     const currentPosition = document.querySelector('#map .cell[data-current="true"]');
     const x = parseInt(currentPosition.dataset.col);
@@ -185,7 +187,7 @@ function roomEventHandler(room, dungeonLevel) {
                 continueButton.addEventListener('click', () => {
                     dungeonLevel++;
                     document.getElementById('level-number').textContent = dungeonLevel;
-                    newLevel(window.currentDungeon, dungeonLevel, 100);
+                    newLevel(sessionStorage.getItem('currentDungeon'), dungeonLevel, 100);
                 });
             });
             break;

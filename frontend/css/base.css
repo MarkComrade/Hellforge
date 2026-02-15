@@ -16,6 +16,8 @@ body {
     background-size: cover;
     overflow: hidden;
     touch-action: none;
+    width: 100%;
+    margin: 0;
 }
 
 /* Common UI elements used across all screens */
