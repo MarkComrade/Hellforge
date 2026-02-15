@@ -14,7 +14,7 @@ async function Menu() {
     }
 
     let body = document.getElementsByTagName('body');
-    body[0].innerHTML = '';
+    clearBody();
     body[0].style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
     body[0].style.backgroundSize = 'cover';
 
@@ -26,13 +26,13 @@ async function Menu() {
     );
     let menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle mainMenu');
-    menuTitle.innerHTML = 'HellForge';
+    menuTitle.textContent = 'HellForge';
     document.querySelector('.topRow').appendChild(menuTitle);
 
     let userNameDisplay = document.createElement('span');
     userNameDisplay.setAttribute('class', 'menuText');
     userNameDisplay.setAttribute('style', 'margin-right: 1vw;');
-    userNameDisplay.innerHTML = userName;
+    userNameDisplay.textContent = userName;
     topRow[1].appendChild(userNameDisplay);
 
     const buttons = [

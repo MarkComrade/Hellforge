@@ -1,6 +1,5 @@
 function Options() {
-    let body = document.getElementsByTagName('body');
-    body[0].innerHTML = '';
+    clearBody();
 
     generateBootStrapGrid(1, 1, 12, 'optionsTitle');
     let optionsTitle = document.createElement('h1');

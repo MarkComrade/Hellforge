@@ -38,7 +38,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     // Clear body
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
-    body[0].innerHTML = '';
+    clearBody();
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
@@ -184,10 +184,8 @@ function createTopLeft(parent, dungeonLevel) {
     if (dungeonLevel > 19) {
         levelNumber = 'HELL';
         levelBox.style.fontSize = '2.5vh';
-        levelBox.style.justifyContent='center';
-    
-    }
-    else{
+        levelBox.style.justifyContent = 'center';
+    } else {
         const levelText = document.createElement('div');
         levelText.className = 'level-text';
         levelText.textContent = 'Level';
@@ -196,9 +194,8 @@ function createTopLeft(parent, dungeonLevel) {
 
     levelBox.textContent = levelNumber;
     levelBox.setAttribute('id', 'level-number');
-    
+
     box.appendChild(levelBox);
-    
 
     parent.appendChild(box);
 }
