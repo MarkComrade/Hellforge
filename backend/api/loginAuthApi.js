@@ -51,23 +51,6 @@ router.post('/registerUser', async (request, response) => {
     }
 });
 
-router.get('/session', (request, response) => {
-    if (request.session.isLoggedIn) {
-        response.json({
-            isLoggedIn: true,
-            isAdmin: request.session.isAdmin || false,
-            userId: request.session.userId,
-            userName: request.session.userName
-        });
-    } else {
-        response.json({
-            isLoggedIn: false,
-            isAdmin: false,
-            userName: request.session.userName || ''
-        });
-    }
-});
-
 router.post('/logout', (request, response) => {
     request.session.destroy((err) => {
         if (err) {
@@ -97,6 +80,23 @@ router.post('/loginAdmin', async (request, response) => {
         response.json(result);
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.get('/session', (request, response) => {
+    if (request.session.isLoggedIn) {
+        response.json({
+            isLoggedIn: true,
+            isAdmin: request.session.isAdmin || false,
+            userId: request.session.userId,
+            userName: request.session.userName
+        });
+    } else {
+        response.json({
+            isLoggedIn: false,
+            isAdmin: false,
+            userName: request.session.userName || ''
+        });
     }
 });
 
