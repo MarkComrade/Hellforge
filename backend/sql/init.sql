@@ -38,8 +38,8 @@ CREATE TABLE `weapons`(
 
 CREATE TABLE `admin`(
     `adminId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name` INT NOT NULL,
-    `password` INT NOT NULL
+    `name` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL
 );
 ALTER TABLE
     `player_inventory` ADD CONSTRAINT `player_inventory_armor_foreign` FOREIGN KEY(`armor`) REFERENCES `armors`(`armorId`);

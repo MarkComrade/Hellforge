@@ -95,6 +95,25 @@
     box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
 }
 
+.loginFormContainer .menuInput:-webkit-autofill,
+.loginFormContainer .menuInput:-webkit-autofill:hover,
+.loginFormContainer .menuInput:-webkit-autofill:focus,
+.loginFormContainer .menuInput:-webkit-autofill:active {
+    -webkit-text-fill-color: rgb(220, 40, 40) !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(30, 5, 5, 0.95) inset !important;
+    box-shadow: 0 0 0px 1000px rgba(30, 5, 5, 0.95) inset !important;
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000 !important;
+    border: 0.2vh solid rgb(220, 40, 40) !important;
+    transition:
+        background-color 5000s ease-in-out 0s,
+        color 5000s ease-in-out 0s;
+    caret-color: rgb(220, 40, 40);
+}
+
 .musicControls {
     margin-top: 5vh;
     height: 50vh;

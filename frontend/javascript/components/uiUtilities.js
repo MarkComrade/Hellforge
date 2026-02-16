@@ -32,6 +32,11 @@ function generateBootStrapGrid(row, col, col_md_value, className) {
     return contDiv;
 }
 
+function clearBody() {
+    const body = document.body;
+    body.replaceChildren();
+}
+
 function generateBackToMenu() {
     generateBootStrapGrid(1, 1, 12, 'backToMenu');
 

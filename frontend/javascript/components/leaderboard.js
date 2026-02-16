@@ -1,12 +1,11 @@
 function LeaderBoard() {
-    let body = document.getElementsByTagName('body');
-    body[0].innerHTML = '';
+    clearBody();
 
     // Title
     generateBootStrapGrid(1, 1, 12);
     let leaderBoardTitle = document.createElement('div');
     leaderBoardTitle.setAttribute('class', 'menuTitle leaderMenu');
-    leaderBoardTitle.innerHTML = 'LeaderBoard';
+    leaderBoardTitle.textContent = 'LeaderBoard';
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
     // Fetch leaderboard data from API

@@ -1,5 +1,6 @@
 //!Module-ok importálása
-const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolatpla
+require('dotenv').config(); //?npm install dotenv
+const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolat
 const express = require('express'); //?npm install express
 const session = require('express-session'); //?npm install express-session
 const path = require('path');
@@ -8,8 +9,8 @@ const path = require('path');
 const app = express();
 const router = express.Router();
 
-const ip = '127.0.0.1';
-const port = 3000;
+const ip = process.env.SERVER_IP || '127.0.0.1';
+const port = parseInt(process.env.SERVER_PORT) || 3000;
 
 app.use(express.json()); //?Middleware JSON
 app.set('trust proxy', 1); //?Middleware Proxy
@@ -17,7 +18,7 @@ app.set('trust proxy', 1); //?Middleware Proxy
 //!Session beállítása:
 app.use(
     session({
-        secret: 'titkos_kulcs', //?Ezt generálni kell a későbbiekben
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true
     })
@@ -33,6 +34,8 @@ router.get('/', (request, response) => {
 app.use('/', router);
 const endpoints = require('./api/api.js');
 app.use('/api', endpoints);
+const login = require('./api/loginAuthApi.js');
+app.use('/api/loginAuthApi', login);
 
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez

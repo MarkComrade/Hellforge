@@ -1,11 +1,13 @@
 function newGame(dungeon) {
+    sessionStorage.setItem('currentDungeon', dungeon);
     let body = document.getElementsByTagName('body');
     switch (dungeon) {
         case 'Laboratory':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_lab.png')";
+            body[0].style.backgroundImage = "url('../textures/rooms/room_laboratory.png')";
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Crypt':
@@ -13,6 +15,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Labyrinth':
@@ -20,6 +23,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Gates of Hell':
@@ -27,6 +31,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
     }
@@ -38,7 +43,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     // Clear body
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
-    body[0].innerHTML = '';
+    clearBody();
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
@@ -184,10 +189,8 @@ function createTopLeft(parent, dungeonLevel) {
     if (dungeonLevel > 19) {
         levelNumber = 'HELL';
         levelBox.style.fontSize = '2.5vh';
-        levelBox.style.justifyContent='center';
-    
-    }
-    else{
+        levelBox.style.justifyContent = 'center';
+    } else {
         const levelText = document.createElement('div');
         levelText.className = 'level-text';
         levelText.textContent = 'Level';
@@ -196,9 +199,8 @@ function createTopLeft(parent, dungeonLevel) {
 
     levelBox.textContent = levelNumber;
     levelBox.setAttribute('id', 'level-number');
-    
+
     box.appendChild(levelBox);
-    
 
     parent.appendChild(box);
 }

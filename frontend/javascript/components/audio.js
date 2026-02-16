@@ -1,6 +1,5 @@
 let audio;
 
-//Play music
 function playMenuMusic() {
     if (!audio) {
         audio = new Audio('../music/track1.mp3');
@@ -13,7 +12,6 @@ function playMenuMusic() {
     }
 }
 
-//Stop music
 function stopAudio() {
     if (audio) {
         audio.pause();

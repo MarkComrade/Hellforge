@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    window.isInGame = false;
     checkOrientation();
 
     //Start music
