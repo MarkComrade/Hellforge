@@ -50,3 +50,28 @@ function generateBackToMenu() {
     let backToMenu = document.querySelector('.backToMenu');
     backToMenu.appendChild(backButton);
 }
+
+
+function showLoadingScreen(message,className) {
+    removeLoadingScreen(className);
+    
+    const loadingScreen = document.createElement('div');
+    loadingScreen.className = className;
+    loadingScreen.innerHTML = `
+        <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-light mt-3">${message}</p>
+    `;
+    loadingScreen.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh;';
+    document.body.appendChild(loadingScreen);
+    
+    return loadingScreen;
+}
+
+function removeLoadingScreen(className) {
+    const loading = document.querySelector(`.${className}`);
+    if (loading) {
+        loading.remove();
+    }
+}

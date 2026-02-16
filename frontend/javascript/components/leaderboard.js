@@ -1,4 +1,10 @@
 function LeaderBoard() {
+    // Prevent multiple simultaneous leaderboard fetches
+    if (window.isLeaderboardLoading === true) {
+        return;
+    }
+    window.isLeaderboardLoading = true;
+    
     clearBody();
 
     // Title
@@ -8,7 +14,16 @@ function LeaderBoard() {
     leaderBoardTitle.textContent = 'LeaderBoard';
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
+<<<<<<< Updated upstream
     // Tesztadat generálás
+=======
+    // Show loading screen
+    showLoadingScreen('Loading leaderboard...', 'leaderboardLoading');
+
+    // Fetch leaderboard data from API
+    // Simulate logged-in user (in real app, get from session/auth)
+    const loggedInUsername = 'test_player_' + (Math.floor(Math.random() * 13) + 1); // Random player 1-13
+>>>>>>> Stashed changes
 
     let loggedIn = true;
     let leaderboardData = [];
@@ -16,6 +31,7 @@ function LeaderBoard() {
         leaderboardData.push({ name: `Player${i}`, score: Math.floor(Math.random() * 1000000) });
     }
 
+<<<<<<< Updated upstream
     // Rendezés (bubble sort)
     for (let i = 0; i < leaderboardData.length; i++) {
         for (let j = 0; j < leaderboardData.length - i - 1; j++) {
@@ -23,6 +39,13 @@ function LeaderBoard() {
                 let temp = leaderboardData[j];
                 leaderboardData[j] = leaderboardData[j + 1];
                 leaderboardData[j + 1] = temp;
+=======
+            if (top10.length === 0) {
+                console.warn('No leaderboard data received');
+                removeLoadingScreen('leaderboardLoading');
+                window.isLeaderboardLoading = false;
+                return;
+>>>>>>> Stashed changes
             }
         }
     }
@@ -31,6 +54,7 @@ function LeaderBoard() {
     let userIndex = Math.floor(Math.random() * 20);
     let loggedUser = leaderboardData[userIndex];
 
+<<<<<<< Updated upstream
     if (loggedIn) {
         let top9 = [];
         if (userIndex < 10) {
@@ -47,11 +71,57 @@ function LeaderBoard() {
 
     // Érmehalmok generálása
     function generatepiles(top9, loggedUser) {
+=======
+                // Check if user is in top 10
+                const isInTop10 = top10.some((player) => player.name === userData.name);
+
+                if (isInTop10) {
+                    // User is in top 10, show all top 10
+                    displayData = top10;
+                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
+                } else {
+                    // User is outside top 10, show top 9 + user at the end
+                    displayData = top10.slice(0, 9);
+                    displayData.push(userData);
+                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
+                }
+            } else {
+                generatepiles(top10, null, false, null);
+            }
+            window.isLeaderboardLoading = false;
+        })
+        .catch((error) => {
+            console.error('Error fetching leaderboard:', error);
+            // Remove loading screen
+            removeLoadingScreen('leaderboardLoading');
+            
+            // Fallback: generate test data
+            let leaderboardData = [];
+            for (let i = 1; i <= 20; i++) {
+                leaderboardData.push({
+                    name: `Player${i}`,
+                    score: Math.floor(Math.random() * 1000000)
+                });
+            }
+            generatepiles(leaderboardData.slice(0, 10), null, false, null);
+            window.isLeaderboardLoading = false;
+        });
+
+    // Érmehalmok generálása
+    function generatepiles(top9, loggedUser, loggedIn, userIndex) {
+        // Remove loading screen
+        removeLoadingScreen('leaderboardLoading');
+        
+        // Clean up any existing leaderboard containers before creating new one
+        const existingContainers = document.querySelectorAll('.leaderBoardContainer');
+        existingContainers.forEach(container => container.remove());
+        
+>>>>>>> Stashed changes
         const row = document.createElement('div');
         row.className = 'row justify-content-center';
 
         const container = document.createElement('div');
-        container.className = 'leadboardContainer container-fluid';
+        container.className = 'leaderBoardContainer container-fluid';
 
         const maxScore = top9[0].score;
         const maxCoins = 150;
@@ -141,9 +211,9 @@ function LeaderBoard() {
             entryDiv.appendChild(scoreDiv);
             row.appendChild(entryDiv);
             container.appendChild(row);
-
-            document.body.appendChild(container);
         });
+        
+        document.body.appendChild(container);
     }
 
     generateBackToMenu();

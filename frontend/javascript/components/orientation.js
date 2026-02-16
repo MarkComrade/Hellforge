@@ -61,7 +61,7 @@ function checkOrientation() {
                 Options();
             } else if (loginMenu) {
                 Login();
-            } else if (leaderMenu) {
+            } else if (leaderMenu || window.isLeaderboardLoading) {
                 LeaderBoard();
             } else if (adminMenu) {
                 if (window.isAdmin) {
