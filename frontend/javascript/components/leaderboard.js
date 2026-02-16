@@ -15,8 +15,11 @@ function LeaderBoard() {
     document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Tesztadat generálás
 =======
+=======
+>>>>>>> Stashed changes
     // Show loading screen
     showLoadingScreen('Loading leaderboard...', 'leaderboardLoading');
 
@@ -116,6 +119,9 @@ function LeaderBoard() {
         const existingContainers = document.querySelectorAll('.leaderBoardContainer');
         existingContainers.forEach(container => container.remove());
         
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         const row = document.createElement('div');
         row.className = 'row justify-content-center';
