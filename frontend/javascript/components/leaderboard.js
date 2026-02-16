@@ -16,8 +16,11 @@ function LeaderBoard() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Tesztadat generálás
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     // Show loading screen
@@ -120,6 +123,9 @@ function LeaderBoard() {
         existingContainers.forEach(container => container.remove());
         
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
