@@ -1,40 +1,40 @@
 /* Dungeon rooms and doors */
 .doorUp {
     position: absolute;
-    top: 0;
-    left: 44.5vw;
-    width: 11vw;
-    height: 13vh;
+    top: -0.6vh;
+    left: 41vw;
+    width: 18vw;
+    height: 22vh;
     transform: rotate(0deg);
     user-select: none;
 }
 
 .doorRight {
     position: absolute;
-    top: 43.5vh;
-    right: -1vw;
-    width: 11vw;
-    height: 13vh;
+    top: 38.5vh;
+    right: -2.25vw;
+    width: 18vw;
+    height: 22vh;
     transform: rotate(90deg);
     user-select: none;
 }
 
 .doorDown {
     position: absolute;
-    bottom: 0;
-    left: 44.5vw;
-    width: 11vw;
-    height: 13vh;
+    bottom: -0.6vh;
+    left: 41vw;
+    width: 18vw;
+    height: 22vh;
     transform: rotate(180deg);
     user-select: none;
 }
 
 .doorLeft {
     position: absolute;
-    top: 43.5vh;
-    left: -1vw;
-    width: 11vw;
-    height: 13vh;
+    top: 38.5vh;
+    left: -2.25vw;
+    width: 18vw;
+    height: 22vh;
     transform: rotate(270deg);
     user-select: none;
 }
