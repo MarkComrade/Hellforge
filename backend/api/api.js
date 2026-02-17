@@ -28,6 +28,7 @@ router.get('/test', (request, response) => {
 
 //?GET /api/testsql
 router.get('/testsql', async (request, response) => {
+    console.log('SQL teszt végpont meghívva');
     try {
         const selectall = await database.selectall();
         response.status(200).json({
@@ -37,6 +38,32 @@ router.get('/testsql', async (request, response) => {
     } catch (error) {
         response.status(500).json({
             message: 'Ez a végpont nem működik.'
+        });
+    }
+});
+router.get('/leaderboard', async (request, response) => {
+    console.log('Leaderboard endpoint called'); // Debug
+    try {
+        const username = request.query.username; // Get username from query params
+        const top10 = await database.selectleadboard();
+        console.log('Top 10 results:', top10); // Debug
+
+        let userData = null;
+        if (username) {
+            userData = await database.getUserRankAndScore(username);
+            console.log('User data:', userData); // Debug
+        }
+
+        response.status(200).json({
+            message: 'leadboardadatoklekerve',
+            top10: top10,
+            user: userData
+        });
+    } catch (error) {
+        console.error('Leaderboard error:', error); // Debug
+        response.status(500).json({
+            message: 'leadboardadatok nem sikerult lekerni',
+            error: error.message
         });
     }
 });
