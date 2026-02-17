@@ -1,163 +1,156 @@
+let leaderboardAbortController = null;
+
+const COIN_TEXTURE = '../textures/items/coing.png';
+const MAX_COINS = 150;
+const COIN_SPACING = 0.38;
+const COIN_ANIMATION_DELAY = 35; // ms delay between each coin appearing
+const COIN_STACK_CLASS =
+    'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
+
+/**
+ * Renders the leaderboard screen with player rankings and coin pile visualizations.
+ * Cancels any pending fetch from a previous call  WINDOW RESIZE
+ */
 function LeaderBoard() {
+    // Cancel any in-flight request to prevent duplicate renders on resize
+    if (leaderboardAbortController) {
+        leaderboardAbortController.abort();
+    }
+    leaderboardAbortController = new AbortController();
+
     clearBody();
+    renderTitle();
+    fetchLeaderboardData();
+    generateBackToMenu();
+}
 
-    // Title
+/** Creates the leaderboard page title. */
+function renderTitle() {
     generateBootStrapGrid(1, 1, 12);
-    let leaderBoardTitle = document.createElement('div');
-    leaderBoardTitle.setAttribute('class', 'menuTitle leaderMenu');
-    leaderBoardTitle.textContent = 'LeaderBoard';
-    document.querySelector('.col-md-12').appendChild(leaderBoardTitle);
+    const title = document.createElement('div');
+    title.className = 'menuTitle leaderMenu';
+    title.textContent = 'LeaderBoard';
+    document.querySelector('.col-md-12').appendChild(title);
+}
 
-    // Fetch leaderboard data from API
-    // Simulate logged-in user (in real app, get from session/auth)
-    const loggedInUsername = 'test_player_' + (Math.floor(Math.random() * 13) + 1); // Random player 1-13
+/** Fetches leaderboard data and determines which players to display. */
+function fetchLeaderboardData() {
+    // TODO: Replace with actual logged-in username from session/auth
+    const loggedInUsername = 'test_player_' + (Math.floor(Math.random() * 13) + 1);
 
-    fetch(`/api/leaderboard?username=${loggedInUsername}`)
+    fetch(`/api/leaderboard?username=${loggedInUsername}`, {
+        signal: leaderboardAbortController.signal
+    })
         .then((response) => response.json())
         .then((data) => {
-            console.log('Leaderboard data:', data); // Debug log
-            let loggedIn = true;
-            let top10 = data.top10 || [];
-            let userData = data.user;
+            const top10 = data.top10 || [];
+            const userData = data.user;
 
             if (top10.length === 0) {
                 console.warn('No leaderboard data received');
                 return;
             }
 
-            if (loggedIn && userData) {
-                let displayData = [];
-
-                // Check if user is in top 10
+            if (userData) {
                 const isInTop10 = top10.some((player) => player.name === userData.name);
-
-                if (isInTop10) {
-                    // User is in top 10, show all top 10
-                    displayData = top10;
-                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
-                } else {
-                    // User is outside top 10, show top 9 + user at the end
-                    displayData = top10.slice(0, 9);
-                    displayData.push(userData);
-                    generatepiles(displayData, userData, loggedIn, userData.rank - 1);
-                }
+                // If user isn't in top 10, show top 9 + user at the end
+                const displayData = isInTop10 ? top10 : [...top10.slice(0, 9), userData];
+                generatePiles(displayData, userData);
             } else {
-                generatepiles(top10, null, false, null);
+                generatePiles(top10, null);
             }
         })
         .catch((error) => {
+            if (error.name === 'AbortError') return;
             console.error('Error fetching leaderboard:', error);
-            // Fallback: generate test data
-            let leaderboardData = [];
-            for (let i = 1; i <= 20; i++) {
-                leaderboardData.push({
-                    name: `Player${i}`,
-                    score: Math.floor(Math.random() * 1000000)
-                });
-            }
-            generatepiles(leaderboardData.slice(0, 10), null, false, null);
         });
+}
 
-    // Érmehalmok generálása
-    function generatepiles(top9, loggedUser, loggedIn, userIndex) {
-        const row = document.createElement('div');
-        row.className = 'row justify-content-center';
+/**
+ * Creates a single coin stack column element.
+ * @returns {{ element: HTMLDivElement, position: number }}
+ */
+function createCoinStack() {
+    const element = document.createElement('div');
+    element.className = COIN_STACK_CLASS;
+    return { element, position: 0 };
+}
 
-        const container = document.createElement('div');
-        container.className = 'leadboardContainer container-fluid';
+/**
+ * Generates the coin pile visualizations for each player.
+ * Coin count is proportional to the player's score relative to the top scorer.
+ * @param {Array} players - Array of player objects with name and score
+ * @param {Object|null} loggedUser - The currently logged-in user's data, or null
+ */
+function generatePiles(players, loggedUser) {
+    const row = document.createElement('div');
+    row.className = 'row justify-content-center';
 
-        const maxScore = top9[0].score;
-        const maxCoins = 150;
+    const container = document.createElement('div');
+    container.className = 'leadboardContainer container-fluid';
 
-        top9.forEach((entry) => {
-            // játékos "kártya"
-            let entryDiv = document.createElement('div');
-            entryDiv.className = 'playerCard text-center p-3 rounded col-sm-1 ';
+    const maxScore = players[0].score;
 
-            // név
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'playerName fw-bold  mt-1';
-            nameDiv.innerText = entry.name;
+    players.forEach((entry) => {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'playerCard text-center p-3 rounded col-sm-1';
 
-            // pont
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'playerScore text-light';
-            scoreDiv.innerText = `${entry.score}p`;
+        // Player name
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'playerName fw-bold mt-1';
+        nameDiv.innerText = entry.name;
 
-            // érme halom
-            let coinStackRow = document.createElement('div');
-            coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
-            const coinStack1 = document.createElement('div');
-            coinStack1.className =
-                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            const coinStack2 = document.createElement('div');
-            coinStack2.className =
-                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            const coinStack3 = document.createElement('div');
-            coinStack3.className =
-                'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
-            let coinStackPosition1 = 0;
-            let coinStackPosition2 = 0;
-            let coinStackPosition3 = 0;
-            if (entry.score == 0) {
-                const noCoinDiv = document.createElement('div');
-                noCoinDiv.className = 'noCoins text-light small';
-                noCoinDiv.innerText = 'No coins';
-                coinStack2.appendChild(noCoinDiv);
-            } else {
-                const coinCount = Math.max(1, Math.round((entry.score / maxScore) * maxCoins));
-                for (let c = 0; c < coinCount; c++) {
-                    const whichStack = Math.floor(Math.random() * 7) + 1;
+        // Player score
+        const scoreDiv = document.createElement('div');
+        scoreDiv.className = 'playerScore text-light';
+        scoreDiv.innerText = `${entry.score}p`;
 
-                    const coin = document.createElement('img');
-                    coin.className = 'coin';
-                    coin.src = '../textures/items/coing.png';
+        // Coin stacks (3 columns for visual spread)
+        const coinStackRow = document.createElement('div');
+        coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
 
-                    switch (whichStack) {
-                        case 1:
-                        case 2:
-                            coin.style.bottom = `${coinStackPosition1 * 0.38}vh`;
-                            coinStack1.appendChild(coin);
-                            coinStackPosition1++;
-                            break;
-                        case 3:
-                        case 4:
-                        case 5:
-                            coin.style.bottom = `${coinStackPosition2 * 0.38}vh`;
-                            coinStack2.appendChild(coin);
-                            coinStackPosition2++;
-                            break;
-                        case 6:
-                        case 7:
-                            coin.style.bottom = `${coinStackPosition3 * 0.38}vh`;
-                            coinStack3.appendChild(coin);
-                            coinStackPosition3++;
-                            break;
-                    }
+        const stacks = [createCoinStack(), createCoinStack(), createCoinStack()];
 
-                    // animáció időzítése
-                    setTimeout(() => {
-                        coin.classList.add('coinVisible');
-                    }, c * 35);
-                }
+        if (entry.score === 0) {
+            const noCoinDiv = document.createElement('div');
+            noCoinDiv.className = 'noCoins text-light small';
+            noCoinDiv.innerText = 'No coins';
+            stacks[1].element.appendChild(noCoinDiv);
+        } else {
+            const coinCount = Math.max(1, Math.round((entry.score / maxScore) * MAX_COINS));
+
+            for (let c = 0; c < coinCount; c++) {
+                const coin = document.createElement('img');
+                coin.className = 'coin';
+                coin.src = COIN_TEXTURE;
+
+                // Randomly distribute coins across the 3 stacks (weighted toward center)
+                const roll = Math.floor(Math.random() * 7);
+                const stackIndex = roll < 2 ? 0 : roll < 5 ? 1 : 2;
+                const stack = stacks[stackIndex];
+
+                coin.style.bottom = `${stack.position * COIN_SPACING}vh`;
+                stack.element.appendChild(coin);
+                stack.position++;
+
+                // Staggered fade-in animation
+                setTimeout(() => coin.classList.add('coinVisible'), c * COIN_ANIMATION_DELAY);
             }
+        }
 
-            // kiemelés, ha a bejelentkezett userről van szó
-            if (loggedIn && entry.name === loggedUser.name) {
-                nameDiv.classList.add('highlightedPlayer');
-            }
-            coinStackRow.appendChild(coinStack1);
-            coinStackRow.appendChild(coinStack2);
-            coinStackRow.appendChild(coinStack3);
-            entryDiv.appendChild(coinStackRow);
-            entryDiv.appendChild(nameDiv);
-            entryDiv.appendChild(scoreDiv);
-            row.appendChild(entryDiv);
-            container.appendChild(row);
+        // Highlight the logged-in player
+        if (loggedUser && entry.name === loggedUser.name) {
+            nameDiv.classList.add('highlightedPlayer');
+        }
 
-            document.body.appendChild(container);
-        });
-    }
+        // Assemble the player card
+        stacks.forEach((stack) => coinStackRow.appendChild(stack.element));
+        entryDiv.appendChild(coinStackRow);
+        entryDiv.appendChild(nameDiv);
+        entryDiv.appendChild(scoreDiv);
+        row.appendChild(entryDiv);
+    });
 
-    generateBackToMenu();
+    container.appendChild(row);
+    document.body.appendChild(container);
 }
