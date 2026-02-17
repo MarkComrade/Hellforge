@@ -33,23 +33,39 @@ function renderTitle() {
     document.querySelector('.col-md-12').appendChild(title);
 }
 
-/** Fetches leaderboard data and determines which players to display. */
-function fetchLeaderboardData() {
-    // TODO: Replace with actual logged-in username from session/auth
-    const loggedInUsername = 'test_player_' + (Math.floor(Math.random() * 13) + 1);
+/** Fetches session info, then leaderboard data, and renders the board. */
+async function fetchLeaderboardData() {
+    // Get the actual logged-in username from the session
+    let loggedInUsername = null;
+    try {
+        const session = await getMethodFetch('/api/loginAuthApi/session');
+        if (session.isLoggedIn && session.userName) {
+            loggedInUsername = session.userName;
+        }
+    } catch (error) {
+        console.warn('Could not fetch session, showing leaderboard without user highlight');
+    }
 
-    fetch(`/api/leaderboard?username=${loggedInUsername}`, {
-        signal: leaderboardAbortController.signal
-    })
+    const url = loggedInUsername
+        ? `/api/leaderboard?username=${loggedInUsername}`
+        : '/api/leaderboard';
+
+    fetch(url, { signal: leaderboardAbortController.signal })
         .then((response) => response.json())
         .then((data) => {
             const top10 = data.top10 || [];
-            const userData = data.user;
 
             if (top10.length === 0) {
                 console.warn('No leaderboard data received');
                 return;
             }
+
+            // If no user data returned but logged in, create a default entry with 0 score
+            const userData =
+                data.user ||
+                (loggedInUsername
+                    ? { name: loggedInUsername, score: 0, rank: top10.length + 1 }
+                    : null);
 
             if (userData) {
                 const isInTop10 = top10.some((player) => player.name === userData.name);
@@ -66,22 +82,14 @@ function fetchLeaderboardData() {
         });
 }
 
-/**
- * Creates a single coin stack column element.
- * @returns {{ element: HTMLDivElement, position: number }}
- */
+// Creates a single coin stack column element
 function createCoinStack() {
     const element = document.createElement('div');
     element.className = COIN_STACK_CLASS;
     return { element, position: 0 };
 }
 
-/**
- * Generates the coin pile visualizations for each player.
- * Coin count is proportional to the player's score relative to the top scorer.
- * @param {Array} players - Array of player objects with name and score
- * @param {Object|null} loggedUser - The currently logged-in user's data, or null
- */
+// Generates coin pile visualizations proportional to each player's score
 function generatePiles(players, loggedUser) {
     const row = document.createElement('div');
     row.className = 'row justify-content-center';
