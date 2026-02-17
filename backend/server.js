@@ -42,12 +42,23 @@ app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa 
 app.listen(port, ip, () => {
     console.log(`Szerver elérhetősége: http://${ip}:${port}`);
 });
-//!Database test
-pool.query('SELECT 1')
-    .then(() => {
-        console.log('Sikeres adatbázis kapcsolat!');
-    })
-    .catch((err) => {
-        console.error('Hiba az adatbázis kapcsolat során:', err);
-        process.exit(1);
-    });
+
+//!Database connection with retry logic
+async function connectWithRetry(retries = 10, delay = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await pool.query('SELECT 1');
+            console.log('Sikeres adatbázis kapcsolat!');
+            return;
+        } catch (err) {
+            console.log(`Adatbázis kapcsolat próbálkozás ${i + 1}/${retries}...`);
+            if (i === retries - 1) {
+                console.error('Hiba az adatbázis kapcsolat során:', err);
+                process.exit(1);
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+}
+
+connectWithRetry();
