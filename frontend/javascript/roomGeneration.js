@@ -1,4 +1,26 @@
+<<<<<<< HEAD
 //map functions — server-authoritative, client is renderer only
+=======
+//--- Fetch utility ---
+const postFetch = async (url, data) => {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error('hiba ' + response.statusText + ' (' + response.status + ')');
+        }
+        return await response.json();
+    } catch (error) {
+        throw new Error('hiba: ' + error.message);
+    }
+};
+
+//--- Map rendering functions (server-authoritative, client is renderer only) ---
+>>>>>>> main
 
 // Render the map grid from server-provided data
 function renderMap(mapData, bounds) {
@@ -7,7 +29,10 @@ function renderMap(mapData, bounds) {
 
     const { minX, maxX, minY, maxY, adaptiveSize } = bounds;
 
+<<<<<<< HEAD
     // Get all cells in the grid
+=======
+>>>>>>> main
     let allCells = container.querySelectorAll('.cell');
     allCells.forEach((cell) => {
         const col = parseInt(cell.dataset.col);
@@ -24,11 +49,19 @@ function renderMap(mapData, bounds) {
             cell.dataset.room = 'false';
         }
 
+<<<<<<< HEAD
         // cutOutMap logic — hide cells outside bounds
+=======
+        // cutOutMap — hide cells outside bounds
+>>>>>>> main
         if (col < minX || col > maxX || row < minY || row > maxY) {
             cell.style.display = 'none';
         } else {
             cell.style.width = 23 / adaptiveSize + 'vh';
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
             cell.style.height = 23 / adaptiveSize + 'vh';
         }
     });
@@ -49,13 +82,22 @@ function renderPlayerPosition(pos) {
 // Render doors based on server-provided adjacency data
 function renderDoors(doors, dungeon) {
     const doorTextures = {
+<<<<<<< HEAD
         Laboratory: '../textures/rooms/door_laboratory.png',
+=======
+        Laboratory: '../textures/rooms/door_lab.png',
+>>>>>>> main
         Crypt: '../textures/rooms/door_crypt.png',
         Labyrinth: '../textures/rooms/door_labyrinth.png',
         'Gates of Hell': '../textures/rooms/door_hell.png'
     };
+<<<<<<< HEAD
 
     const doorTexture = doorTextures[dungeon];
+=======
+    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
+
+>>>>>>> main
     const currentCell = document.querySelector('#map .cell[data-current="true"]');
     if (!currentCell) return;
 
@@ -77,7 +119,11 @@ function appendDoor(cell, src, className) {
     cell.appendChild(img);
 }
 
+<<<<<<< HEAD
 // Set up navigation — sends move requests to server
+=======
+// Set up navigation — sends move requests to server instead of checking DOM
+>>>>>>> main
 function navigateToRoom(startX, startY, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
     const dungeon = sessionStorage.getItem('currentDungeon');
@@ -120,6 +166,10 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 renderPlayerPosition(result.position);
                 renderDoors(result.doors, dungeon);
 
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:frontend/javascript/room.js
+>>>>>>> main
                 console.log(`Current position: (${result.position.x}, ${result.position.y})`);
 
                 // Handle room events with server-validated data
@@ -130,14 +180,42 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 }
             } catch (error) {
                 console.log('Move failed:', error.message);
+<<<<<<< HEAD
+=======
+========
+                generateDoors(sessionStorage.getItem('currentDungeon'));
+                roomEventHandler(data, dungeonLevel);
+            } else {
+                console.log('No room available');
+>>>>>>>> main:frontend/javascript/roomGeneration.js
+>>>>>>> main
             }
         });
     });
 }
+<<<<<<< HEAD
 
 // Room event handler — uses server-provided roomType instead of client DOM data
 function roomEventHandler(room, dungeonLevel, serverRoomType) {
     // Use server-provided roomType if available, fall back to DOM (for start room)
+=======
+<<<<<<<< HEAD:frontend/javascript/room.js
+========
+function generateDoors(dungeon) {
+    console.log(dungeon);
+    const doorTextures = {
+        Laboratory: '../textures/rooms/door_laboratory.png',
+        Crypt: '../textures/rooms/door_crypt.png',
+        Labyrinth: '../textures/rooms/door_labyrinth.png',
+        'Gates of Hell': '../textures/rooms/door_hell.png'
+    };
+
+    const doorTexture = doorTextures[dungeon];
+>>>>>>>> main:frontend/javascript/roomGeneration.js
+
+// Room event handler — uses server-provided roomType
+function roomEventHandler(room, dungeonLevel, serverRoomType) {
+>>>>>>> main
     const roomType = serverRoomType || room.dataset.roomType;
 
     if (roomType !== 'out') {
@@ -185,16 +263,32 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                 exitButton.className = 'menuButton';
                 exitButton.textContent = 'Exit the dungeon';
                 document.body.appendChild(exitButton);
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:frontend/javascript/room.js
+>>>>>>> main
                 exitButton.addEventListener('click', async () => {
                     // Server validates exit is from 'out' room
                     try {
                         await postFetch('/api/dungeon/exit', {
                             sessionToken: sessionStorage.getItem('dungeonSessionToken')
                         });
+<<<<<<< HEAD
                         exitDungeon();
                     } catch (error) {
                         console.log('Exit failed:', error.message);
                     }
+=======
+                        isInGame = false;
+                        Menu();
+                    } catch (error) {
+                        console.log('Exit failed:', error.message);
+                    }
+========
+                exitButton.addEventListener('click', () => {
+                    exitDungeon();
+>>>>>>>> main:frontend/javascript/roomGeneration.js
+>>>>>>> main
                 });
 
                 let continueButton = document.createElement('button');
@@ -202,6 +296,10 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                 continueButton.className = 'menuButton';
                 continueButton.textContent = 'Continue dungeon';
                 document.body.appendChild(continueButton);
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:frontend/javascript/room.js
+>>>>>>> main
                 continueButton.addEventListener('click', async () => {
                     // Server generates next level and validates we're at exit
                     try {
@@ -211,7 +309,10 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                         if (result.success) {
                             dungeonLevel = result.dungeonLevel;
                             document.getElementById('level-number').textContent = dungeonLevel;
+<<<<<<< HEAD
                             // Rebuild the level from server data
+=======
+>>>>>>> main
                             newLevelFromServer(
                                 sessionStorage.getItem('currentDungeon'),
                                 result,
@@ -221,6 +322,15 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                     } catch (error) {
                         console.log('Next level failed:', error.message);
                     }
+<<<<<<< HEAD
+=======
+========
+                continueButton.addEventListener('click', () => {
+                    dungeonLevel++;
+                    document.getElementById('level-number').textContent = dungeonLevel;
+                    newLevel(sessionStorage.getItem('currentDungeon'), dungeonLevel, 100);
+>>>>>>>> main:frontend/javascript/roomGeneration.js
+>>>>>>> main
                 });
             });
             break;

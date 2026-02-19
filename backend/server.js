@@ -1,4 +1,6 @@
 //!Module-ok importálása
+require('dotenv').config(); //?npm install dotenv
+const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolat
 const express = require('express'); //?npm install express
 const session = require('express-session'); //?npm install express-session
 const path = require('path');
@@ -7,8 +9,8 @@ const path = require('path');
 const app = express();
 const router = express.Router();
 
-const ip = '127.0.0.1';
-const port = 3000;
+const ip = process.env.SERVER_IP || '127.0.0.1';
+const port = parseInt(process.env.SERVER_PORT) || 3000;
 
 app.use(express.json()); //?Middleware JSON
 app.set('trust proxy', 1); //?Middleware Proxy
@@ -16,7 +18,7 @@ app.set('trust proxy', 1); //?Middleware Proxy
 //!Session beállítása:
 app.use(
     session({
-        secret: 'titkos_kulcs', //?Ezt generálni kell a későbbiekben
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true
     })
@@ -43,6 +45,22 @@ app.listen(port, ip, () => {
     console.log(`Szerver elérhetősége: http://${ip}:${port}`);
 });
 
-//?Szerver futtatása terminalból: npm run dev
-//?Szerver leállítása (MacBook és Windows): Control + C
-//?Terminal ablak tartalmának törlése (MacBook): Command + K
+//!Database connection with retry logic
+async function connectWithRetry(retries = 10, delay = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await pool.query('SELECT 1');
+            console.log('Sikeres adatbázis kapcsolat!');
+            return;
+        } catch (err) {
+            console.log(`Adatbázis kapcsolat próbálkozás ${i + 1}/${retries}...`);
+            if (i === retries - 1) {
+                console.error('Hiba az adatbázis kapcsolat során:', err);
+                process.exit(1);
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+}
+
+connectWithRetry();

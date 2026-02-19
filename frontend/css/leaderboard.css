@@ -1,0 +1,65 @@
+/* Leaderboard styles */
+.leadboardContainer {
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+}
+
+.playerCard {
+    width: 15vh !important;
+    min-height: 30vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.playerName {
+    font-size: 1.6vh;
+    color: white;
+    text-align: center;
+}
+
+.playerScore {
+    font-size: 1.4vh;
+    color: #ddd;
+}
+
+.coinStack {
+    min-height: 20vh;
+    position: relative;
+    width: 4vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.coinStackRow {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+
+    margin-top: 1vh;
+    flex-wrap: nowrap;
+}
+
+.coin {
+    width: 5.5vh;
+    height: 5.5vh;
+    position: absolute;
+    opacity: 0;
+    transform: translateY(-40vh) translateZ(-100px);
+    transition: all 0.15s ease-out;
+}
+
+.coinVisible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.highlightedPlayer {
+    color: yellow !important;
+    text-shadow: 0 0 8px gold;
+}

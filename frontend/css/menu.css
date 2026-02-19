@@ -1,0 +1,150 @@
+/* Menu-specific styles */
+.hellForgeLogo {
+    display: flex;
+    align-self: center;
+    width: 10vw;
+    height: 10vw;
+    margin-left: 1vw;
+}
+
+.mainMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20vh;
+}
+
+.topRow p {
+    margin: 0px;
+}
+
+.volumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    align-self: center;
+    width: 25vw;
+    height: 3vh;
+    background: linear-gradient(90deg, #500000, #b02020, #ff3b3b);
+    border: 0.4vh solid #7a2f02;
+    outline: 0.2vh solid rgb(220, 40, 40);
+    image-rendering: pixelated;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
+    cursor: pointer;
+}
+
+.volumeSlider:hover {
+    box-shadow: 0 0 2vh rgba(255, 60, 60, 0.9);
+    transform: scale(1.03);
+}
+
+.volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    image-rendering: pixelated;
+    width: 2vh;
+    height: 3vh;
+    background-color: #ff5555;
+    border: 0.3vh solid rgb(220, 40, 40);
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background-color: rgb(255, 80, 80);
+    border-color: #7a2f02;
+    box-shadow:
+        -0.3vh 0 0 #000,
+        0.3vh 0 0 #000,
+        0 -0.3vh 0 #000,
+        0 0.3vh 0 #000;
+}
+
+.loginFormContainer .row {
+    margin: 2vh 0;
+    padding: 1vh 0;
+    display: flex;
+    align-items: center;
+}
+
+.loginFormContainer .menuText {
+    margin-right: 2vw;
+    text-align: right;
+    padding-right: 2vw;
+    border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
+}
+
+.loginFormContainer .menuInput {
+    font-size: 1.8vw;
+    padding: 1vh 1vw;
+    background: rgba(220, 40, 40, 0.12);
+    border: 0.2vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
+    width: 20vw;
+    transition: all 0.2s ease;
+}
+
+.loginFormContainer .menuInput:focus {
+    background: rgba(220, 40, 40, 0.25);
+    outline: none;
+    transform: scale(1.02);
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
+}
+
+.loginFormContainer .menuInput:-webkit-autofill,
+.loginFormContainer .menuInput:-webkit-autofill:hover,
+.loginFormContainer .menuInput:-webkit-autofill:focus,
+.loginFormContainer .menuInput:-webkit-autofill:active {
+    -webkit-text-fill-color: rgb(220, 40, 40) !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(30, 5, 5, 0.95) inset !important;
+    box-shadow: 0 0 0px 1000px rgba(30, 5, 5, 0.95) inset !important;
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000 !important;
+    border: 0.2vh solid rgb(220, 40, 40) !important;
+    transition:
+        background-color 5000s ease-in-out 0s,
+        color 5000s ease-in-out 0s;
+    caret-color: rgb(220, 40, 40);
+}
+
+.musicControls {
+    margin-top: 5vh;
+    height: 50vh;
+}
+
+.dungeonImage {
+    width: 15vw;
+    height: auto;
+    border: 0.4vh solid #000000;
+    outline: 0.2vh solid rgb(220, 40, 40);
+}
+
+.exitDungeonMenu {
+    height: 70vh;
+    width: 80vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.exitDungeonDiv {
+    height: 50vh;
+    width: 70vw;
+    border: 0.4vh solid #000000;
+    outline: 0.2vh solid rgb(220, 40, 40);
+    margin-left: 3vw;
+    margin-right: 3vw;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2vh;
+}

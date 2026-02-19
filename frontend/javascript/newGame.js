@@ -3,10 +3,11 @@ function newGame(dungeon) {
     let body = document.getElementsByTagName('body');
     switch (dungeon) {
         case 'Laboratory':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_lab.png')";
+            body[0].style.backgroundImage = "url('../textures/rooms/room_laboratory.png')";
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Crypt':
@@ -14,6 +15,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Labyrinth':
@@ -21,6 +23,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
         case 'Gates of Hell':
@@ -28,6 +31,7 @@ function newGame(dungeon) {
             body[0].style.backgroundSize = '98vw 95vh';
             body[0].style.backgroundRepeat = 'no-repeat';
             body[0].style.backgroundPosition = 'center';
+            body[0].style.backgroundAttachment = 'fixed';
             body[0].style.backgroundColor = '#000000';
             break;
     }
@@ -51,8 +55,7 @@ function newGame(dungeon) {
 function newLevelFromServer(dungeon, serverData, currentHP) {
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
-    body[0].innerHTML = '';
-
+    clearBody();
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
@@ -64,7 +67,7 @@ function newLevelFromServer(dungeon, serverData, currentHP) {
     // 9x9 grid (same DOM structure as before)
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
-        div.setAttribute('class', 'row');
+        div.setAttribute('class', 'row g-0');
         for (let j = 0; j < 9; j++) {
             let cell = document.createElement('div');
             cell.setAttribute('class', 'cell');
