@@ -1,22 +1,4 @@
-//--- Fetch utility ---
-const postFetch = async (url, data) => {
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            throw new Error('hiba ' + response.statusText + ' (' + response.status + ')');
-        }
-        return await response.json();
-    } catch (error) {
-        throw new Error('hiba: ' + error.message);
-    }
-};
-
-//--- Map rendering functions (server-authoritative, client is renderer only) ---
+//map functions — server-authoritative, client is renderer only
 
 // Render the map grid from server-provided data
 function renderMap(mapData, bounds) {
@@ -25,6 +7,7 @@ function renderMap(mapData, bounds) {
 
     const { minX, maxX, minY, maxY, adaptiveSize } = bounds;
 
+    // Get all cells in the grid
     let allCells = container.querySelectorAll('.cell');
     allCells.forEach((cell) => {
         const col = parseInt(cell.dataset.col);
@@ -41,7 +24,7 @@ function renderMap(mapData, bounds) {
             cell.dataset.room = 'false';
         }
 
-        // cutOutMap — hide cells outside bounds
+        // cutOutMap logic — hide cells outside bounds
         if (col < minX || col > maxX || row < minY || row > maxY) {
             cell.style.display = 'none';
         } else {
@@ -66,13 +49,13 @@ function renderPlayerPosition(pos) {
 // Render doors based on server-provided adjacency data
 function renderDoors(doors, dungeon) {
     const doorTextures = {
-        Laboratory: '../textures/rooms/door_lab.png',
+        Laboratory: '../textures/rooms/door_laboratory.png',
         Crypt: '../textures/rooms/door_crypt.png',
         Labyrinth: '../textures/rooms/door_labyrinth.png',
         'Gates of Hell': '../textures/rooms/door_hell.png'
     };
-    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
 
+    const doorTexture = doorTextures[dungeon];
     const currentCell = document.querySelector('#map .cell[data-current="true"]');
     if (!currentCell) return;
 
@@ -94,7 +77,7 @@ function appendDoor(cell, src, className) {
     cell.appendChild(img);
 }
 
-// Set up navigation — sends move requests to server instead of checking DOM
+// Set up navigation — sends move requests to server
 function navigateToRoom(startX, startY, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
     const dungeon = sessionStorage.getItem('currentDungeon');
@@ -152,8 +135,9 @@ function navigateToRoom(startX, startY, dungeonLevel) {
     });
 }
 
-// Room event handler — uses server-provided roomType
+// Room event handler — uses server-provided roomType instead of client DOM data
 function roomEventHandler(room, dungeonLevel, serverRoomType) {
+    // Use server-provided roomType if available, fall back to DOM (for start room)
     const roomType = serverRoomType || room.dataset.roomType;
 
     if (roomType !== 'out') {
@@ -207,8 +191,7 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                         await postFetch('/api/dungeon/exit', {
                             sessionToken: sessionStorage.getItem('dungeonSessionToken')
                         });
-                        isInGame = false;
-                        Menu();
+                        exitDungeon();
                     } catch (error) {
                         console.log('Exit failed:', error.message);
                     }
@@ -228,6 +211,7 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                         if (result.success) {
                             dungeonLevel = result.dungeonLevel;
                             document.getElementById('level-number').textContent = dungeonLevel;
+                            // Rebuild the level from server data
                             newLevelFromServer(
                                 sessionStorage.getItem('currentDungeon'),
                                 result,
@@ -240,127 +224,5 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
                 });
             });
             break;
-    }
-}
-
-function createUI(dungeonLevel) {
-    const body = document.body;
-
-    const ui = document.createElement('div');
-    ui.id = 'ui';
-    body.appendChild(ui);
-
-    createTopLeft(ui, dungeonLevel);
-    createTopRight(ui);
-    createBottomLeft(ui);
-    createBottomRight(ui);
-}
-function createTopLeft(parent, dungeonLevel) {
-    const box = document.createElement('div');
-    box.className = 'ui-box top-left';
-    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
-    box.innerHTML = `
-        <div id="level-number" class="level-number">${dungeonLevel}</div>
-        <div class="level-text">Level</div>
-    `;
-
-    parent.appendChild(box);
-}
-function createTopRight(parent) {
-    const box = document.createElement('div');
-    box.className = 'ui-box top-right';
-    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
-    box.innerHTML = `
-        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory id='openInventory">
-        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings id='openSettings">
-    `;
-    /*
-    document.getElementById('openInventory').addEventListener('click', function () {
-        openInventory();
-    });
-
-    document.getElementById('openSettings').addEventListener('click', function () {
-        openSettings();
-    });*/
-
-    parent.appendChild(box);
-}
-
-function openInventory() {
-    //TODO
-}
-
-function openSettings() {
-    //TODO
-}
-
-function createBottomRight(parent) {
-    const box = document.createElement('div');
-    box.className = 'ui-box bottom-right';
-
-    parent.appendChild(box);
-}
-function createBottomLeft(parent) {
-    const box = document.createElement('div');
-    box.setAttribute('class', 'ui-box bottom-left');
-    box.setAttribute('id', 'hpBox');
-
-    /* felső sor */
-    const hpTop = document.createElement('div');
-    hpTop.setAttribute('class', 'hp-top');
-
-    const hpLabel = document.createElement('div');
-    hpLabel.setAttribute('class', 'hp-label');
-    hpLabel.textContent = 'HP';
-
-    const hpText = document.createElement('div');
-    hpText.setAttribute('class', 'hp-text');
-
-    const hpValue = document.createElement('span');
-    hpValue.setAttribute('id', 'hpValue');
-    hpValue.textContent = '100';
-
-    const hpMaxText = document.createTextNode(' / 100');
-
-    hpText.appendChild(hpValue);
-    hpText.appendChild(hpMaxText);
-
-    hpTop.appendChild(hpLabel);
-    hpTop.appendChild(hpText);
-
-    /* HP bar */
-    const hpBar = document.createElement('div');
-    hpBar.setAttribute('class', 'hp-bar');
-
-    const hpFill = document.createElement('div');
-    hpFill.setAttribute('class', 'hp-fill');
-    hpFill.setAttribute('id', 'hpFill');
-
-    hpBar.appendChild(hpFill);
-
-    /* összerakás */
-    box.appendChild(hpTop);
-    box.appendChild(hpBar);
-
-    parent.appendChild(box);
-}
-function setHP(currentHP) {
-    const maxHP = 100;
-
-    const hpFill = document.getElementById('hpFill');
-    const hpValue = document.getElementById('hpValue');
-    // Százalékos HP számítás nem lehet kisebb 0-nál és nagyobb mint a maxHP
-    const percent = Math.max(0, Math.min(currentHP, maxHP));
-
-    hpFill.style.width = percent + '%';
-    hpValue.textContent = percent;
-
-    // Színváltás alacsony HP-nál
-    if (percent <= 30) {
-        hpFill.style.background = 'linear-gradient(to right, #ff3333, #ff7777)';
-    } else if (percent <= 50) {
-        hpFill.style.background = 'linear-gradient(to right, #ffaa00, #ffdd55)';
-    } else {
-        hpFill.style.background = 'linear-gradient(to right, #00ff66, #55ff99)';
     }
 }

@@ -1,4 +1,5 @@
 function newGame(dungeon) {
+    sessionStorage.setItem('currentDungeon', dungeon);
     let body = document.getElementsByTagName('body');
     switch (dungeon) {
         case 'Laboratory':
@@ -30,15 +31,28 @@ function newGame(dungeon) {
             body[0].style.backgroundColor = '#000000';
             break;
     }
-    let dungeonLevel = 1;
-    let currentHP = 100;
-    newLevel(dungeon, dungeonLevel, currentHP);
+
+    // Request dungeon generation from server instead of client-side
+    postFetch('/api/dungeon/start', { dungeonName: dungeon })
+        .then((data) => {
+            if (!data.success) {
+                console.log('Failed to start dungeon:', data.message);
+                return;
+            }
+            sessionStorage.setItem('dungeonSessionToken', data.sessionToken);
+            newLevelFromServer(dungeon, data, data.currentHP);
+        })
+        .catch((error) => {
+            console.log('Dungeon start failed:', error.message);
+        });
 }
-function newLevel(dungeon, dungeonLevel, currentHP) {
-    // Clear body
+
+// Build the level UI from server-provided map data (replaces old newLevel)
+function newLevelFromServer(dungeon, serverData, currentHP) {
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
     body[0].innerHTML = '';
+
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
@@ -47,7 +61,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     container.setAttribute('id', 'map');
     mapContainer.appendChild(container);
 
-    // 9x9 grid
+    // 9x9 grid (same DOM structure as before)
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
         div.setAttribute('class', 'row');
@@ -56,104 +70,24 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
             cell.setAttribute('class', 'cell');
             cell.dataset.row = i + 1;
             cell.dataset.col = j + 1;
-            cell.dataset.room = false;
-            cell.dataset.visited = false;
+            cell.dataset.room = 'false';
+            cell.dataset.visited = 'false';
 
             div.appendChild(cell);
         }
         container.appendChild(div);
     }
 
-    // start
     isInGame = true;
-    let startX = 5;
-    let startY = 5;
-    let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
-    start.dataset.current = 'true';
-    start.dataset.room = true;
-    start.dataset.visited = true;
-    start.dataset.roomType = 'start';
 
-    //generate room lenght
-    let roomsToGenerate = Math.floor(Math.random() * 3 + 1) + dungeonLevel + 4;
-    console.log('Rooms to generate:', roomsToGenerate);
+    // Render map layout + player position from server data
+    renderMap(serverData.map, serverData.bounds);
+    renderPlayerPosition(serverData.position);
 
-    // active rooms list
-    let activeRooms = [{ x: startX, y: startY }];
+    const dungeonLevel = serverData.dungeonLevel;
 
-    while (activeRooms.length < roomsToGenerate) {
-        // choose random active room
-        let current = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-
-        // 4 directions
-        let directions = [
-            { x: current.x - 1, y: current.y },
-            { x: current.x + 1, y: current.y },
-            { x: current.x, y: current.y - 1 },
-            { x: current.x, y: current.y + 1 }
-        ];
-
-        // random direction
-        let dir = directions[Math.floor(Math.random() * directions.length)];
-        //
-        if (setCell(dir.x, dir.y)) {
-            activeRooms.push({ x: dir.x, y: dir.y });
-        }
-    }
-
-    // active room cells to array
-    let roomCells = activeRooms.map((r) =>
-        document.querySelector(`#map .cell[data-row="${r.y}"][data-col="${r.x}"]`)
-    );
-
-    // start room cut out
-    roomCells = roomCells.filter((c) => c.dataset.roomType !== 'start');
-
-    // furthest room from start to outroom
-    let maxDistance = 0;
-    let outMax = roomCells[0];
-    for (let i = 0; i < roomCells.length; i++) {
-        // Manhattan distance calculation
-        let distance =
-            Math.abs(roomCells[i].dataset.col - startX) +
-            Math.abs(roomCells[i].dataset.row - startY);
-
-        if (distance > maxDistance) {
-            maxDistance = distance;
-            outMax = roomCells[i];
-        }
-    }
-    // cut out outroom
-    let outRoom = outMax;
-    roomCells = roomCells.filter((c) => c !== outRoom);
-    outRoom.dataset.roomType = 'out';
-
-    // 1 shop
-    let shopRoom = roomCells.pop();
-    shopRoom.dataset.roomType = 'shop';
-
-    // other randomtypes
-    let randomTypes = ['combat', 'combat', 'combat', 'combat', 'event', 'loot'];
-
-    roomCells.forEach((cell) => {
-        cell.dataset.roomType = randomTypes[Math.floor(Math.random() * randomTypes.length)];
-    });
-
-    navigateToRoom(startX, startY, dungeonLevel);
-    cutOutMap();
+    navigateToRoom(serverData.position.x, serverData.position.y, dungeonLevel);
     createUI(dungeonLevel);
-    generateDoors(dungeon);
+    renderDoors(serverData.doors, dungeon);
     setHP(currentHP);
-}
-// set cell as room
-function setCell(x, y) {
-    if (x > 0 && x < 10 && y > 0 && y < 10) {
-        let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-        if (cell && cell.dataset.room === 'false' && Math.random() < 0.4) {
-            cell.dataset.room = 'true';
-
-            return true;
-        }
-    }
-    return false;
 }
