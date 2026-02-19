@@ -1,49 +1,58 @@
+// Dungeon background textures — maps dungeon name to its room background image
+const DUNGEON_BACKGROUNDS = {
+    Laboratory: "url('../textures/rooms/room_laboratory.png')",
+    Crypt: "url('../textures/rooms/room_crypt.png')",
+    Labyrinth: "url('../textures/rooms/room_labyrinth.png')",
+    'Gates of Hell': "url('../textures/rooms/room_hell.png')"
+};
+
+// Start a new dungeon run — sets the background and asks the server to generate the map.
 function newGame(dungeon) {
-    sessionStorage.setItem('currentDungeon', dungeon);
-    let body = document.getElementsByTagName('body');
-    switch (dungeon) {
-        case 'Laboratory':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_laboratory.png')";
-            body[0].style.backgroundSize = '98vw 95vh';
-            body[0].style.backgroundRepeat = 'no-repeat';
-            body[0].style.backgroundPosition = 'center';
-            body[0].style.backgroundAttachment = 'fixed';
-            body[0].style.backgroundColor = '#000000';
-            break;
-        case 'Crypt':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_crypt.png')";
-            body[0].style.backgroundSize = '98vw 95vh';
-            body[0].style.backgroundRepeat = 'no-repeat';
-            body[0].style.backgroundPosition = 'center';
-            body[0].style.backgroundAttachment = 'fixed';
-            body[0].style.backgroundColor = '#000000';
-            break;
-        case 'Labyrinth':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_labyrinth.png')";
-            body[0].style.backgroundSize = '98vw 95vh';
-            body[0].style.backgroundRepeat = 'no-repeat';
-            body[0].style.backgroundPosition = 'center';
-            body[0].style.backgroundAttachment = 'fixed';
-            body[0].style.backgroundColor = '#000000';
-            break;
-        case 'Gates of Hell':
-            body[0].style.backgroundImage = "url('../textures/rooms/room_hell.png')";
-            body[0].style.backgroundSize = '98vw 95vh';
-            body[0].style.backgroundRepeat = 'no-repeat';
-            body[0].style.backgroundPosition = 'center';
-            body[0].style.backgroundAttachment = 'fixed';
-            body[0].style.backgroundColor = '#000000';
-            break;
+    // Block guests — server would reject anyway, but we show a message and skip the bg change
+    if (!isLoggedIn) {
+        showGuestError();
+        return;
     }
-    let dungeonLevel = 1;
-    let currentHP = 100;
-    newLevel(dungeon, dungeonLevel, currentHP);
+
+    sessionStorage.setItem('currentDungeon', dungeon);
+
+    // Apply dungeon-specific background
+    const bg = DUNGEON_BACKGROUNDS[dungeon];
+    if (bg) {
+        Object.assign(document.body.style, {
+            backgroundImage: bg,
+            backgroundSize: '98vw 95vh',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed',
+            backgroundColor: '#000000'
+        });
+    }
+
+    // Ask the server to generate the dungeon map — all game state lives server-side.
+    // The server returns: map layout, player position, door info, bounds, and a session token.
+    postFetch('/api/dungeon/start', { dungeonName: dungeon })
+        .then((data) => {
+            if (!data.success) {
+                console.log('Failed to start dungeon:', data.message);
+                return;
+            }
+            sessionStorage.setItem('dungeonSessionToken', data.sessionToken);
+            newLevelFromServer(dungeon, data, data.currentHP);
+        })
+        .catch((error) => {
+            console.log('Dungeon start failed:', error.message);
+        });
 }
-function newLevel(dungeon, dungeonLevel, currentHP) {
-    // Clear body
+
+// Build the level UI from server-provided data.
+// Creates the 9×9 DOM grid, then hands off to rendering functions in roomGeneration.js
+// which stamp the server's map/position/doors onto the grid cells.
+function newLevelFromServer(dungeon, serverData, currentHP) {
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
     clearBody();
+
     let mapContainer = document.createElement('div');
     mapContainer.setAttribute('id', 'mapContainer');
     mapContainer.setAttribute('class', 'mapContainer');
@@ -52,7 +61,7 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
     container.setAttribute('id', 'map');
     mapContainer.appendChild(container);
 
-    // 9x9 grid
+    // Build a 9×9 grid of empty cells — renderMap() will mark which ones are actual rooms
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
         div.setAttribute('class', 'row g-0');
@@ -61,111 +70,29 @@ function newLevel(dungeon, dungeonLevel, currentHP) {
             cell.setAttribute('class', 'cell');
             cell.dataset.row = i + 1;
             cell.dataset.col = j + 1;
-            cell.dataset.room = false;
-            cell.dataset.visited = false;
+            cell.dataset.room = 'false';
+            cell.dataset.visited = 'false';
 
             div.appendChild(cell);
         }
         container.appendChild(div);
     }
 
-    // start
     isInGame = true;
-    let startX = 5;
-    let startY = 5;
-    let start = document.querySelector(`#map .cell[data-row="${startY}"][data-col="${startX}"]`);
-    start.dataset.current = 'true';
-    start.dataset.room = true;
-    start.dataset.visited = true;
-    start.dataset.roomType = 'start';
 
-    //generate room lenght
-    let roomsToGenerate = Math.floor(Math.random() * 3 + 1 + dungeonLevel / 2 + 4);
+    // Apply server state to the DOM — these functions live in roomGeneration.js
+    renderMap(serverData.map, serverData.bounds);
+    renderPlayerPosition(serverData.position);
 
-    roomsToGenerate = Math.min(roomsToGenerate, 20);
+    const dungeonLevel = serverData.dungeonLevel;
 
-    console.log('Rooms to generate:', roomsToGenerate);
-
-    // active rooms list
-    let activeRooms = [{ x: startX, y: startY }];
-
-    while (activeRooms.length < roomsToGenerate) {
-        // choose random active room
-        let current = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-
-        // 4 directions
-        let directions = [
-            { x: current.x - 1, y: current.y },
-            { x: current.x + 1, y: current.y },
-            { x: current.x, y: current.y - 1 },
-            { x: current.x, y: current.y + 1 }
-        ];
-
-        // random direction
-        let dir = directions[Math.floor(Math.random() * directions.length)];
-        //
-        if (setCell(dir.x, dir.y)) {
-            activeRooms.push({ x: dir.x, y: dir.y });
-        }
-    }
-
-    // active room cells to array
-    let roomCells = activeRooms.map((r) =>
-        document.querySelector(`#map .cell[data-row="${r.y}"][data-col="${r.x}"]`)
-    );
-
-    // start room cut out
-    roomCells = roomCells.filter((c) => c.dataset.roomType !== 'start');
-
-    // furthest room from start to outroom
-    let maxDistance = 0;
-    let outMax = roomCells[0];
-    for (let i = 0; i < roomCells.length; i++) {
-        // Manhattan distance calculation
-        let distance =
-            Math.abs(roomCells[i].dataset.col - startX) +
-            Math.abs(roomCells[i].dataset.row - startY);
-
-        if (distance > maxDistance) {
-            maxDistance = distance;
-            outMax = roomCells[i];
-        }
-    }
-    // cut out outroom
-    let outRoom = outMax;
-    roomCells = roomCells.filter((c) => c !== outRoom);
-    outRoom.dataset.roomType = 'out';
-
-    // 1 shop
-    let shopRoom = roomCells.pop();
-    shopRoom.dataset.roomType = 'shop';
-
-    // other randomtypes
-    let randomTypes = ['combat', 'combat', 'combat', 'combat', 'event', 'loot'];
-
-    roomCells.forEach((cell) => {
-        cell.dataset.roomType = randomTypes[Math.floor(Math.random() * randomTypes.length)];
-    });
-
-    navigateToRoom(startX, startY, dungeonLevel);
-    cutOutMap();
+    navigateToRoom(serverData.position.x, serverData.position.y, dungeonLevel);
     createUI(dungeonLevel);
-    generateDoors(dungeon);
+    renderDoors(serverData.doors, dungeon);
     setHP(currentHP);
 }
-// set cell as room
-function setCell(x, y) {
-    if (x > 0 && x < 10 && y > 0 && y < 10) {
-        let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-        if (cell && cell.dataset.room === 'false' && Math.random() < 0.4) {
-            cell.dataset.room = 'true';
 
-            return true;
-        }
-    }
-    return false;
-}
-
+// Build the 4-corner UI overlay (level indicator, buttons, HP bar)
 function createUI(dungeonLevel) {
     const body = document.body;
 
@@ -204,27 +131,22 @@ function createTopLeft(parent, dungeonLevel) {
 
     parent.appendChild(box);
 }
+// Top-right corner: settings, inventory, abandon buttons
 function createTopRight(parent) {
     const box = document.createElement('div');
     box.className = 'ui-box top-right';
     box.innerHTML = `
-        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Inventory" id="openSettings">
-        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Settings" id="openInventory">
+        <img src="../textures/UI/settings-UI.png" class="ui-icon" title="Settings" id="openSettings">
+        <img src="../textures/UI/inventory-UI.png" class="ui-icon" title="Inventory" id="openInventory">
         <img src="../textures/UI/abandon.png" class="ui-icon" title="Abandon" id="abandonDungeon">
     `;
 
     parent.appendChild(box);
 
-    document.getElementById('openInventory').addEventListener('click', () => {
-        openInventory();
-    });
-    document.getElementById('openSettings').addEventListener('click', () => {
-        openSettings();
-    });
-
-    document.getElementById('abandonDungeon').addEventListener('click', () => {
-        abandonDungeon();
-    });
+    // openInventory, openSettings, abandonDungeon are defined in gameOverlays.js
+    document.getElementById('openInventory').addEventListener('click', openInventory);
+    document.getElementById('openSettings').addEventListener('click', openSettings);
+    document.getElementById('abandonDungeon').addEventListener('click', abandonDungeon);
 }
 
 function createBottomRight(parent) {
@@ -277,6 +199,7 @@ function createBottomLeft(parent) {
 
     parent.appendChild(box);
 }
+// Update the HP bar width and colour based on current HP
 function setHP(currentHP) {
     const maxHP = 100;
 
@@ -296,4 +219,25 @@ function setHP(currentHP) {
     } else {
         hpFill.style.background = 'linear-gradient(to right, #00ff66, #55ff99)';
     }
+}
+
+// Show an overlay telling the guest they need to log in to play.
+// Auto-dismisses after 3 seconds or on click.
+function showGuestError() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText =
+        'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:10000;flex-direction:column;gap:2vh;';
+
+    const msg = document.createElement('p');
+    msg.textContent = 'You must be logged in to play!';
+    msg.style.cssText =
+        'color:rgb(220,40,40);font-size:3vw;text-align:center;font-family:inherit;text-shadow:-0.15vw -0.15vw 0 #000,0.15vw -0.15vw 0 #000,-0.15vw 0.15vw 0 #000,0.15vw 0.15vw 0 #000;';
+
+    overlay.appendChild(msg);
+    document.body.appendChild(overlay);
+
+    // Dismiss on click or after 3 seconds
+    const dismiss = () => overlay.remove();
+    overlay.addEventListener('click', dismiss);
+    setTimeout(dismiss, 3000);
 }

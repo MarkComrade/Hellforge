@@ -72,9 +72,19 @@ function openSettings() {
     body.appendChild(settingsOverlay);
 }
 
-function abandonDungeon() {
-    if (confirm('Are you sure you want to abandon the dungeon? Your progress will not be saved.')) {
-        let abandoned = true;
-        exitDungeon(abandoned);
+// Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
+async function abandonDungeon() {
+    if (
+        !confirm('Are you sure you want to abandon the dungeon? Your progress will not be saved.')
+    ) {
+        return;
     }
+    try {
+        await postFetch('/api/dungeon/abandon', {
+            sessionToken: sessionStorage.getItem('dungeonSessionToken')
+        });
+    } catch (error) {
+        console.log('Abandon failed:', error.message);
+    }
+    exitDungeon(true);
 }
