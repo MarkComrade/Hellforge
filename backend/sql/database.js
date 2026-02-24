@@ -59,7 +59,7 @@ async function registerUser(username, password) {
 
         return { success: true, userId: result.insertId, message: 'Sikeres regisztráció' };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a regisztráció során' };
+        return { success: false, message: error.message || 'Hiba történt a regisztráció során' };
     }
 }
 

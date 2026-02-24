@@ -14,10 +14,12 @@ const lastMoveTime = new Map(); // sessionId → timestamp
 // Express calls them in order: requireSession → requireDungeon → route handler.
 // If any middleware calls res.status().json() it stops the chain (the route never runs).
 
-// Blocks unauthenticated users — checks if the login flow set session.userName
-function requireSession(req, res, next) {
-    if (!req.session || !req.session.userName) {
-        return res.status(401).json({ success: false, message: 'Not logged in' });
+// Like requireSession but allows guests — if no session identity exists,
+// automatically assign a guest identity so unauthenticated users can play.
+function allowGuest(req, res, next) {
+    if (!req.session.userName) {
+        req.session.userName = 'Guest';
+        req.session.isLoggedIn = false;
     }
     next();
 }
@@ -51,7 +53,7 @@ function saveDungeon(req) {
 // ───── Endpoints ─────
 
 // Creates a fresh dungeon — generates the map server-side and sends it to the client
-router.post('/start', requireSession, (req, res) => {
+router.post('/start', allowGuest, (req, res) => {
     try {
         const { dungeonName } = req.body;
         // SECURITY: only allow known dungeon names — prevents injection of arbitrary strings
@@ -73,7 +75,7 @@ router.post('/start', requireSession, (req, res) => {
 
 // Move the player one cell — dx/dy must be a cardinal direction (e.g. dx=1,dy=0 = right)
 // movePlayer() returns null if the target cell doesn't exist (wall), preventing cheating
-router.post('/move', requireSession, requireDungeon, (req, res) => {
+router.post('/move', allowGuest, requireDungeon, (req, res) => {
     try {
         const { dx, dy } = req.body;
         if (dx === undefined || dy === undefined) {
@@ -112,7 +114,7 @@ router.post('/move', requireSession, requireDungeon, (req, res) => {
 
 // Advance to the next dungeon level — only allowed when standing on the exit ('out') room.
 // This is the anti-cheat gate: clients can't skip levels because the server checks position.
-router.post('/next-level', requireSession, requireDungeon, (req, res) => {
+router.post('/next-level', allowGuest, requireDungeon, (req, res) => {
     try {
         const dungeon = req.dungeon;
         // Build the map key from current coords to look up what room the player is in
@@ -142,7 +144,7 @@ router.post('/next-level', requireSession, requireDungeon, (req, res) => {
 });
 
 // Leave the dungeon — only allowed from the exit room
-router.post('/exit', requireSession, requireDungeon, (req, res) => {
+router.post('/exit', allowGuest, requireDungeon, (req, res) => {
     try {
         const dungeon = req.dungeon;
         const currentKey = `${dungeon.playerX},${dungeon.playerY}`;
@@ -162,7 +164,7 @@ router.post('/exit', requireSession, requireDungeon, (req, res) => {
 });
 
 // Abandon — quit the dungeon from any room (no exit-room check)
-router.post('/abandon', requireSession, requireDungeon, (req, res) => {
+router.post('/abandon', allowGuest, requireDungeon, (req, res) => {
     try {
         delete req.session.dungeonData;
         res.json({ success: true, message: 'Dungeon abandoned' });
@@ -173,7 +175,7 @@ router.post('/abandon', requireSession, requireDungeon, (req, res) => {
 });
 
 // Returns the full dungeon state — useful for reconnecting or debugging
-router.get('/state', requireSession, requireDungeon, (req, res) => {
+router.get('/state', allowGuest, requireDungeon, (req, res) => {
     try {
         res.json(req.dungeon.getClientState());
     } catch (error) {

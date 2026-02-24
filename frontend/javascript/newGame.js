@@ -9,10 +9,6 @@ const DUNGEON_BACKGROUNDS = {
 // Start a new dungeon run — sets the background and asks the server to generate the map.
 function newGame(dungeon) {
     // Block guests — server would reject anyway, but we show a message and skip the bg change
-    if (!isLoggedIn) {
-        showGuestError();
-        return;
-    }
 
     sessionStorage.setItem('currentDungeon', dungeon);
 
@@ -223,6 +219,8 @@ function setHP(currentHP) {
 
 // Show an overlay telling the guest they need to log in to play.
 // Auto-dismisses after 3 seconds or on click.
+
+/*
 function showGuestError() {
     const overlay = document.createElement('div');
     overlay.style.cssText =
@@ -241,3 +239,4 @@ function showGuestError() {
     overlay.addEventListener('click', dismiss);
     setTimeout(dismiss, 3000);
 }
+*/
