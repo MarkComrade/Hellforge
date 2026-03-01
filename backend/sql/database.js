@@ -95,6 +95,47 @@ async function getUserRankAndScore(username) {
     const [rows] = await pool.execute(query, [username]);
     return rows[0];
 }
+async function getAllUsers() {
+    const query = 'SELECT userId, name FROM user ORDER BY userId ASC';
+    const [rows] = await pool.execute(query);
+    return rows;
+}
+
+async function deleteUser(username) {
+    const query = 'DELETE FROM user WHERE name = ?';
+    const [result] = await pool.execute(query, [username]);
+    return result;
+}
+
+async function getUserInventory(userId) {
+    const query = `
+        SELECT 
+            u.userId,
+            u.name as username,
+            pi.gold,
+            h.name as helmet_name,
+            h.img_path as helmet_img,
+            h.tier as helmet_tier,
+            a.name as armor_name,
+            a.img_path as armor_img,
+            a.tier as armor_tier,
+            m.name as melee_name,
+            m.img_path as melee_img,
+            m.tier as melee_tier,
+            r.name as ranged_name,
+            r.img_path as ranged_img,
+            r.tier as ranged_tier
+        FROM user u
+        JOIN player_inventory pi ON u.userId = pi.playerId
+        LEFT JOIN armors h ON pi.helmet = h.armorId
+        LEFT JOIN armors a ON pi.armor = a.armorId
+        LEFT JOIN weapons m ON pi.melee = m.weaponId
+        LEFT JOIN weapons r ON pi.ranged = r.weaponId
+        WHERE u.userId = ?
+    `;
+    const [rows] = await pool.execute(query, [userId]);
+    return rows[0];
+}
 
 //!Export
 module.exports = {
@@ -103,5 +144,8 @@ module.exports = {
     getUserRankAndScore,
     loginUser,
     registerUser,
-    loginAdmin
+    loginAdmin,
+    getAllUsers,
+    deleteUser,
+    getUserInventory
 };

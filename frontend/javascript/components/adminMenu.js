@@ -118,7 +118,161 @@ async function adminTools() {
         document.querySelectorAll('.adminToolsButtons')[i].appendChild(button);
         i++;
     });
+    document.getElementById('manageUsersButton').addEventListener('click', async function () {
+        document.querySelector('body').innerHTML = '';
+        generateBootStrapGrid(1, 1, 12, 'adminToolsTitle');
+        let menuTitle = document.createElement('h1');
+        menuTitle.setAttribute('class', 'menuTitle adminMenu');
+        menuTitle.textContent = 'User Management';
+        document.querySelector('.adminToolsTitle').appendChild(menuTitle);
+
+        try {
+            const userArray = await getMethodFetch('/api/adminActions/getAllUsers');
+
+            // Create custom grid with col-4 and col-8
+            const containerFluid = document.createElement('div');
+            containerFluid.setAttribute('class', 'container-fluid');
+
+            const rowDiv = document.createElement('div');
+            rowDiv.setAttribute('class', 'row');
+            containerFluid.appendChild(rowDiv);
+
+            // First column (col-4) for user select
+            const col4 = document.createElement('div');
+            col4.setAttribute(
+                'class',
+                'col-sm-4 col-md-4 d-flex justify-content-center userSelectContainer'
+            );
+            rowDiv.appendChild(col4);
+
+            // Second column (col-8) for inventory
+            const col8 = document.createElement('div');
+            col8.setAttribute(
+                'class',
+                'col-sm-8 col-md-8 d-flex justify-content-center inventoryContainer'
+            );
+            rowDiv.appendChild(col8);
+
+            document.body.appendChild(containerFluid);
+
+            const selectContainer = document.querySelector('.userSelectContainer');
+
+            // Create label
+            const label = document.createElement('label');
+            label.setAttribute('class', 'menuText');
+            label.textContent = 'Select User:';
+            label.setAttribute('for', 'userSelect');
+            selectContainer.appendChild(label);
+
+            // Create select element
+            const select = document.createElement('select');
+            select.setAttribute('class', 'menuSelect');
+            select.setAttribute('id', 'userSelect');
+            select.setAttribute('size', '10'); // Show 10 users at once
+
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '- Choose a user -';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+
+            // Populate select with users from array
+            userArray.results.forEach((user) => {
+                const option = document.createElement('option');
+                option.value = user.userId;
+                option.textContent = user.name || `User ${user.userId}`;
+                select.appendChild(option);
+            });
+
+            selectContainer.appendChild(select);
+
+            // Add event listener for selection
+            select.addEventListener('change', async function () {
+                const selectedUserId = this.value;
+                console.log('Selected user:', selectedUserId);
+
+                // Display inventory
+                await displayUserInventory(selectedUserId);
+            });
+        } catch (error) {
+            console.error('Session check hiba:', error.message);
+        }
+
+        generateBackToAdminTools();
+    });
 
     generateBackToMenu();
     //TODO: Implementation of admin tools
+}
+
+async function displayUserInventory(userId) {
+    const inventoryContainer = document.querySelector('.inventoryContainer');
+    inventoryContainer.innerHTML = '';
+
+    try {
+        const response = await getMethodFetch(`/api/adminActions/getUserInventory/${userId}`);
+        const inventory = response.inventory;
+
+        // Create inventory title
+        const title = document.createElement('h2');
+        title.setAttribute('class', 'menuText');
+        title.textContent = `${inventory.username}'s Inventory`;
+        inventoryContainer.appendChild(title);
+
+        // Create inventory display container
+        const inventoryDisplay = document.createElement('div');
+        inventoryDisplay.setAttribute('class', 'inventoryDisplay');
+
+        // Gold display
+        const goldDiv = document.createElement('div');
+        goldDiv.setAttribute('class', 'inventoryItem');
+        goldDiv.innerHTML = `
+            <span class="menuText">Gold:</span>
+            <span class="menuText inventoryValue">${inventory.gold}</span>
+        `;
+        inventoryDisplay.appendChild(goldDiv);
+
+        // Helmet
+        const helmetDiv = document.createElement('div');
+        helmetDiv.setAttribute('class', 'inventoryItem');
+        helmetDiv.innerHTML = `
+            <span class="menuText">Helmet:</span>
+            <span class="menuText inventoryValue">${inventory.helmet_name} (Tier ${inventory.helmet_tier})</span>
+        `;
+        inventoryDisplay.appendChild(helmetDiv);
+
+        // Armor
+        const armorDiv = document.createElement('div');
+        armorDiv.setAttribute('class', 'inventoryItem');
+        armorDiv.innerHTML = `
+            <span class="menuText">Armor:</span>
+            <span class="menuText inventoryValue">${inventory.armor_name} (Tier ${inventory.armor_tier})</span>
+        `;
+        inventoryDisplay.appendChild(armorDiv);
+
+        // Melee
+        const meleeDiv = document.createElement('div');
+        meleeDiv.setAttribute('class', 'inventoryItem');
+        meleeDiv.innerHTML = `
+            <span class="menuText">Melee:</span>
+            <span class="menuText inventoryValue">${inventory.melee_name} (Tier ${inventory.melee_tier})</span>
+        `;
+        inventoryDisplay.appendChild(meleeDiv);
+
+        // Ranged
+        const rangedDiv = document.createElement('div');
+        rangedDiv.setAttribute('class', 'inventoryItem');
+        rangedDiv.innerHTML = `
+            <span class="menuText">Ranged:</span>
+            <span class="menuText inventoryValue">${inventory.ranged_name} (Tier ${inventory.ranged_tier})</span>
+        `;
+        inventoryDisplay.appendChild(rangedDiv);
+
+        inventoryContainer.appendChild(inventoryDisplay);
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        inventoryContainer.innerHTML = '<p class="menuText">Error loading inventory</p>';
+    }
 }
