@@ -30,3 +30,20 @@ const postFetch = async (url, data) => {
         throw new Error('hiba: ' + error.message);
     }
 };
+
+const deleteFetch = async (url, data) => {
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error('hiba' + response.statusText + '(' + response.status + ')');
+        }
+        return await response.json();
+    } catch (error) {
+        throw new Error('hiba: ' + error.message);
+    }
+};

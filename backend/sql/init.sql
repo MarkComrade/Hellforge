@@ -17,6 +17,7 @@ CREATE TABLE `player_inventory`(
     `melee` INT UNSIGNED NOT NULL DEFAULT 1,
     `ranged` INT UNSIGNED NOT NULL DEFAULT 2
 );
+
 CREATE TABLE `armors`(
     `armorId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `type` VARCHAR(255) NOT NULL,
@@ -34,6 +35,25 @@ CREATE TABLE `weapons`(
     `tier` INT NOT NULL,
     `price` INT NOT NULL,
     `attack_multiplier` DOUBLE NOT NULL
+);
+
+CREATE TABLE `misc_items`(
+    `itemId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `img_path` VARCHAR(255) NOT NULL,
+    `value` INT NOT NULL
+);
+
+CREATE TABLE `player_stash`(
+    `stashId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `playerId` INT UNSIGNED NOT NULL,
+    `armor_id` INT UNSIGNED DEFAULT NULL,
+    `weapon_id` INT UNSIGNED DEFAULT NULL,
+    `misc_item_id` INT UNSIGNED DEFAULT NULL,
+    CONSTRAINT `stash_player_foreign` FOREIGN KEY(`playerId`) REFERENCES `user`(`userId`),
+    CONSTRAINT `stash_armor_foreign` FOREIGN KEY(`armor_id`) REFERENCES `armors`(`armorId`),
+    CONSTRAINT `stash_weapon_foreign` FOREIGN KEY(`weapon_id`) REFERENCES `weapons`(`weaponId`),
+    CONSTRAINT `stash_misc_item_foreign` FOREIGN KEY(`misc_item_id`) REFERENCES `misc_items`(`itemId`)
 );
 
 CREATE TABLE `admin`(
@@ -104,4 +124,14 @@ INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, 
     (9, 650, 5, 6, 7, 8),
     (10, 950, 7, 8, 9, 10);
 
+
 INSERT INTO `admin` (`name`, `password`) VALUES ('admin1', 'adminpass1'), ('admin2', 'adminpass2');
+
+INSERT INTO `player_stash` (`playerId`, `armor_id`, `weapon_id`, `misc_item_id`) VALUES
+    (1, 3, NULL, NULL),
+    (1, 4, NULL, NULL),
+    (1, 5, NULL, NULL),
+    (1, NULL, 3, NULL),
+    (1, NULL, 4, NULL),
+    (1, NULL, 5, NULL),
+    (1, NULL, 6, NULL);

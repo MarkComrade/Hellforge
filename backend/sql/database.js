@@ -83,10 +83,211 @@ async function loginAdmin(username, password) {
     }
 }
 
+//!Stash Queries
+
+const STASH_LIMIT = 60;
+
+async function getStash(playerId) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id,
+                    a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
+                    w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
+                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
+             FROM player_stash s
+             LEFT JOIN armors a ON s.armor_id = a.armorId
+             LEFT JOIN weapons w ON s.weapon_id = w.weaponId
+             LEFT JOIN misc_items m ON s.misc_item_id = m.itemId
+             WHERE s.playerId = ?`,
+            [playerId]
+        );
+        return { success: true, stash: rows };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a stash lekérése során' };
+    }
+}
+
+async function getStashCount(playerId) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?',
+        [playerId]
+    );
+    return rows[0].count;
+}
+
+async function addArmorToStash(playerId, armorId) {
+    try {
+        const count = await getStashCount(playerId);
+        if (count >= STASH_LIMIT) {
+            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+        }
+        await pool.query('INSERT INTO player_stash (playerId, armor_id) VALUES (?, ?)', [
+            playerId,
+            armorId
+        ]);
+        return { success: true, message: 'Páncél hozzáadva a stash-hez' };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a páncél hozzáadása során' };
+    }
+}
+
+async function addWeaponToStash(playerId, weaponId) {
+    try {
+        const count = await getStashCount(playerId);
+        if (count >= STASH_LIMIT) {
+            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+        }
+        await pool.query('INSERT INTO player_stash (playerId, weapon_id) VALUES (?, ?)', [
+            playerId,
+            weaponId
+        ]);
+        return { success: true, message: 'Fegyver hozzáadva a stash-hez' };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a fegyver hozzáadása során' };
+    }
+}
+
+async function addMiscToStash(playerId, miscItemId) {
+    try {
+        const count = await getStashCount(playerId);
+        if (count >= STASH_LIMIT) {
+            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+        }
+        await pool.query('INSERT INTO player_stash (playerId, misc_item_id) VALUES (?, ?)', [
+            playerId,
+            miscItemId
+        ]);
+        return { success: true, message: 'Tárgy hozzáadva a stash-hez' };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a tárgy hozzáadása során' };
+    }
+}
+
+async function removeFromStash(stashId, playerId) {
+    try {
+        const [result] = await pool.query(
+            'DELETE FROM player_stash WHERE stashId = ? AND playerId = ?',
+            [stashId, playerId]
+        );
+        if (result.affectedRows === 0) {
+            return { success: false, message: 'A tárgy nem található a stash-ben' };
+        }
+        return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
+    }
+}
+
+async function getPlayerInventory(playerId) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT pi.gold, pi.helmet, pi.armor, pi.melee, pi.ranged,
+                    h.name AS helmet_name, h.img_path AS helmet_img, h.tier AS helmet_tier, h.defense_multiplier AS helmet_defense,
+                    a.name AS armor_name, a.img_path AS armor_img, a.tier AS armor_tier, a.defense_multiplier AS armor_defense,
+                    m.name AS melee_name, m.img_path AS melee_img, m.tier AS melee_tier, m.attack_multiplier AS melee_attack,
+                    r.name AS ranged_name, r.img_path AS ranged_img, r.tier AS ranged_tier, r.attack_multiplier AS ranged_attack
+             FROM player_inventory pi
+             LEFT JOIN armors h ON pi.helmet = h.armorId
+             LEFT JOIN armors a ON pi.armor = a.armorId
+             LEFT JOIN weapons m ON pi.melee = m.weaponId
+             LEFT JOIN weapons r ON pi.ranged = r.weaponId
+             WHERE pi.playerId = ?`,
+            [playerId]
+        );
+        if (rows.length === 0) {
+            return { success: false, message: 'Játékos nem található' };
+        }
+        return { success: true, inventory: rows[0] };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a felszerelés lekérése során' };
+    }
+}
+
+async function swapEquipment(playerId, stashId, slot) {
+    const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
+    if (!validSlots.includes(slot)) {
+        return { success: false, message: 'Érvénytelen slot' };
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Get the stash item
+        const [stashRows] = await connection.query(
+            `SELECT * FROM player_stash WHERE stashId = ? AND playerId = ?`,
+            [stashId, playerId]
+        );
+        if (stashRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'A tárgy nem található a stash-ben' };
+        }
+        const stashItem = stashRows[0];
+
+        // Determine new item id from stash based on slot
+        let newItemId;
+        if (slot === 'helmet' || slot === 'armor') {
+            newItemId = stashItem.armor_id;
+            if (!newItemId) {
+                await connection.rollback();
+                return { success: false, message: 'Ez a tárgy nem páncél' };
+            }
+        } else {
+            newItemId = stashItem.weapon_id;
+            if (!newItemId) {
+                await connection.rollback();
+                return { success: false, message: 'Ez a tárgy nem fegyver' };
+            }
+        }
+
+        // Get currently equipped item id
+        const [invRows] = await connection.query(
+            `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
+            [playerId]
+        );
+        const currentEquippedId = invRows[0].equippedId;
+
+        // Update equipped slot to new item
+        await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
+            newItemId,
+            playerId
+        ]);
+
+        // Update the stash row: replace item with old equipped item
+        if (slot === 'helmet' || slot === 'armor') {
+            await connection.query(
+                `UPDATE player_stash SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE stashId = ?`,
+                [currentEquippedId, stashId]
+            );
+        } else {
+            await connection.query(
+                `UPDATE player_stash SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL WHERE stashId = ?`,
+                [currentEquippedId, stashId]
+            );
+        }
+
+        await connection.commit();
+        return { success: true, message: 'Felszerelés cserélve' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Hiba történt a csere során' };
+    } finally {
+        connection.release();
+    }
+}
+
 //!Export
 module.exports = {
     pool,
     loginUser,
     registerUser,
-    loginAdmin
+    loginAdmin,
+    getStash,
+    getStashCount,
+    addArmorToStash,
+    addWeaponToStash,
+    addMiscToStash,
+    removeFromStash,
+    getPlayerInventory,
+    swapEquipment
 };

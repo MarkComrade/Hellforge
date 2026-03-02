@@ -36,6 +36,8 @@ const endpoints = require('./api/api.js');
 app.use('/api', endpoints);
 const login = require('./api/loginAuthApi.js');
 app.use('/api/loginAuthApi', login);
+const inventory = require('./api/inventoryHandlerApi.js');
+app.use('/api/inventory', inventory);
 
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez
@@ -43,11 +45,21 @@ app.listen(port, ip, () => {
     console.log(`Szerver elérhetősége: http://${ip}:${port}`);
 });
 //!Database test
-pool.query('SELECT 1')
-    .then(() => {
-        console.log('Sikeres adatbázis kapcsolat!');
-    })
-    .catch((err) => {
-        console.error('Hiba az adatbázis kapcsolat során:', err);
-        process.exit(1);
-    });
+async function connectWithRetry(retries = 10, delay = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await pool.query('SELECT 1');
+            console.log('Sikeres adatbázis kapcsolat!');
+            return;
+        } catch (err) {
+            console.log(`Adatbázis kapcsolat próbálkozás ${i + 1}/${retries}...`);
+            if (i === retries - 1) {
+                console.error('Hiba az adatbázis kapcsolat során:', err);
+                process.exit(1);
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+    }
+}
+
+connectWithRetry();

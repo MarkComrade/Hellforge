@@ -41,3 +41,168 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Stash overlay */
+.stashOverlay {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 10000;
+    padding: 3vh 2vw;
+    overflow-y: auto;
+}
+
+.stashHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    margin-bottom: 2vh;
+}
+
+.stashTitle {
+    font-size: 5vh;
+    color: rgb(220, 40, 40);
+    text-shadow:
+        -0.3vw -0.3vw 0 #000,
+        0.3vw -0.3vw 0 #000,
+        -0.3vw 0.3vw 0 #000,
+        0.3vw 0.3vw 0 #000;
+}
+
+.stashCount {
+    font-size: 2.5vh;
+    color: rgb(200, 200, 200);
+}
+
+.stashGrid {
+    margin-top: 3vh;
+    display: grid;
+    grid-template-columns: repeat(10, 6.5vw);
+    gap: 1.5vh;
+    justify-content: center;
+}
+
+.stashSlot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0.3vh;
+    padding: 0.3vh;
+    height: 12vh;
+    width: 13vh;
+    border: 0.2vh solid rgb(220, 40, 40);
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 0.4vh;
+    position: relative;
+    transition:
+        border-color 0.2s,
+        background-color 0.2s;
+    cursor: default;
+}
+
+.stashSlot.filled {
+    cursor: pointer;
+}
+
+.stashSlot.filled:hover {
+    border-color: rgb(255, 180, 40);
+    background-color: rgba(255, 180, 40, 0.1);
+}
+
+.stashSlot.empty {
+    opacity: 0.3;
+}
+
+.stashSlotImg {
+    width: 40%;
+    height: 80%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.stashSlotName {
+    font-size: 1.1vh;
+    color: rgb(200, 200, 200);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.stashTooltip {
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(20, 20, 20, 0.95);
+    border: 0.2vh solid rgb(220, 40, 40);
+    border-radius: 0.5vh;
+    padding: 1vh 1.5vh;
+    z-index: 10001;
+    white-space: nowrap;
+    pointer-events: all;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3vh;
+}
+
+.stashTooltip .tooltipName {
+    color: rgb(255, 180, 40);
+    font-size: 1.8vh;
+    font-weight: bold;
+}
+
+.stashTooltip .tooltipDetail {
+    color: rgb(200, 200, 200);
+    font-size: 1.5vh;
+}
+
+.stashTooltipBtnRow {
+    display: flex;
+    gap: 0.8vh;
+    margin-top: 0.5vh;
+    pointer-events: all;
+}
+
+.stashEquipBtn {
+    background-color: rgb(40, 140, 40);
+    color: white;
+    border: none;
+    padding: 0.5vh 1.5vh;
+    font-size: 1.5vh;
+    border-radius: 0.3vh;
+    cursor: pointer;
+}
+
+.stashEquipBtn:hover {
+    background-color: rgb(60, 180, 60);
+}
+
+.stashDeleteBtn {
+    background-color: rgb(140, 40, 40);
+    color: white;
+    border: none;
+    padding: 0.5vh 1.5vh;
+    font-size: 1.5vh;
+    border-radius: 0.3vh;
+    cursor: pointer;
+}
+
+.stashDeleteBtn:hover {
+    background-color: rgb(200, 50, 50);
+}
+
+.stashEmpty {
+    color: rgb(150, 150, 150);
+    font-size: 3vh;
+    margin-top: 10vh;
+    font-family: 'MedievalSharp', cursive;
+}

@@ -3,10 +3,27 @@ async function Home() {
 
     document.body.style.backgroundImage = "url('../menuImages/home.jpg')";
 
-    //TODO: Home screen content
+    // Fetch session and player data
+    let playerName = 'Guest';
+    let playerId = null;
+    let gold = 0;
+    let equippedGear = null;
 
-    let gearLevel = 10; //placeholder values
-    let gold = 250;
+    try {
+        const session = await getMethodFetch('/api/loginAuthApi/session');
+        if (session.isLoggedIn && session.userId) {
+            playerId = session.userId;
+            playerName = session.userName;
+
+            const result = await getMethodFetch(`/api/inventory/equipment/${playerId}`);
+            if (result.success) {
+                gold = result.inventory.gold;
+                equippedGear = result.inventory;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load player data:', error);
+    }
 
     generateBootStrapGrid(1, 1, 12, 'homeMenuRow');
     let menuTitle = document.createElement('div');
@@ -24,7 +41,7 @@ async function Home() {
     );
 
     let userNameText = document.createElement('h2');
-    userNameText.textContent = 'User: Player';
+    userNameText.textContent = 'User: ' + playerName;
     userNameText.setAttribute('class', 'menuText');
     homeUI[0].appendChild(userNameText);
 
@@ -35,16 +52,9 @@ async function Home() {
 
     //? Custom user image upload
 
-    let characterInfo = document.createElement('h3');
-    characterInfo.setAttribute('class', 'menuText');
-    characterInfo.textContent = 'Character Level:' + gearLevel;
-    homeUI[0].appendChild(characterInfo);
-
-    //! Character level = overall gear level
-
     let goldAmount = document.createElement('h3');
     goldAmount.setAttribute('class', 'menuText');
-    goldAmount.textContent = 'Gold:' + gold;
+    goldAmount.textContent = 'Gold: ' + gold;
     homeUI[0].appendChild(goldAmount);
 
     let equipmentTitle = document.createElement('h2');
@@ -60,14 +70,61 @@ async function Home() {
     let weaponsRow = document.createElement('div');
     weaponsRow.setAttribute('class', 'characterWeaponsRow');
 
-    const equipmentSlots = [
-        { slot: 'Helmet', img: '../textures/items/armour/helmet_rusty.png', type: 'armour' },
-        { slot: 'Armor', img: '../textures/items/armour/armour_rusty.png', type: 'armour' },
-        { slot: 'Melee', img: '../textures/items/weapons/sword_rusty.png', type: 'weapon' },
-        { slot: 'Ranged', img: '../textures/items/weapons/bow_rusty.png', type: 'weapon' }
-    ];
+    const equipmentSlots = equippedGear
+        ? [
+              {
+                  slot: 'Helmet',
+                  img: equippedGear.helmet_img,
+                  name: equippedGear.helmet_name,
+                  type: 'armour'
+              },
+              {
+                  slot: 'Armor',
+                  img: equippedGear.armor_img,
+                  name: equippedGear.armor_name,
+                  type: 'armour'
+              },
+              {
+                  slot: 'Melee',
+                  img: equippedGear.melee_img,
+                  name: equippedGear.melee_name,
+                  type: 'weapon'
+              },
+              {
+                  slot: 'Ranged',
+                  img: equippedGear.ranged_img,
+                  name: equippedGear.ranged_name,
+                  type: 'weapon'
+              }
+          ]
+        : [
+              {
+                  slot: 'Helmet',
+                  img: '../textures/items/armour/helmet_rusty.png',
+                  name: 'Rusty Helmet',
+                  type: 'armour'
+              },
+              {
+                  slot: 'Armor',
+                  img: '../textures/items/armour/armour_rusty.png',
+                  name: 'Rusty Chestplate',
+                  type: 'armour'
+              },
+              {
+                  slot: 'Melee',
+                  img: '../textures/items/weapons/sword_rusty.png',
+                  name: 'Rusty Sword',
+                  type: 'weapon'
+              },
+              {
+                  slot: 'Ranged',
+                  img: '../textures/items/weapons/bow_rusty.png',
+                  name: 'Rusty Bow',
+                  type: 'weapon'
+              }
+          ];
 
-    equipmentSlots.forEach(({ slot, img, type }) => {
+    equipmentSlots.forEach(({ img, name, type }) => {
         let slotDiv = document.createElement('div');
         slotDiv.setAttribute(
             'class',
@@ -76,6 +133,7 @@ async function Home() {
         let slotImg = document.createElement('img');
         slotImg.setAttribute('src', img);
         slotImg.setAttribute('class', 'itemImage img-fluid');
+        slotImg.setAttribute('title', name);
         slotDiv.appendChild(slotImg);
         if (type === 'armour') {
             armourRow.appendChild(slotDiv);
@@ -92,7 +150,7 @@ async function Home() {
         'characterStashDiv col-sm-7 col-md-7 d-flex flex-column align-items-center'
     );
 
-    equipmentSlots.forEach(({ slot, img }) => {
+    equipmentSlots.forEach(({ img }) => {
         let rowDiv = document.createElement('div');
         rowDiv.setAttribute('class', 'equipmentRow');
 
@@ -112,6 +170,18 @@ async function Home() {
         homeUI[1].appendChild(rowDiv);
     });
 
+    let stashButton = document.createElement('input');
+    stashButton.setAttribute('type', 'button');
+    stashButton.setAttribute('value', 'Open Stash');
+    stashButton.setAttribute('class', 'menuButton');
+    stashButton.addEventListener('click', () => {
+        openStash();
+    });
+
+    generateBootStrapGrid(1, 2, 6, 'homeActionRow');
+    let homeActionCols = document.querySelectorAll('.homeActionRow');
+    homeActionCols[0].appendChild(stashButton);
+
     let backButton = document.createElement('input');
     backButton.setAttribute('type', 'button');
     backButton.setAttribute('value', 'Back to Dungeon Selection');
@@ -120,8 +190,5 @@ async function Home() {
         document.body.style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
         StartGame();
     });
-
-    generateBootStrapGrid(1, 1, 12, 'backToDungeonSelectRow');
-    let backToDungeonSelectRow = document.querySelector('.backToDungeonSelectRow');
-    backToDungeonSelectRow.appendChild(backButton);
+    homeActionCols[1].appendChild(backButton);
 }
