@@ -30,3 +30,24 @@ const postFetch = async (url, data) => {
         throw new Error('hiba: ' + error.message);
     }
 };
+
+const postFetchForm = async (url, formData) => {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                errorData.message || `Error: ${response.status} ${response.statusText}`
+            );
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('POST form request error:', error);
+        throw error;
+    }
+};

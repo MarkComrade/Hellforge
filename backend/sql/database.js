@@ -102,9 +102,39 @@ async function getAllUsers() {
 }
 
 async function deleteUser(username) {
-    const query = 'DELETE FROM user WHERE name = ?';
-    const [result] = await pool.execute(query, [username]);
-    return result;
+    // TODO: In the future, this should add to ban list instead of hard delete
+    // Need to delete inventory first due to foreign key constraint
+    // Then delete the user
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        // Get userId first
+        const [userRows] = await connection.execute('SELECT userId FROM user WHERE name = ?', [
+            username
+        ]);
+
+        if (userRows.length === 0) {
+            throw new Error('User not found');
+        }
+
+        const userId = userRows[0].userId;
+
+        // Delete inventory first (child table)
+        await connection.execute('DELETE FROM player_inventory WHERE playerId = ?', [userId]);
+
+        // Then delete user (parent table)
+        const [result] = await connection.execute('DELETE FROM user WHERE userId = ?', [userId]);
+
+        await connection.commit();
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 async function getUserInventory(userId) {
@@ -113,15 +143,19 @@ async function getUserInventory(userId) {
             u.userId,
             u.name as username,
             pi.gold,
+            pi.helmet as helmet_id,
             h.name as helmet_name,
             h.img_path as helmet_img,
             h.tier as helmet_tier,
+            pi.armor as armor_id,
             a.name as armor_name,
             a.img_path as armor_img,
             a.tier as armor_tier,
+            pi.melee as melee_id,
             m.name as melee_name,
             m.img_path as melee_img,
             m.tier as melee_tier,
+            pi.ranged as ranged_id,
             r.name as ranged_name,
             r.img_path as ranged_img,
             r.tier as ranged_tier
@@ -137,6 +171,35 @@ async function getUserInventory(userId) {
     return rows[0];
 }
 
+async function getAllArmors() {
+    const query = 'SELECT armorId, name, type, tier FROM armors ORDER BY type, tier ASC';
+    const [rows] = await pool.execute(query);
+    return rows;
+}
+
+async function getAllWeapons() {
+    const query = 'SELECT weaponId, name, type, tier FROM weapons ORDER BY type, tier ASC';
+    const [rows] = await pool.execute(query);
+    return rows;
+}
+
+async function updateUserInventory(userId, inventoryData) {
+    const query = `
+        UPDATE player_inventory 
+        SET gold = ?, helmet = ?, armor = ?, melee = ?, ranged = ?
+        WHERE playerId = ?
+    `;
+    const [result] = await pool.execute(query, [
+        inventoryData.gold,
+        inventoryData.helmet,
+        inventoryData.armor,
+        inventoryData.melee,
+        inventoryData.ranged,
+        userId
+    ]);
+    return result;
+}
+
 //!Export
 module.exports = {
     pool,
@@ -147,5 +210,8 @@ module.exports = {
     loginAdmin,
     getAllUsers,
     deleteUser,
-    getUserInventory
+    getUserInventory,
+    getAllArmors,
+    getAllWeapons,
+    updateUserInventory
 };

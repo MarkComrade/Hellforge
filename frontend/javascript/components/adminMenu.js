@@ -193,12 +193,152 @@ async function adminTools() {
                 const selectedUserId = this.value;
                 console.log('Selected user:', selectedUserId);
 
+                // Validate that a user is actually selected
+                if (!selectedUserId || selectedUserId === '') {
+                    const inventoryContainer = document.querySelector('.inventoryContainer');
+                    if (inventoryContainer) {
+                        inventoryContainer.innerHTML =
+                            '<p class="menuText">Please select a user to view their inventory.</p>';
+                    }
+                    return;
+                }
+
                 // Display inventory
                 await displayUserInventory(selectedUserId);
             });
         } catch (error) {
             console.error('Session check hiba:', error.message);
         }
+
+        const containerFluid = document.createElement('div');
+        containerFluid.setAttribute('class', 'container-fluid');
+
+        const rowDiv = document.createElement('div');
+        rowDiv.setAttribute('class', 'row');
+        containerFluid.appendChild(rowDiv);
+
+        const col61 = document.createElement('div');
+        col61.setAttribute(
+            'class',
+            'col-sm-6 col-md-6 d-flex justify-content-center deleteButtonContainer'
+        );
+        const deleteButton = document.createElement('input');
+        deleteButton.setAttribute('type', 'button');
+        deleteButton.setAttribute('value', 'Delete User');
+        deleteButton.setAttribute('class', 'menuButton');
+        deleteButton.addEventListener('click', async function () {
+            const form = document.getElementById('inventoryForm');
+            if (!form) {
+                alert('Please select a user first!');
+                return;
+            }
+
+            const userId = form.getAttribute('data-user-id');
+            const userSelect = document.getElementById('userSelect');
+            const selectedOption = userSelect.options[userSelect.selectedIndex];
+            const username = selectedOption ? selectedOption.textContent : 'this user';
+
+            // TODO: In the future, this will add user to ban list instead of deleting
+            // Confirmation dialog
+            const confirmed = confirm(
+                `Are you sure you want to delete ${username}?\n\nThis action cannot be undone and will permanently remove:\n- User account\n- Inventory data\n\nNote: This will be replaced with a ban system in the future.`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await postFetch(`/api/adminActions/deleteUser/${userId}`, {});
+
+                if (response.success) {
+                    alert('User deleted successfully!');
+
+                    // Clear the inventory display
+                    const inventoryContainer = document.querySelector('.inventoryContainer');
+                    if (inventoryContainer) {
+                        inventoryContainer.innerHTML =
+                            '<p class="menuText">User deleted. Select another user.</p>';
+                    }
+
+                    // Remove the user from the select dropdown
+                    if (selectedOption) {
+                        selectedOption.remove();
+                    }
+
+                    // Reset to default option
+                    userSelect.value = '';
+                } else {
+                    alert('Error deleting user: ' + response.message);
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user: ' + error.message);
+            }
+        });
+        col61.appendChild(deleteButton);
+        rowDiv.appendChild(col61);
+
+        const col62 = document.createElement('div');
+        col62.setAttribute(
+            'class',
+            'col-sm-6 col-md-6 d-flex justify-content-center editButtonContainer'
+        );
+        const editButton = document.createElement('input');
+        editButton.setAttribute('type', 'button');
+        editButton.setAttribute('value', 'Edit User');
+        editButton.setAttribute('class', 'menuButton');
+        editButton.addEventListener('click', async function () {
+            const form = document.getElementById('inventoryForm');
+            if (!form) {
+                alert('Please select a user first!');
+                return;
+            }
+
+            const userId = form.getAttribute('data-user-id');
+
+            // Create FormData from the form
+            const formData = new FormData();
+            formData.append('gold', document.getElementById('goldInput').value);
+            formData.append('helmet', document.getElementById('helmetSelect').value);
+            formData.append('armor', document.getElementById('armorSelect').value);
+            formData.append('melee', document.getElementById('meleeSelect').value);
+            formData.append('ranged', document.getElementById('rangedSelect').value);
+
+            // Validate that all fields have values
+            if (
+                !formData.get('gold') ||
+                !formData.get('helmet') ||
+                !formData.get('armor') ||
+                !formData.get('melee') ||
+                !formData.get('ranged')
+            ) {
+                alert('All fields are required!');
+                return;
+            }
+
+            try {
+                const response = await postFetchForm(
+                    `/api/adminActions/updateUserInventory/${userId}`,
+                    formData
+                );
+
+                if (response.success) {
+                    alert('Inventory updated successfully!');
+                    // Refresh the inventory display
+                    await displayUserInventory(userId);
+                } else {
+                    alert('Error updating inventory: ' + response.message);
+                }
+            } catch (error) {
+                console.error('Error updating inventory:', error);
+                alert('Error updating inventory: ' + error.message);
+            }
+        });
+        col62.appendChild(editButton);
+        rowDiv.appendChild(col62);
+
+        document.body.appendChild(containerFluid);
 
         generateBackToAdminTools();
     });
@@ -212,8 +352,16 @@ async function displayUserInventory(userId) {
     inventoryContainer.innerHTML = '';
 
     try {
-        const response = await getMethodFetch(`/api/adminActions/getUserInventory/${userId}`);
-        const inventory = response.inventory;
+        // Fetch user inventory and all available items
+        const [inventoryResponse, armorsResponse, weaponsResponse] = await Promise.all([
+            getMethodFetch(`/api/adminActions/getUserInventory/${userId}`),
+            getMethodFetch('/api/adminActions/getAllArmors'),
+            getMethodFetch('/api/adminActions/getAllWeapons')
+        ]);
+
+        const inventory = inventoryResponse.inventory;
+        const armors = armorsResponse.armors;
+        const weapons = weaponsResponse.weapons;
 
         // Create inventory title
         const title = document.createElement('h2');
@@ -221,56 +369,127 @@ async function displayUserInventory(userId) {
         title.textContent = `${inventory.username}'s Inventory`;
         inventoryContainer.appendChild(title);
 
-        // Create inventory display container
-        const inventoryDisplay = document.createElement('div');
-        inventoryDisplay.setAttribute('class', 'inventoryDisplay');
+        // Create editable form
+        const inventoryForm = document.createElement('form');
+        inventoryForm.setAttribute('class', 'inventoryDisplay');
+        inventoryForm.setAttribute('id', 'inventoryForm');
+        inventoryForm.setAttribute('data-user-id', userId);
 
-        // Gold display
+        // Gold input
         const goldDiv = document.createElement('div');
         goldDiv.setAttribute('class', 'inventoryItem');
         goldDiv.innerHTML = `
-            <span class="menuText">Gold:</span>
-            <span class="menuText inventoryValue">${inventory.gold}</span>
+            <label class="menuText" for="goldInput">Gold:</label>
+            <input type="number" id="goldInput" class="menuInput inventoryInput" 
+                   value="${inventory.gold}" min="0" required>
         `;
-        inventoryDisplay.appendChild(goldDiv);
+        inventoryForm.appendChild(goldDiv);
 
-        // Helmet
+        // Helmet select
         const helmetDiv = document.createElement('div');
         helmetDiv.setAttribute('class', 'inventoryItem');
-        helmetDiv.innerHTML = `
-            <span class="menuText">Helmet:</span>
-            <span class="menuText inventoryValue">${inventory.helmet_name} (Tier ${inventory.helmet_tier})</span>
-        `;
-        inventoryDisplay.appendChild(helmetDiv);
+        const helmetLabel = document.createElement('label');
+        helmetLabel.setAttribute('class', 'menuText');
+        helmetLabel.setAttribute('for', 'helmetSelect');
+        helmetLabel.textContent = 'Helmet:';
+        helmetDiv.appendChild(helmetLabel);
 
-        // Armor
+        const helmetSelect = document.createElement('select');
+        helmetSelect.setAttribute('id', 'helmetSelect');
+        helmetSelect.setAttribute('class', 'menuSelect inventorySelect');
+        armors
+            .filter((armor) => armor.type === 'Helmet')
+            .forEach((armor) => {
+                const option = document.createElement('option');
+                option.value = armor.armorId;
+                option.textContent = `${armor.name} (Tier ${armor.tier})`;
+                if (armor.armorId === inventory.helmet_id) {
+                    option.selected = true;
+                }
+                helmetSelect.appendChild(option);
+            });
+        helmetDiv.appendChild(helmetSelect);
+        inventoryForm.appendChild(helmetDiv);
+
+        // Armor select
         const armorDiv = document.createElement('div');
         armorDiv.setAttribute('class', 'inventoryItem');
-        armorDiv.innerHTML = `
-            <span class="menuText">Armor:</span>
-            <span class="menuText inventoryValue">${inventory.armor_name} (Tier ${inventory.armor_tier})</span>
-        `;
-        inventoryDisplay.appendChild(armorDiv);
+        const armorLabel = document.createElement('label');
+        armorLabel.setAttribute('class', 'menuText');
+        armorLabel.setAttribute('for', 'armorSelect');
+        armorLabel.textContent = 'Armor:';
+        armorDiv.appendChild(armorLabel);
 
-        // Melee
+        const armorSelect = document.createElement('select');
+        armorSelect.setAttribute('id', 'armorSelect');
+        armorSelect.setAttribute('class', 'menuSelect inventorySelect');
+        armors
+            .filter((armor) => armor.type === 'Armor')
+            .forEach((armor) => {
+                const option = document.createElement('option');
+                option.value = armor.armorId;
+                option.textContent = `${armor.name} (Tier ${armor.tier})`;
+                if (armor.armorId === inventory.armor_id) {
+                    option.selected = true;
+                }
+                armorSelect.appendChild(option);
+            });
+        armorDiv.appendChild(armorSelect);
+        inventoryForm.appendChild(armorDiv);
+
+        // Melee weapon select
         const meleeDiv = document.createElement('div');
         meleeDiv.setAttribute('class', 'inventoryItem');
-        meleeDiv.innerHTML = `
-            <span class="menuText">Melee:</span>
-            <span class="menuText inventoryValue">${inventory.melee_name} (Tier ${inventory.melee_tier})</span>
-        `;
-        inventoryDisplay.appendChild(meleeDiv);
+        const meleeLabel = document.createElement('label');
+        meleeLabel.setAttribute('class', 'menuText');
+        meleeLabel.setAttribute('for', 'meleeSelect');
+        meleeLabel.textContent = 'Melee:';
+        meleeDiv.appendChild(meleeLabel);
 
-        // Ranged
+        const meleeSelect = document.createElement('select');
+        meleeSelect.setAttribute('id', 'meleeSelect');
+        meleeSelect.setAttribute('class', 'menuSelect inventorySelect');
+        weapons
+            .filter((weapon) => weapon.type === 'Melee')
+            .forEach((weapon) => {
+                const option = document.createElement('option');
+                option.value = weapon.weaponId;
+                option.textContent = `${weapon.name} (Tier ${weapon.tier})`;
+                if (weapon.weaponId === inventory.melee_id) {
+                    option.selected = true;
+                }
+                meleeSelect.appendChild(option);
+            });
+        meleeDiv.appendChild(meleeSelect);
+        inventoryForm.appendChild(meleeDiv);
+
+        // Ranged weapon select
         const rangedDiv = document.createElement('div');
         rangedDiv.setAttribute('class', 'inventoryItem');
-        rangedDiv.innerHTML = `
-            <span class="menuText">Ranged:</span>
-            <span class="menuText inventoryValue">${inventory.ranged_name} (Tier ${inventory.ranged_tier})</span>
-        `;
-        inventoryDisplay.appendChild(rangedDiv);
+        const rangedLabel = document.createElement('label');
+        rangedLabel.setAttribute('class', 'menuText');
+        rangedLabel.setAttribute('for', 'rangedSelect');
+        rangedLabel.textContent = 'Ranged:';
+        rangedDiv.appendChild(rangedLabel);
 
-        inventoryContainer.appendChild(inventoryDisplay);
+        const rangedSelect = document.createElement('select');
+        rangedSelect.setAttribute('id', 'rangedSelect');
+        rangedSelect.setAttribute('class', 'menuSelect inventorySelect');
+        weapons
+            .filter((weapon) => weapon.type === 'Ranged')
+            .forEach((weapon) => {
+                const option = document.createElement('option');
+                option.value = weapon.weaponId;
+                option.textContent = `${weapon.name} (Tier ${weapon.tier})`;
+                if (weapon.weaponId === inventory.ranged_id) {
+                    option.selected = true;
+                }
+                rangedSelect.appendChild(option);
+            });
+        rangedDiv.appendChild(rangedSelect);
+        inventoryForm.appendChild(rangedDiv);
+
+        inventoryContainer.appendChild(inventoryForm);
     } catch (error) {
         console.error('Error loading inventory:', error);
         inventoryContainer.innerHTML = '<p class="menuText">Error loading inventory</p>';

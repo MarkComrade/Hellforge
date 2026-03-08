@@ -53,16 +53,37 @@ router.get('/getAllUsers', async (request, response) => {
         });
     }
 });
-router.get('/deleteUser', async (request, response) => {
+// TODO: In the future, this should add user to ban list instead of hard delete
+router.post('/deleteUser/:userId', async (request, response) => {
     try {
-        const result = await database.deleteUser();
+        const userId = request.params.userId;
+        
+        if (!userId) {
+            return response.status(400).json({
+                message: 'User ID is required.',
+                success: false
+            });
+        }
+
+        // Get username first for deletion (database.deleteUser expects username)
+        const inventory = await database.getUserInventory(userId);
+        if (!inventory) {
+            return response.status(404).json({
+                message: 'User not found.',
+                success: false
+            });
+        }
+
+        const result = await database.deleteUser(inventory.username);
         response.status(200).json({
-            message: 'A User successfully deleted.',
+            message: 'User successfully deleted.',
+            success: true,
             results: result
         });
     } catch (error) {
         response.status(500).json({
-            message: 'this endpoint is not working.'
+            message: 'Error deleting user: ' + error.message,
+            success: false
         });
     }
 });
@@ -85,6 +106,68 @@ router.get('/getUserInventory/:userId', async (request, response) => {
     } catch (error) {
         response.status(500).json({
             message: 'Error retrieving inventory.',
+            error: error.message
+        });
+    }
+});
+
+router.get('/getAllArmors', async (request, response) => {
+    try {
+        const armors = await database.getAllArmors();
+        response.status(200).json({
+            message: 'Armors successfully retrieved.',
+            armors: armors
+        });
+    } catch (error) {
+        response.status(500).json({
+            message: 'Error retrieving armors.',
+            error: error.message
+        });
+    }
+});
+
+router.get('/getAllWeapons', async (request, response) => {
+    try {
+        const weapons = await database.getAllWeapons();
+        response.status(200).json({
+            message: 'Weapons successfully retrieved.',
+            weapons: weapons
+        });
+    } catch (error) {
+        response.status(500).json({
+            message: 'Error retrieving weapons.',
+            error: error.message
+        });
+    }
+});
+
+router.post('/updateUserInventory/:userId', upload.none(), async (request, response) => {
+    try {
+        const userId = request.params.userId;
+        const { gold, helmet, armor, melee, ranged } = request.body;
+
+        // Validate input
+        if (gold === undefined || !helmet || !armor || !melee || !ranged) {
+            return response.status(400).json({
+                message: 'All inventory fields are required.'
+            });
+        }
+
+        await database.updateUserInventory(userId, {
+            gold: parseInt(gold),
+            helmet: parseInt(helmet),
+            armor: parseInt(armor),
+            melee: parseInt(melee),
+            ranged: parseInt(ranged)
+        });
+
+        response.status(200).json({
+            message: 'Inventory successfully updated.',
+            success: true
+        });
+    } catch (error) {
+        response.status(500).json({
+            message: 'Error updating inventory.',
             error: error.message
         });
     }
