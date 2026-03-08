@@ -1,45 +1,91 @@
-//map functions
-function checkCell(x, y) {
-    if (x > 0 && x < 10 && y > 0 && y < 10) {
-        let cell = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-        return cell && cell.dataset.room === 'true';
-    }
-    return false;
-}
-function cutOutMap() {
-    let cells = document.querySelectorAll('#map .cell[data-room="true"]');
-    let minX = 10,
-        maxX = 0,
-        minY = 10,
-        maxY = 0;
-    cells.forEach((cell) => {
-        let x = parseInt(cell.dataset.col);
-        let y = parseInt(cell.dataset.row);
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-    });
-    let allCells = document.querySelectorAll('#map .cell');
+// roomGeneration.js — Map rendering, navigation, and room event handling.
+// these functions only render what the server sends.
+// Uses postFetch from getPostFetch.js (check load order).
 
-    let adaptiveSize = Math.max(maxX - minX + 1, maxY - minY + 1);
+// Apply the server's map onto the 9×9 DOM grid.
+// Each cell is matched by col,row to the server's "x,y" keys.
+// Cells outside the bounding box are hidden; visible cells are scaled to fit.
+function renderMap(mapData, bounds) {
+    const container = document.getElementById('map');
+    if (!container) return;
+
+    const { minX, maxX, minY, maxY, adaptiveSize } = bounds;
+
+    let allCells = container.querySelectorAll('.cell');
     allCells.forEach((cell) => {
-        if (
-            cell.dataset.col < minX ||
-            cell.dataset.col > maxX ||
-            cell.dataset.row < minY ||
-            cell.dataset.row > maxY
-        ) {
+        const col = parseInt(cell.dataset.col);
+        const row = parseInt(cell.dataset.row);
+        const key = `${col},${row}`;
+
+        if (mapData[key] && mapData[key].exists) {
+            cell.dataset.room = 'true';
+            cell.dataset.visited = mapData[key].visited ? 'true' : 'false';
+            if (mapData[key].roomType) {
+                cell.dataset.roomType = mapData[key].roomType;
+            }
+        } else {
+            cell.dataset.room = 'false';
+        }
+
+        // cutOutMap logic — hide cells outside bounds
+        if (col < minX || col > maxX || row < minY || row > maxY) {
             cell.style.display = 'none';
         } else {
             cell.style.width = 23 / adaptiveSize + 'vh';
-
             cell.style.height = 23 / adaptiveSize + 'vh';
         }
     });
 }
-function navigateToRoom(x, y, dungeonLevel) {
+
+// Render player position on the map
+function renderPlayerPosition(pos) {
+    document
+        .querySelectorAll('#map .cell[data-current="true"]')
+        .forEach((c) => (c.dataset.current = 'false'));
+    const cell = document.querySelector(`#map .cell[data-row="${pos.y}"][data-col="${pos.x}"]`);
+    if (cell) {
+        cell.dataset.current = 'true';
+        cell.dataset.visited = 'true';
+    }
+}
+
+// Render doors based on server-provided adjacency data
+function renderDoors(doors, dungeon) {
+    const doorTextures = {
+        Laboratory: '../textures/rooms/door_laboratory.png',
+        Crypt: '../textures/rooms/door_crypt.png',
+        Labyrinth: '../textures/rooms/door_labyrinth.png',
+        'Gates of Hell': '../textures/rooms/door_hell.png'
+    };
+    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
+
+    const currentCell = document.querySelector('#map .cell[data-current="true"]');
+    if (!currentCell) return;
+
+    // Remove old doors
+    currentCell
+        .querySelectorAll('img.doorUp, img.doorRight, img.doorDown, img.doorLeft')
+        .forEach((img) => img.remove());
+
+    if (doors.up) appendDoor(currentCell, doorTexture, 'doorUp');
+    if (doors.right) appendDoor(currentCell, doorTexture, 'doorRight');
+    if (doors.down) appendDoor(currentCell, doorTexture, 'doorDown');
+    if (doors.left) appendDoor(currentCell, doorTexture, 'doorLeft');
+}
+
+function appendDoor(cell, src, className) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.classList.add(className);
+    cell.appendChild(img);
+}
+
+// Set up navigation — sends move requests to server
+function navigateToRoom(startX, startY, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
+    const dungeon = sessionStorage.getItem('currentDungeon');
+    const sessionToken = sessionStorage.getItem('dungeonSessionToken');
+
     const directions = [
         { name: 'Up', dx: 0, dy: -1 },
         { name: 'Right', dx: 1, dy: 0 },
@@ -51,99 +97,66 @@ function navigateToRoom(x, y, dungeonLevel) {
         let span = document.createElement('span');
         span.setAttribute('id', 'navigate' + dir.name);
         body.appendChild(span);
-        span.addEventListener('click', function () {
-            const newX = x + dir.dx;
-            const newY = y + dir.dy;
-            if (checkCell(newX, newY) === true) {
-                const prevCell = document.querySelector(
-                    `#map .cell[data-row="${y}"][data-col="${x}"]`
-                );
-                prevCell.dataset.current = 'false';
-                prevCell
-                    .querySelectorAll('img.doorUp, img.doorRight, img.doorDown, img.doorLeft')
-                    .forEach((img) => img.remove());
+        span.addEventListener('click', async function () {
+            try {
+                const result = await postFetch('/api/dungeon/move', {
+                    dx: dir.dx,
+                    dy: dir.dy,
+                    sessionToken: sessionToken
+                });
 
-                x = newX;
-                y = newY;
+                if (!result.success) {
+                    console.log('No room available');
+                    return;
+                }
 
-                let data = document.querySelector(`#map .cell[data-row="${y}"][data-col="${x}"]`);
-                data.dataset.visited = 'true';
-                data.dataset.current = 'true';
+                // Remove old doors from previous cell
+                const prevCell = document.querySelector('#map .cell[data-current="true"]');
+                if (prevCell) {
+                    prevCell.dataset.current = 'false';
+                    prevCell
+                        .querySelectorAll('img.doorUp, img.doorRight, img.doorDown, img.doorLeft')
+                        .forEach((img) => img.remove());
+                }
 
-                data.querySelectorAll(
-                    'img.doorUp, img.doorRight, img.doorDown, img.doorLeft'
-                ).forEach((img) => img.remove());
+                // Update position from server response
+                renderPlayerPosition(result.position);
+                renderDoors(result.doors, dungeon);
 
-                generateDoors(sessionStorage.getItem('currentDungeon'));
-                roomEventHandler(data, dungeonLevel);
-            } else {
-                console.log('No room available');
+                console.log(`Current position: (${result.position.x}, ${result.position.y})`);
+
+                // Handle room events with server-validated data
+                const cell = document.querySelector('#map .cell[data-current="true"]');
+                if (cell && result.roomType) {
+                    cell.dataset.roomType = result.roomType;
+                    roomEventHandler(cell, dungeonLevel, result.roomType);
+                }
+            } catch (error) {
+                console.log('Move failed:', error.message);
             }
-            console.log(`Current position: (${x}, ${y})`);
         });
     });
 }
-function generateDoors(dungeon) {
-    console.log(dungeon);
-    const doorTextures = {
-        Laboratory: '../textures/rooms/door_laboratory.png',
-        Crypt: '../textures/rooms/door_crypt.png',
-        Labyrinth: '../textures/rooms/door_labyrinth.png',
-        'Gates of Hell': '../textures/rooms/door_hell.png'
-    };
 
-    const doorTexture = doorTextures[dungeon];
+// Room event handler — uses server-provided roomType instead of client DOM data
+function roomEventHandler(room, dungeonLevel, serverRoomType) {
+    // Use server-provided roomType if available, fall back to DOM (for start room)
+    const roomType = serverRoomType || room.dataset.roomType;
 
-    const currentPosition = document.querySelector('#map .cell[data-current="true"]');
-    const x = parseInt(currentPosition.dataset.col);
-    const y = parseInt(currentPosition.dataset.row);
-
-    // Up
-    if (checkCell(x, y - 1)) {
-        const doorUp = document.createElement('img');
-        doorUp.src = doorTexture;
-        doorUp.classList.add('doorUp');
-        currentPosition.appendChild(doorUp);
-    }
-    // Right
-    if (checkCell(x + 1, y)) {
-        const doorRight = document.createElement('img');
-        doorRight.src = doorTexture;
-        doorRight.classList.add('doorRight');
-        currentPosition.appendChild(doorRight);
-    }
-    // Down
-    if (checkCell(x, y + 1)) {
-        const doorDown = document.createElement('img');
-        doorDown.src = doorTexture;
-        doorDown.classList.add('doorDown');
-        currentPosition.appendChild(doorDown);
-    }
-    // Left
-    if (checkCell(x - 1, y)) {
-        const doorLeft = document.createElement('img');
-        doorLeft.src = doorTexture;
-        doorLeft.classList.add('doorLeft');
-        currentPosition.appendChild(doorLeft);
-    }
-}
-
-function roomEventHandler(room, dungeonLevel) {
-    //TODO
-    if (room.dataset.roomType !== 'out') {
+    if (roomType !== 'out') {
         let trapdoor = document.getElementById('trapDoor');
         let exitButton = document.getElementById('exitButton');
         let continueButton = document.getElementById('continueButton');
         if (trapdoor || exitButton || continueButton) {
-            trapdoor.remove();
-            exitButton.remove();
-            continueButton.remove();
+            if (trapdoor) trapdoor.remove();
+            if (exitButton) exitButton.remove();
+            if (continueButton) continueButton.remove();
         }
     }
 
-    console.log(`Entered room type: ${room.dataset.roomType}`);
+    console.log(`Entered room type: ${roomType}`);
 
-    switch (room.dataset.roomType) {
+    switch (roomType) {
         case 'start':
             console.log('Spawn room entered');
             break;
@@ -175,8 +188,16 @@ function roomEventHandler(room, dungeonLevel) {
                 exitButton.className = 'menuButton';
                 exitButton.textContent = 'Exit the dungeon';
                 document.body.appendChild(exitButton);
-                exitButton.addEventListener('click', () => {
-                    exitDungeon();
+                exitButton.addEventListener('click', async () => {
+                    // Server validates exit is from 'out' room
+                    try {
+                        await postFetch('/api/dungeon/exit', {
+                            sessionToken: sessionStorage.getItem('dungeonSessionToken')
+                        });
+                        exitDungeon();
+                    } catch (error) {
+                        console.log('Exit failed:', error.message);
+                    }
                 });
 
                 let continueButton = document.createElement('button');
@@ -184,10 +205,24 @@ function roomEventHandler(room, dungeonLevel) {
                 continueButton.className = 'menuButton';
                 continueButton.textContent = 'Continue dungeon';
                 document.body.appendChild(continueButton);
-                continueButton.addEventListener('click', () => {
-                    dungeonLevel++;
-                    document.getElementById('level-number').textContent = dungeonLevel;
-                    newLevel(sessionStorage.getItem('currentDungeon'), dungeonLevel, 100);
+                continueButton.addEventListener('click', async () => {
+                    // Server generates next level and validates we're at exit
+                    try {
+                        const result = await postFetch('/api/dungeon/next-level', {
+                            sessionToken: sessionStorage.getItem('dungeonSessionToken')
+                        });
+                        if (result.success) {
+                            dungeonLevel = result.dungeonLevel;
+                            document.getElementById('level-number').textContent = dungeonLevel;
+                            newLevelFromServer(
+                                sessionStorage.getItem('currentDungeon'),
+                                result,
+                                100
+                            );
+                        }
+                    } catch (error) {
+                        console.log('Next level failed:', error.message);
+                    }
                 });
             });
             break;

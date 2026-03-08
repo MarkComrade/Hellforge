@@ -59,7 +59,7 @@ async function registerUser(username, password) {
 
         return { success: true, userId: result.insertId, message: 'Sikeres regisztráció' };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a regisztráció során' };
+        return { success: false, message: error.message || 'Hiba történt a regisztráció során' };
     }
 }
 
@@ -81,6 +81,19 @@ async function loginAdmin(username, password) {
     } catch (error) {
         return { success: false, message: 'Hiba történt a bejelentkezés során' };
     }
+}
+async function selectleadboard() {
+    const query =
+        'SELECT u.name, pi.gold as score FROM player_inventory pi JOIN user u ON pi.playerId = u.userId ORDER BY pi.gold DESC LIMIT 10;';
+    const [rows] = await pool.execute(query);
+    return rows;
+}
+
+async function getUserRankAndScore(username) {
+    const query =
+        'SELECT u.name, pi.gold as score, (SELECT COUNT(*) + 1 FROM player_inventory pi2 WHERE pi2.gold > pi.gold) as `rank` FROM player_inventory pi JOIN user u ON pi.playerId = u.userId WHERE u.name = ?';
+    const [rows] = await pool.execute(query, [username]);
+    return rows[0];
 }
 
 //!Stash Queries
@@ -495,6 +508,8 @@ async function moveLoadoutToStash(playerId, loadoutId) {
 //!Export
 module.exports = {
     pool,
+    selectleadboard,
+    getUserRankAndScore,
     loginUser,
     registerUser,
     loginAdmin,
