@@ -178,17 +178,26 @@ async function Home() {
         openStash();
     });
 
-    generateBootStrapGrid(1, 2, 6, 'homeActionRow');
+    let loadoutButton = document.createElement('input');
+    loadoutButton.setAttribute('type', 'button');
+    loadoutButton.setAttribute('value', 'Open Loadout');
+    loadoutButton.setAttribute('class', 'menuButton');
+    loadoutButton.addEventListener('click', () => {
+        openInventory();
+    });
+
+    generateBootStrapGrid(1, 3, 4, 'homeActionRow');
     let homeActionCols = document.querySelectorAll('.homeActionRow');
     homeActionCols[0].appendChild(stashButton);
+    homeActionCols[1].appendChild(loadoutButton);
 
     let backButton = document.createElement('input');
     backButton.setAttribute('type', 'button');
-    backButton.setAttribute('value', 'Back to Dungeon Selection');
+    backButton.setAttribute('value', 'Dungeon Selection');
     backButton.setAttribute('class', 'menuButton');
     backButton.addEventListener('click', () => {
         document.body.style.backgroundImage = "url('../menuImages/mainBackGround-brightened.png')";
         StartGame();
     });
-    homeActionCols[1].appendChild(backButton);
+    homeActionCols[2].appendChild(backButton);
 }

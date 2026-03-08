@@ -4,7 +4,6 @@ const database = require('../sql/database.js');
 
 //!Endpoints:
 
-//?GET /api/inventory/stash/:playerId - Stash lekérése
 router.get('/stash/:playerId', async (request, response) => {
     const playerId = parseInt(request.params.playerId);
     if (!playerId) {
@@ -20,7 +19,6 @@ router.get('/stash/:playerId', async (request, response) => {
     }
 });
 
-//?GET /api/inventory/stash/count/:playerId - Stash tárgyak száma
 router.get('/stash/count/:playerId', async (request, response) => {
     const playerId = parseInt(request.params.playerId);
     if (!playerId) {
@@ -36,7 +34,6 @@ router.get('/stash/count/:playerId', async (request, response) => {
     }
 });
 
-//?POST /api/inventory/stash/addArmor - Páncél hozzáadása a stash-hez
 router.post('/stash/addArmor', async (request, response) => {
     const { playerId, armorId } = request.body;
     if (!playerId || !armorId) {
@@ -50,7 +47,6 @@ router.post('/stash/addArmor', async (request, response) => {
     }
 });
 
-//?POST /api/inventory/stash/addWeapon - Fegyver hozzáadása a stash-hez
 router.post('/stash/addWeapon', async (request, response) => {
     const { playerId, weaponId } = request.body;
     if (!playerId || !weaponId) {
@@ -64,7 +60,6 @@ router.post('/stash/addWeapon', async (request, response) => {
     }
 });
 
-//?POST /api/inventory/stash/addMisc - Misc tárgy hozzáadása a stash-hez
 router.post('/stash/addMisc', async (request, response) => {
     const { playerId, miscItemId } = request.body;
     if (!playerId || !miscItemId) {
@@ -78,7 +73,6 @@ router.post('/stash/addMisc', async (request, response) => {
     }
 });
 
-//?DELETE /api/inventory/stash/remove - Tárgy eltávolítása a stash-ből
 router.delete('/stash/remove', async (request, response) => {
     const { stashId, playerId } = request.body;
     if (!stashId || !playerId) {
@@ -92,7 +86,6 @@ router.delete('/stash/remove', async (request, response) => {
     }
 });
 
-//?GET /api/inventory/equipment/:playerId - Felszerelés lekérése
 router.get('/equipment/:playerId', async (request, response) => {
     const playerId = parseInt(request.params.playerId);
     if (!playerId) {
@@ -108,7 +101,6 @@ router.get('/equipment/:playerId', async (request, response) => {
     }
 });
 
-//?POST /api/inventory/stash/swap - Felszerelés cseréje stash tárggyal
 router.post('/stash/swap', async (request, response) => {
     const { playerId, stashId, slot } = request.body;
     if (!playerId || !stashId || !slot) {
@@ -116,6 +108,73 @@ router.post('/stash/swap', async (request, response) => {
     }
     try {
         const result = await database.swapEquipment(playerId, stashId, slot);
+        response.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.get('/loadout/:playerId', async (request, response) => {
+    const playerId = parseInt(request.params.playerId);
+    if (!playerId) {
+        return response
+            .status(400)
+            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
+    }
+    try {
+        const result = await database.getLoadout(playerId);
+        response.status(result.success ? 200 : 500).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.post('/stash/moveToInventory', async (request, response) => {
+    const { playerId, stashId } = request.body;
+    if (!playerId || !stashId) {
+        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
+    }
+    try {
+        const result = await database.moveStashToLoadout(playerId, stashId);
+        response.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.post('/loadout/swap', async (request, response) => {
+    const { playerId, loadoutId, slot } = request.body;
+    if (!playerId || !loadoutId || !slot) {
+        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
+    }
+    try {
+        const result = await database.swapLoadoutEquipment(playerId, loadoutId, slot);
+        response.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.delete('/loadout/remove', async (request, response) => {
+    const { playerId, loadoutId } = request.body;
+    if (!playerId || !loadoutId) {
+        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
+    }
+    try {
+        const result = await database.deleteFromLoadout(playerId, loadoutId);
+        response.status(result.success ? 200 : 404).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.post('/loadout/moveToStash', async (request, response) => {
+    const { playerId, loadoutId } = request.body;
+    if (!playerId || !loadoutId) {
+        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
+    }
+    try {
+        const result = await database.moveLoadoutToStash(playerId, loadoutId);
         response.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });

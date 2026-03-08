@@ -4,11 +4,11 @@
     flex-direction: column;
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
+    background-color: rgba(0, 0, 0, 0.85);
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     z-index: 10000;
+    padding: 3vh 2vw;
 }
 
 .settingsOverlay {

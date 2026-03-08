@@ -276,6 +276,222 @@ async function swapEquipment(playerId, stashId, slot) {
     }
 }
 
+const LOADOUT_LIMIT = 10;
+
+//!Loadout Queries
+
+async function getLoadout(playerId) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id,
+                    a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
+                    w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
+                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
+             FROM player_loadout l
+             LEFT JOIN armors a ON l.armor_id = a.armorId
+             LEFT JOIN weapons w ON l.weapon_id = w.weaponId
+             LEFT JOIN misc_items m ON l.misc_item_id = m.itemId
+             WHERE l.playerId = ?`,
+            [playerId]
+        );
+        return { success: true, loadout: rows };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a loadout lekérése során' };
+    }
+}
+
+async function getLoadoutCount(playerId) {
+    const [rows] = await pool.query(
+        'SELECT COUNT(*) AS count FROM player_loadout WHERE playerId = ?',
+        [playerId]
+    );
+    return rows[0].count;
+}
+
+async function moveStashToLoadout(playerId, stashId) {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Check loadout limit
+        const [countRows] = await connection.query(
+            'SELECT COUNT(*) AS count FROM player_loadout WHERE playerId = ?',
+            [playerId]
+        );
+        if (countRows[0].count >= LOADOUT_LIMIT) {
+            await connection.rollback();
+            return { success: false, message: 'Inventory is full.' };
+        }
+
+        // Get the stash item
+        const [stashRows] = await connection.query(
+            'SELECT * FROM player_stash WHERE stashId = ? AND playerId = ?',
+            [stashId, playerId]
+        );
+        if (stashRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in stash.' };
+        }
+        const stashItem = stashRows[0];
+
+        // Insert into loadout
+        await connection.query(
+            'INSERT INTO player_loadout (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
+            [playerId, stashItem.armor_id, stashItem.weapon_id, stashItem.misc_item_id]
+        );
+
+        // Remove from stash
+        await connection.query('DELETE FROM player_stash WHERE stashId = ? AND playerId = ?', [
+            stashId,
+            playerId
+        ]);
+
+        await connection.commit();
+        return { success: true, message: 'Item moved to inventory.' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error moving item to inventory.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function swapLoadoutEquipment(playerId, loadoutId, slot) {
+    const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
+    if (!validSlots.includes(slot)) {
+        return { success: false, message: 'Érvénytelen slot' };
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Get the loadout item
+        const [loadoutRows] = await connection.query(
+            'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
+            [loadoutId, playerId]
+        );
+        if (loadoutRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in inventory.' };
+        }
+        const loadoutItem = loadoutRows[0];
+
+        // Determine new item id from loadout based on slot
+        let newItemId;
+        if (slot === 'helmet' || slot === 'armor') {
+            newItemId = loadoutItem.armor_id;
+            if (!newItemId) {
+                await connection.rollback();
+                return { success: false, message: 'This item is not armor.' };
+            }
+        } else {
+            newItemId = loadoutItem.weapon_id;
+            if (!newItemId) {
+                await connection.rollback();
+                return { success: false, message: 'This item is not a weapon.' };
+            }
+        }
+
+        // Get currently equipped item id
+        const [invRows] = await connection.query(
+            `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
+            [playerId]
+        );
+        const currentEquippedId = invRows[0].equippedId;
+
+        // Update equipped slot to new item
+        await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
+            newItemId,
+            playerId
+        ]);
+
+        // Update the loadout row: replace item with old equipped item
+        if (slot === 'helmet' || slot === 'armor') {
+            await connection.query(
+                'UPDATE player_loadout SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE loadoutId = ?',
+                [currentEquippedId, loadoutId]
+            );
+        } else {
+            await connection.query(
+                'UPDATE player_loadout SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL WHERE loadoutId = ?',
+                [currentEquippedId, loadoutId]
+            );
+        }
+
+        await connection.commit();
+        return { success: true, message: 'Equipment swapped from inventory.' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error swapping equipment.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function deleteFromLoadout(playerId, loadoutId) {
+    try {
+        const [result] = await pool.query(
+            'DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
+            [loadoutId, playerId]
+        );
+        if (result.affectedRows === 0) {
+            return { success: false, message: 'Item not found in inventory.' };
+        }
+        return { success: true, message: 'Item deleted from inventory.' };
+    } catch (error) {
+        return { success: false, message: 'Error deleting item from inventory.' };
+    }
+}
+
+async function moveLoadoutToStash(playerId, loadoutId) {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Check stash limit
+        const [countRows] = await connection.query(
+            'SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?',
+            [playerId]
+        );
+        if (countRows[0].count >= STASH_LIMIT) {
+            await connection.rollback();
+            return { success: false, message: 'Stash is full.' };
+        }
+
+        // Get the loadout item
+        const [loadoutRows] = await connection.query(
+            'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
+            [loadoutId, playerId]
+        );
+        if (loadoutRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in inventory.' };
+        }
+        const loadoutItem = loadoutRows[0];
+
+        // Insert into stash
+        await connection.query(
+            'INSERT INTO player_stash (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
+            [playerId, loadoutItem.armor_id, loadoutItem.weapon_id, loadoutItem.misc_item_id]
+        );
+
+        // Remove from loadout
+        await connection.query('DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?', [
+            loadoutId,
+            playerId
+        ]);
+
+        await connection.commit();
+        return { success: true, message: 'Item moved to stash.' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error moving item to stash.' };
+    } finally {
+        connection.release();
+    }
+}
+
 //!Export
 module.exports = {
     pool,
@@ -289,5 +505,11 @@ module.exports = {
     addMiscToStash,
     removeFromStash,
     getPlayerInventory,
-    swapEquipment
+    swapEquipment,
+    getLoadout,
+    getLoadoutCount,
+    moveStashToLoadout,
+    moveLoadoutToStash,
+    swapLoadoutEquipment,
+    deleteFromLoadout
 };
