@@ -36,6 +36,8 @@ const endpoints = require('./api/api.js');
 app.use('/api', endpoints);
 const login = require('./api/loginAuthApi.js');
 app.use('/api/loginAuthApi', login);
+const inventory = require('./api/inventoryHandlerApi.js');
+app.use('/api/inventory', inventory);
 const dungeon = require('./api/dungeonApi.js'); // server-authoritative dungeon routes (start, move, exit, etc.)
 app.use('/api/dungeon', dungeon);
 
@@ -44,6 +46,7 @@ app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa 
 app.listen(port, ip, () => {
     console.log(`Szerver elérhetősége: http://${ip}:${port}`);
 });
+//!Database test
 
 //!Database connection with retry logic
 async function connectWithRetry(retries = 10, delay = 2000) {
