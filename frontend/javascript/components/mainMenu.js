@@ -1,7 +1,9 @@
 async function Menu() {
+    let isAdmin = false;
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         isLoggedIn = session.isLoggedIn;
+        isAdmin = Boolean(session.isAdmin);
         if (isLoggedIn && session.userName) {
             userName = session.userName;
         } else if (isLoggedIn && session.isAdmin) {
@@ -50,8 +52,8 @@ async function Menu() {
 
     buttons.forEach(({ text, onClick }, index) => {
         if (text == 'Login' && isLoggedIn) return;
-
         if (text == 'Logout' && !isLoggedIn) return;
+        if (text == 'Admin' && isLoggedIn && !isAdmin) return;
 
         if (text != 'Login' && text != 'Logout') {
             let button = document.createElement('input');
