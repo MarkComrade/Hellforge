@@ -148,3 +148,141 @@
     align-items: center;
     padding: 2vh;
 }
+.menuSelect {
+    font-size: 1.5vw;
+
+    background: rgba(220, 40, 40, 0.12);
+    border: 0.2vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
+    width: 20vw;
+
+    transition: all 0.2s ease;
+    cursor: pointer;
+    overflow-y: auto;
+}
+
+.menuSelect:focus {
+    background: rgba(220, 40, 40, 0.25);
+    outline: none;
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
+}
+
+.menuSelect option {
+    background: rgba(0, 0, 0, 0.95);
+    color: rgb(220, 40, 40);
+    padding: 1vh;
+    max-height: 4vh;
+}
+
+.menuSelect option:hover,
+.menuSelect option:checked {
+    background: rgba(220, 40, 40, 0.4);
+}
+
+.userSelectContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.inventoryContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 3vh 0;
+}
+
+.inventoryDisplay {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    margin-top: 2vh;
+    padding: 2vh;
+    background: rgba(220, 40, 40, 0.08);
+    border: 0.2vh solid rgb(220, 40, 40);
+    border-radius: 0.5vh;
+    min-width: 30vw;
+}
+
+.inventoryItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1vh 1.5vw;
+    background: rgba(0, 0, 0, 0.4);
+    border: 0.15vh solid rgba(220, 40, 40, 0.5);
+    transition: all 0.2s ease;
+    gap: 2vw;
+}
+
+.inventoryItem:hover {
+    background: rgba(220, 40, 40, 0.15);
+    border-color: rgb(220, 40, 40);
+    transform: translateX(0.3vw);
+}
+
+.inventoryItem label {
+    min-width: 7vw;
+    text-align: left;
+}
+
+.inventoryInput {
+    font-size: 1.5vw;
+    padding: 0.5vh 1vw;
+    background: rgba(220, 40, 40, 0.12);
+    border: 0.2vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.inventoryInput:focus {
+    background: rgba(220, 40, 40, 0.25);
+    outline: none;
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
+}
+
+.inventorySelect {
+    font-size: 1.3vw;
+    padding: 0.5vh 1vw;
+    background: rgba(220, 40, 40, 0.12);
+    border: 0.2vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.inventorySelect:focus {
+    background: rgba(220, 40, 40, 0.25);
+    outline: none;
+    box-shadow: 0 0 1vh rgba(220, 40, 40, 0.6);
+}
+
+.inventorySelect option {
+    background: rgba(0, 0, 0, 0.95);
+    color: rgb(220, 40, 40);
+    padding: 1vh;
+}
+
+.inventoryValue {
+    font-weight: bold;
+    color: rgb(255, 80, 80);
+}
