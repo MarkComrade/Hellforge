@@ -608,6 +608,7 @@ async function updateUserInventory(userId, inventoryData) {
     ]);
     return result;
 }
+//dungeonloot algorithm
 
 //!Export
 module.exports = {

@@ -42,6 +42,8 @@ const inventory = require('./api/inventoryHandlerApi.js');
 app.use('/api/inventory', inventory);
 const dungeon = require('./api/dungeonApi.js'); // server-authoritative dungeon routes (start, move, exit, etc.)
 app.use('/api/dungeon', dungeon);
+const events = require('./api/eventApi.js');
+app.use('/api/events', events);
 
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez
