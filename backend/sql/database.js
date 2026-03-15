@@ -652,6 +652,10 @@ async function transferGoldBetweenStorage(playerId, from, amount) {
     } catch (error) {
         await connection.rollback();
         return { success: false, message: 'Error transferring gold.' };
+    } finally {
+        connection.release();
+    }
+}
 // Admin Queries
 async function deleteUser(username) {
     // TODO: In the future, this should add to ban list instead of hard delete
