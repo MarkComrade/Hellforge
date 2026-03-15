@@ -50,7 +50,6 @@ CREATE TABLE `player_stash`(
     `armor_id` INT UNSIGNED DEFAULT NULL,
     `weapon_id` INT UNSIGNED DEFAULT NULL,
     `misc_item_id` INT UNSIGNED DEFAULT NULL,
-    `gold_amount` INT UNSIGNED DEFAULT NULL,
     CONSTRAINT `stash_player_foreign` FOREIGN KEY(`playerId`) REFERENCES `user`(`userId`),
     CONSTRAINT `stash_armor_foreign` FOREIGN KEY(`armor_id`) REFERENCES `armors`(`armorId`),
     CONSTRAINT `stash_weapon_foreign` FOREIGN KEY(`weapon_id`) REFERENCES `weapons`(`weaponId`),
@@ -147,12 +146,11 @@ INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, 
 
 INSERT INTO `admin` (`name`, `password`) VALUES ('admin1', 'adminpass1'), ('admin2', 'adminpass2');
 
-INSERT INTO `player_stash` (`playerId`, `armor_id`, `weapon_id`, `misc_item_id`, `gold_amount`) VALUES
-    (1, 3, NULL, NULL, NULL),
-    (1, 4, NULL, NULL, NULL),
-    (1, 5, NULL, NULL, NULL),
-    (1, NULL, 3, NULL, NULL),
-    (1, NULL, 4, NULL, NULL),
-    (1, NULL, 5, NULL, NULL),
-    (1, NULL, 6, NULL, NULL),
-    (1, NULL, NULL, NULL, 50);
+INSERT INTO `player_stash` (`playerId`, `armor_id`, `weapon_id`, `misc_item_id`) VALUES
+    (1, 3, NULL, NULL),
+    (1, 4, NULL, NULL),
+    (1, 5, NULL, NULL),
+    (1, NULL, 3, NULL),
+    (1, NULL, 4, NULL),
+    (1, NULL, 5, NULL),
+    (1, NULL, 6, NULL);

@@ -181,4 +181,51 @@ router.post('/loadout/moveToStash', async (request, response) => {
     }
 });
 
+router.get('/gold/:playerId', async (request, response) => {
+    const playerId = parseInt(request.params.playerId, 10);
+    if (!playerId) {
+        return response
+            .status(400)
+            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
+    }
+
+    try {
+        const result = await database.getGoldBalances(playerId);
+        response.status(result.success ? 200 : 500).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
+router.post('/gold/transfer', async (request, response) => {
+    const { playerId, from, amount } = request.body;
+    const parsedPlayerId = parseInt(playerId, 10);
+    const parsedAmount = parseInt(amount, 10);
+
+    if (!from || !Number.isInteger(parsedPlayerId) || parsedPlayerId <= 0) {
+        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
+    }
+
+    if (!Number.isInteger(parsedAmount) || parsedAmount <= 0) {
+        return response
+            .status(400)
+            .json({ success: false, message: 'Az összeg pozitív egész szám kell legyen' });
+    }
+
+    if (from !== 'stash' && from !== 'loadout') {
+        return response.status(400).json({ success: false, message: 'Érvénytelen forrás tároló' });
+    }
+
+    try {
+        const result = await database.transferGoldBetweenStorage(
+            parsedPlayerId,
+            from,
+            parsedAmount
+        );
+        response.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        response.status(500).json({ success: false, message: 'Szerver hiba' });
+    }
+});
+
 module.exports = router;
