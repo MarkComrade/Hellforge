@@ -36,6 +36,8 @@ const endpoints = require('./api/api.js');
 app.use('/api', endpoints);
 const login = require('./api/loginAuthApi.js');
 app.use('/api/loginAuthApi', login);
+const adminActions = require('./api/adminActions.js');
+app.use('/api/adminActions', adminActions);
 const inventory = require('./api/inventoryHandlerApi.js');
 app.use('/api/inventory', inventory);
 const dungeon = require('./api/dungeonApi.js'); // server-authoritative dungeon routes (start, move, exit, etc.)
