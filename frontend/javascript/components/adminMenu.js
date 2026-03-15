@@ -495,3 +495,4 @@ async function displayUserInventory(userId) {
         inventoryContainer.innerHTML = '<p class="menuText">Error loading inventory</p>';
     }
 }
+//asdsadasddsd
