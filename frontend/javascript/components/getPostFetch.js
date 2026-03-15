@@ -49,5 +49,19 @@ const postFetchForm = async (url, formData) => {
     } catch (error) {
         console.error('POST form request error:', error);
         throw error;
+const deleteFetch = async (url, data) => {
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error('hiba' + response.statusText + '(' + response.status + ')');
+        }
+        return await response.json();
+    } catch (error) {
+        throw new Error('hiba: ' + error.message);
     }
 };
