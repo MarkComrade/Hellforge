@@ -122,3 +122,153 @@ async function adminTools() {
     generateBackToMenu();
     //TODO: Implementation of admin tools
 }
+
+async function displayUserInventory(userId) {
+    const inventoryContainer = document.querySelector('.inventoryContainer');
+    inventoryContainer.innerHTML = '';
+
+    try {
+        // Fetch user inventory and all available items
+        const [inventoryResponse, armorsResponse, weaponsResponse] = await Promise.all([
+            getMethodFetch(`/api/adminActions/getUserInventory/${userId}`),
+            getMethodFetch('/api/adminActions/getAllArmors'),
+            getMethodFetch('/api/adminActions/getAllWeapons')
+        ]);
+
+        const inventory = inventoryResponse.inventory;
+        const armors = armorsResponse.armors;
+        const weapons = weaponsResponse.weapons;
+
+        // Create inventory title
+        const title = document.createElement('h2');
+        title.setAttribute('class', 'menuText');
+        title.textContent = `${inventory.username}'s Inventory`;
+        inventoryContainer.appendChild(title);
+
+        // Create editable form
+        const inventoryForm = document.createElement('form');
+        inventoryForm.setAttribute('class', 'inventoryDisplay');
+        inventoryForm.setAttribute('id', 'inventoryForm');
+        inventoryForm.setAttribute('data-user-id', userId);
+
+        // Gold input
+        const goldDiv = document.createElement('div');
+        goldDiv.setAttribute('class', 'inventoryItem');
+        goldDiv.innerHTML = `
+            <label class="menuText" for="goldInput">Gold:</label>
+            <input type="number" id="goldInput" class="menuInput inventoryInput" 
+                   value="${inventory.gold}" min="0" required>
+        `;
+        inventoryForm.appendChild(goldDiv);
+
+        // Helmet select
+        const helmetDiv = document.createElement('div');
+        helmetDiv.setAttribute('class', 'inventoryItem');
+        const helmetLabel = document.createElement('label');
+        helmetLabel.setAttribute('class', 'menuText');
+        helmetLabel.setAttribute('for', 'helmetSelect');
+        helmetLabel.textContent = 'Helmet:';
+        helmetDiv.appendChild(helmetLabel);
+
+        const helmetSelect = document.createElement('select');
+        helmetSelect.setAttribute('id', 'helmetSelect');
+        helmetSelect.setAttribute('class', 'menuSelect inventorySelect');
+        armors
+            .filter((armor) => armor.type === 'Helmet')
+            .forEach((armor) => {
+                const option = document.createElement('option');
+                option.value = armor.armorId;
+                option.textContent = `${armor.name} (Tier ${armor.tier})`;
+                if (armor.armorId === inventory.helmet_id) {
+                    option.selected = true;
+                }
+                helmetSelect.appendChild(option);
+            });
+        helmetDiv.appendChild(helmetSelect);
+        inventoryForm.appendChild(helmetDiv);
+
+        // Armor select
+        const armorDiv = document.createElement('div');
+        armorDiv.setAttribute('class', 'inventoryItem');
+        const armorLabel = document.createElement('label');
+        armorLabel.setAttribute('class', 'menuText');
+        armorLabel.setAttribute('for', 'armorSelect');
+        armorLabel.textContent = 'Armor:';
+        armorDiv.appendChild(armorLabel);
+
+        const armorSelect = document.createElement('select');
+        armorSelect.setAttribute('id', 'armorSelect');
+        armorSelect.setAttribute('class', 'menuSelect inventorySelect');
+        armors
+            .filter((armor) => armor.type === 'Armor')
+            .forEach((armor) => {
+                const option = document.createElement('option');
+                option.value = armor.armorId;
+                option.textContent = `${armor.name} (Tier ${armor.tier})`;
+                if (armor.armorId === inventory.armor_id) {
+                    option.selected = true;
+                }
+                armorSelect.appendChild(option);
+            });
+        armorDiv.appendChild(armorSelect);
+        inventoryForm.appendChild(armorDiv);
+
+        // Melee weapon select
+        const meleeDiv = document.createElement('div');
+        meleeDiv.setAttribute('class', 'inventoryItem');
+        const meleeLabel = document.createElement('label');
+        meleeLabel.setAttribute('class', 'menuText');
+        meleeLabel.setAttribute('for', 'meleeSelect');
+        meleeLabel.textContent = 'Melee:';
+        meleeDiv.appendChild(meleeLabel);
+
+        const meleeSelect = document.createElement('select');
+        meleeSelect.setAttribute('id', 'meleeSelect');
+        meleeSelect.setAttribute('class', 'menuSelect inventorySelect');
+        weapons
+            .filter((weapon) => weapon.type === 'Melee')
+            .forEach((weapon) => {
+                const option = document.createElement('option');
+                option.value = weapon.weaponId;
+                option.textContent = `${weapon.name} (Tier ${weapon.tier})`;
+                if (weapon.weaponId === inventory.melee_id) {
+                    option.selected = true;
+                }
+                meleeSelect.appendChild(option);
+            });
+        meleeDiv.appendChild(meleeSelect);
+        inventoryForm.appendChild(meleeDiv);
+
+        // Ranged weapon select
+        const rangedDiv = document.createElement('div');
+        rangedDiv.setAttribute('class', 'inventoryItem');
+        const rangedLabel = document.createElement('label');
+        rangedLabel.setAttribute('class', 'menuText');
+        rangedLabel.setAttribute('for', 'rangedSelect');
+        rangedLabel.textContent = 'Ranged:';
+        rangedDiv.appendChild(rangedLabel);
+
+        const rangedSelect = document.createElement('select');
+        rangedSelect.setAttribute('id', 'rangedSelect');
+        rangedSelect.setAttribute('class', 'menuSelect inventorySelect');
+        weapons
+            .filter((weapon) => weapon.type === 'Ranged')
+            .forEach((weapon) => {
+                const option = document.createElement('option');
+                option.value = weapon.weaponId;
+                option.textContent = `${weapon.name} (Tier ${weapon.tier})`;
+                if (weapon.weaponId === inventory.ranged_id) {
+                    option.selected = true;
+                }
+                rangedSelect.appendChild(option);
+            });
+        rangedDiv.appendChild(rangedSelect);
+        inventoryForm.appendChild(rangedDiv);
+
+        inventoryContainer.appendChild(inventoryForm);
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        inventoryContainer.innerHTML = '<p class="menuText">Error loading inventory</p>';
+    }
+}
+//asdsadasddsd
