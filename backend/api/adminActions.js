@@ -25,21 +25,7 @@ router.get('/test', (request, response) => {
         message: 'Ez a végpont működik.'
     });
 });
-//sadsaasd
-//?GET /api/testsql
-router.get('/testsql', async (request, response) => {
-    try {
-        const selectall = await database.selectall();
-        response.status(200).json({
-            message: 'Ez a végpont működik.',
-            results: selectall
-        });
-    } catch (error) {
-        response.status(500).json({
-            message: 'Ez a végpont nem működik.'
-        });
-    }
-});
+
 router.get('/getAllUsers', async (request, response) => {
     try {
         const result = await database.getAllUsers();
