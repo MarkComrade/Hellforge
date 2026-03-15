@@ -1,11 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     window.isInGame = false;
-
-    if (checkOrientation()) {
-        Menu();
-    }
-
-    document.body.classList.add('ready');
+    checkOrientation();
 
     //Start music
     document.addEventListener('click', function startMusicOnce() {

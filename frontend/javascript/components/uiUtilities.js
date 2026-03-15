@@ -50,3 +50,16 @@ function generateBackToMenu() {
     let backToMenu = document.querySelector('.backToMenu');
     backToMenu.appendChild(backButton);
 }
+function generateBackToAdminTools() {
+    generateBootStrapGrid(1, 1, 12, 'backToAdminTools');
+
+    let backButton = document.createElement('input');
+    backButton.setAttribute('type', 'button');
+    backButton.setAttribute('value', 'Back to Admin Tools');
+    backButton.setAttribute('class', 'menuButton');
+
+    backButton.addEventListener('click', Admin);
+
+    let backToAdminTools = document.querySelector('.backToAdminTools');
+    backToAdminTools.appendChild(backButton);
+}
