@@ -25,7 +25,7 @@ router.get('/test', (request, response) => {
         message: 'Ez a végpont működik.'
     });
 });
-
+//sadsaasd
 //?GET /api/testsql
 router.get('/testsql', async (request, response) => {
     try {
@@ -57,7 +57,7 @@ router.get('/getAllUsers', async (request, response) => {
 router.post('/deleteUser/:userId', async (request, response) => {
     try {
         const userId = request.params.userId;
-        
+
         if (!userId) {
             return response.status(400).json({
                 message: 'User ID is required.',
