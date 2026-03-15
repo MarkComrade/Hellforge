@@ -31,19 +31,23 @@ const postFetch = async (url, data) => {
     }
 };
 
-const deleteFetch = async (url, data) => {
+const postFetchForm = async (url, formData) => {
     try {
         const response = await fetch(url, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            method: 'POST',
+            body: formData
         });
 
         if (!response.ok) {
-            throw new Error('hiba' + response.statusText + '(' + response.status + ')');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                errorData.message || `Error: ${response.status} ${response.statusText}`
+            );
         }
+
         return await response.json();
     } catch (error) {
-        throw new Error('hiba: ' + error.message);
+        console.error('POST form request error:', error);
+        throw error;
     }
 };
