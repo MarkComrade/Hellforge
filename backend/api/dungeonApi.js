@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
+const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
 
 // Valid dungeon names — reject anything not in this list
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
@@ -75,7 +76,7 @@ router.post('/start', allowGuest, (req, res) => {
 
 // Move the player one cell — dx/dy must be a cardinal direction (e.g. dx=1,dy=0 = right)
 // movePlayer() returns null if the target cell doesn't exist (wall), preventing cheating
-router.post('/move', allowGuest, requireDungeon, (req, res) => {
+router.post('/move', allowGuest, requireDungeon, async (req, res) => {
     try {
         const { dx, dy } = req.body;
         if (dx === undefined || dy === undefined) {
@@ -88,6 +89,12 @@ router.post('/move', allowGuest, requireDungeon, (req, res) => {
         if (!Number.isInteger(ndx) || !Number.isInteger(ndy)) {
             return res.status(400).json({ success: false, message: 'dx/dy must be integers' });
         }
+
+        const targetX = req.dungeon.playerX + ndx;
+        const targetY = req.dungeon.playerY + ndy;
+        const targetKey = `${targetX},${targetY}`;
+        const targetRoom = req.dungeon.map[targetKey];
+        const wasVisited = !!targetRoom?.visited;
 
         // SECURITY: rate limit — prevent automated scripts from traversing instantly
         const sessionId = req.sessionID;
@@ -103,9 +110,27 @@ router.post('/move', allowGuest, requireDungeon, (req, res) => {
             return res.json({ success: false, message: 'Invalid move' });
         }
 
+        let lootEvent = null;
+        if (result.roomType === 'loot' && !wasVisited) {
+            const playerId = Number(req.session.userId);
+
+            if (Number.isInteger(playerId) && playerId > 0) {
+                lootEvent = await generateAndInsertLoot(
+                    playerId,
+                    req.dungeon.dungeonName,
+                    req.dungeon.dungeonLevel
+                );
+            } else {
+                lootEvent = {
+                    success: false,
+                    message: 'Loot event skipped: no logged-in player.'
+                };
+            }
+        }
+
         saveDungeon(req);
         // Spread result into response (position, roomType, doors, visited)
-        res.json({ success: true, ...result });
+        res.json({ success: true, ...result, lootEvent });
     } catch (error) {
         console.error('Move error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
