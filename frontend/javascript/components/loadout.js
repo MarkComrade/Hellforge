@@ -62,7 +62,10 @@ async function createLoadoutGoldPanel(playerId) {
 
     const refreshGoldControls = () => {
         const availableGold = Math.max(0, goldState.loadoutGold);
+        const blockedInGame = typeof isInGame !== 'undefined' && isInGame;
         amountSlider.max = String(Math.max(1, availableGold));
+
+        controlsRow.style.display = blockedInGame ? 'none' : 'flex';
 
         let transferAmount = parseLoadoutGold(amountSlider.value);
         if (transferAmount > availableGold) {
@@ -75,7 +78,7 @@ async function createLoadoutGoldPanel(playerId) {
                 ? `Transfer ${transferAmount} gold to stash`
                 : 'No loadout gold available to transfer';
         transferAmountLabel.textContent = `${transferAmount} gold`;
-        transferButton.disabled = availableGold === 0;
+        transferButton.disabled = availableGold === 0 || blockedInGame;
 
         currentGoldLabel.textContent = `Loadout Gold: ${goldState.loadoutGold}`;
     };
@@ -86,6 +89,12 @@ async function createLoadoutGoldPanel(playerId) {
     });
 
     transferButton.addEventListener('click', async () => {
+        if (typeof isInGame !== 'undefined' && isInGame) {
+            alert('You cannot move gold to stash while in game.');
+            refreshGoldControls();
+            return;
+        }
+
         const transferAmount = parseLoadoutGold(amountSlider.value);
         if (transferAmount <= 0) {
             return;
