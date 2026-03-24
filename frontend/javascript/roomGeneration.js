@@ -233,4 +233,3 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
             break;
     }
 }
-function createFrontendLootPopup(lootEvent) {}
