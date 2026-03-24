@@ -622,7 +622,7 @@ async function upgradeWeakestGearDB(weakestSlot, playerId) {
 async function fetchWeaponByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT weaponId AS id, name, tier
+            `SELECT weaponId AS id, name, tier, img_path
              FROM weapons
              WHERE tier = ?
              ORDER BY RAND()
@@ -639,7 +639,7 @@ async function fetchWeaponByTier(tier) {
 async function fetchArmorByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT armorId AS id, name, tier
+            `SELECT armorId AS id, name, tier, img_path
              FROM armors
              WHERE tier = ?
              ORDER BY RAND()
@@ -656,7 +656,7 @@ async function fetchArmorByTier(tier) {
 async function fetchRandomMisc() {
     try {
         const [rows] = await pool.query(
-            `SELECT itemId AS id, name
+            `SELECT itemId AS id, name, img_path
              FROM misc_items
              ORDER BY RAND()
              LIMIT 1`

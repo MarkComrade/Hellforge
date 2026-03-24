@@ -9,6 +9,7 @@ const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
 // Simple per-session rate limiter for moves (prevents speedhack scripts)
 const MOVE_COOLDOWN_MS = 150; // minimum ms between moves
 const lastMoveTime = new Map(); // sessionId → timestamp
+const GOLD_IMG_PATH = '../textures/items/coing.png';
 
 // ───── Middleware ─────
 // These functions run BEFORE the actual route handler.
@@ -125,6 +126,13 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
                     success: false,
                     message: 'Loot event skipped: no logged-in player.'
                 };
+            }
+        }
+
+        if (lootEvent && lootEvent.success) {
+            lootEvent.goldImgPath = lootEvent.goldImgPath || GOLD_IMG_PATH;
+            if (lootEvent.item) {
+                lootEvent.item.img_path = lootEvent.item.img_path || lootEvent.item.img || null;
             }
         }
 

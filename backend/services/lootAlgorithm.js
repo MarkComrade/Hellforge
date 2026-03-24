@@ -14,6 +14,7 @@ const types = {
     laboratory: 3,
     gates_of_hell: 4
 };
+const GOLD_IMG_PATH = '../textures/items/coing.png';
 function normalizeDungeonKey(dungeonName) {
     return String(dungeonName || '')
         .trim()
@@ -123,15 +124,28 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
             return dbResult;
         }
 
-        return {
+        const item = loot.item.item || null;
+        const normalizedItem = item
+            ? {
+                  ...item,
+                  img_path: item.img_path || item.img || null
+              }
+            : null;
+
+        const payload = {
             success: true,
             message: 'Loot added to loadout.',
             dungeon,
             level,
             tier: loot.tier,
             type: loot.item.type,
-            item: loot.item.item
+            item: normalizedItem,
+            goldImgPath: GOLD_IMG_PATH
         };
+
+        console.log('[LootPayload]', payload);
+
+        return payload;
     } catch (error) {
         console.error(error);
         return { success: false, message: 'Loot pipeline error.' };
@@ -221,7 +235,8 @@ async function generateFinalLoot(playerId, dungeon, level) {
                 message: 'Item found! Gold reduced.',
                 gold,
                 item: lootResult.item,
-                tier: lootResult.tier
+                tier: lootResult.tier,
+                goldImgPath: GOLD_IMG_PATH
             };
         }
 
@@ -233,7 +248,8 @@ async function generateFinalLoot(playerId, dungeon, level) {
             type: 'gold_only',
             message: 'Gold acquired.',
             gold,
-            item: null
+            item: null,
+            goldImgPath: GOLD_IMG_PATH
         };
     } catch (error) {
         console.error(error);
