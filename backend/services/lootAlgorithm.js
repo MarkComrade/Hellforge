@@ -5,7 +5,8 @@ const {
     fetchRandomMisc,
     insertIntoLoadout,
     upgradeWeakestGearDB,
-    getLoadout
+    getLoadout,
+    addGoldToInventory
 } = require('../sql/database.js');
 const types = {
     crypt: 1,
@@ -21,12 +22,9 @@ function normalizeDungeonKey(dungeonName) {
 }
 
 function getBaseTier(dungeon, level) {
-    const dungeonDifficulty = types[dungeon] ?? 1;
-    const parsedLevel = Number(level);
-    const safeLevel = Number.isFinite(parsedLevel) ? parsedLevel : 1;
-    const levelFactor = safeLevel / 20;
+    const dungeonDifficulty = types[dungeon];
 
-    let tier = Math.floor(dungeonDifficulty + levelFactor * 3);
+    let tier = dungeonDifficulty + Math.floor(level / 10);
 
     return Math.min(Math.max(tier, 1), 6);
 }
@@ -140,6 +138,22 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
     }
 }
 
+function shouldDropItem(dungeon, level) {
+    const dungeonKey = normalizeDungeonKey(dungeon);
+    const dungeonDifficulty = types[dungeonKey] || 1;
+
+    const levelFactor = level / 20;
+    const dungeonFactor = (dungeonDifficulty - 1) / 3;
+
+    const curvedLevel = Math.pow(levelFactor, 1.8);
+
+    let dropChance = 0.05 + curvedLevel * 0.65 + dungeonFactor * 0.25;
+
+    dropChance = Math.min(Math.max(dropChance, 0.05), 0.95);
+
+    return Math.random() < dropChance;
+}
+
 async function getAverageGearTier(playerId) {
     const result = await getLoadout(playerId);
 
@@ -166,21 +180,69 @@ async function getAverageGearTier(playerId) {
     return avgGearTier;
 }
 
-//dungein tipus kulonbseg
-//altag gearhez kepest pluisz minusz loot rng
-//hardcap dungeonokon
-//leggyengebb item upgrade
-//loot table szintenkent
-//varja a dungeon szintet tipust es player idt
-//visszaadja a lootot es a leggyengebb itemet amire upgradeelni lehetne
-//
-async function lootAlgorithm(dungeonLevel, playerId, dungeonName) {
-    // Implementation for loot algorithm
-    console.log(
-        `Running loot algorithm for dungeon level ${dungeonLevel}, player ID ${playerId}, dungeon name ${dungeonName}`
-    );
+function generateGoldReward(dungeon, level) {
+    const dungeonKey = normalizeDungeonKey(dungeon);
+    const dungeonDifficulty = types[dungeonKey] || 1;
+
+    const baseGold = level * 50 + dungeonDifficulty * 200;
+
+    const variance = baseGold * (Math.random() * 0.4 - 0.2);
+
+    let gold = Math.floor(baseGold + variance);
+
+    gold = Math.max(100, Math.min(gold, 10000));
+
+    return gold;
+}
+
+async function generateFinalLoot(playerId, dungeon, level) {
+    try {
+        const dropItem = shouldDropItem(dungeon, level);
+
+        let gold;
+
+        if (dropItem) {
+            const lootResult = await generateAndInsertLoot(playerId, dungeon, level);
+
+            if (!lootResult.success) {
+                return { success: false, message: 'Item generation failed.' };
+            }
+
+            // Reduce gold heavily (10%–30%)
+            const baseGold = generateGoldReward(dungeon, level);
+            const reducedMultiplier = 0.1 + Math.random() * 0.2;
+            gold = Math.floor(baseGold * reducedMultiplier);
+
+            await addGoldToInventory(playerId, gold);
+
+            return {
+                success: true,
+                type: 'item_drop',
+                message: 'Item found! Gold reduced.',
+                gold,
+                item: lootResult.item,
+                tier: lootResult.tier
+            };
+        }
+
+        gold = generateGoldReward(dungeon, level);
+        await addGoldToInventory(playerId, gold);
+
+        return {
+            success: true,
+            type: 'gold_only',
+            message: 'Gold acquired.',
+            gold,
+            item: null
+        };
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Final loot pipeline error.' };
+    }
 }
 
 module.exports = {
-    generateAndInsertLoot
+    generateAndInsertLoot,
+    generateGoldReward,
+    generateFinalLoot
 };

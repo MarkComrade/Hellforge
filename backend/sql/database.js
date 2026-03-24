@@ -708,6 +708,18 @@ async function insertIntoLoadout(playerId, type, itemId) {
         };
     }
 }
+//gold add
+async function addGoldToInventory(userId, goldAmount) {
+    const query = `
+        UPDATE player_inventory
+        SET gold = gold + ?
+        WHERE playerId = ?
+    `;
+
+    const [result] = await pool.execute(query, [goldAmount, userId]);
+
+    return result;
+}
 //!Export
 module.exports = {
     pool,
@@ -740,5 +752,6 @@ module.exports = {
     fetchWeaponByTier,
     fetchArmorByTier,
     fetchRandomMisc,
-    insertIntoLoadout
+    insertIntoLoadout,
+    addGoldToInventory
 };

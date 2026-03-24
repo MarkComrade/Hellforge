@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
-const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
+const { generateFinalLoot } = require('../services/lootAlgorithm.js');
 
 // Valid dungeon names — reject anything not in this list
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
@@ -115,7 +115,7 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
             const playerId = Number(req.session.userId);
 
             if (Number.isInteger(playerId) && playerId > 0) {
-                lootEvent = await generateAndInsertLoot(
+                lootEvent = await generateFinalLoot(
                     playerId,
                     req.dungeon.dungeonName,
                     req.dungeon.dungeonLevel
