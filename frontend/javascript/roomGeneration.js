@@ -161,22 +161,13 @@ function roomEventHandler(room, dungeonLevel, result) {
             //combatStart();
             break;
         case 'loot':
-            //lootGained();
-            const goldAmount = Number(result.lootEvent.gold || 0);
-            const itemName = result.lootEvent.item?.name || 'none';
-            const itemPath =
-                result.lootEvent.item?.img_path || result.lootEvent.item?.img || 'none';
-            const goldPath = result.lootEvent.goldImgPath || 'none';
-            console.log(
-                `[LootEvent] type=${result.lootEvent.type || 'unknown'} | gold=${goldAmount} | goldPath=${goldPath} | item=${itemName} | itemPath=${itemPath}`
-            );
-            createFrontendLootPopup(result.lootEvent);
+            createFrontendLootPopup(result.Event);
             break;
         case 'shop':
             //openShop();
             break;
         case 'event':
-            //triggerEvent();
+            createFrontendEvent(result.Event);
             break;
         case 'out':
             let trapdoor = document.createElement('img');

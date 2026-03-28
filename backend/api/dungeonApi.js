@@ -111,34 +111,33 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
             return res.json({ success: false, message: 'Invalid move' });
         }
 
-        let lootEvent = null;
+        let Event = null;
         if (result.roomType === 'loot' && !wasVisited) {
             const playerId = Number(req.session.userId);
 
             if (Number.isInteger(playerId) && playerId > 0) {
-                lootEvent = await generateFinalLoot(
+                Event = await generateFinalLoot(
                     playerId,
                     req.dungeon.dungeonName,
                     req.dungeon.dungeonLevel
                 );
             } else {
-                lootEvent = {
+                Event = {
                     success: false,
                     message: 'Loot event skipped: no logged-in player.'
                 };
             }
-        }
-
-        if (lootEvent && lootEvent.success) {
-            lootEvent.goldImgPath = lootEvent.goldImgPath || GOLD_IMG_PATH;
-            if (lootEvent.item) {
-                lootEvent.item.img_path = lootEvent.item.img_path || lootEvent.item.img || null;
+            if (Event && Event.success) {
+                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
+                if (Event.item) {
+                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
+                }
             }
         }
 
         saveDungeon(req);
         // Spread result into response (position, roomType, doors, visited)
-        res.json({ success: true, ...result, lootEvent });
+        res.json({ success: true, ...result, Event });
     } catch (error) {
         console.error('Move error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
