@@ -123,25 +123,13 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 renderPlayerPosition(result.position);
                 renderDoors(result.doors, dungeon);
 
-                if (result.lootEvent) {
-                    const goldAmount = Number(result.lootEvent.gold || 0);
-                    const itemName = result.lootEvent.item?.name || 'none';
-                    const itemPath =
-                        result.lootEvent.item?.img_path || result.lootEvent.item?.img || 'none';
-                    const goldPath = result.lootEvent.goldImgPath || 'none';
-                    console.log(
-                        `[LootEvent] type=${result.lootEvent.type || 'unknown'} | gold=${goldAmount} | goldPath=${goldPath} | item=${itemName} | itemPath=${itemPath}`
-                    );
-                    createFrontendLootPopup(result.lootEvent);
-                }
-
                 //console.log(`Current position: (${result.position.x}, ${result.position.y})`);
 
                 // Handle room events with server-validated data
                 const cell = document.querySelector('#map .cell[data-current="true"]');
                 if (cell && result.roomType) {
                     cell.dataset.roomType = result.roomType;
-                    roomEventHandler(cell, dungeonLevel, result.roomType);
+                    roomEventHandler(cell, dungeonLevel, result);
                 }
             } catch (error) {
                 console.log('Move failed:', error.message);
@@ -151,9 +139,9 @@ function navigateToRoom(startX, startY, dungeonLevel) {
 }
 
 // Room event handler — uses server-provided roomType instead of client DOM data
-function roomEventHandler(room, dungeonLevel, serverRoomType) {
+function roomEventHandler(room, dungeonLevel, result) {
     // Use server-provided roomType if available, fall back to DOM (for start room)
-    const roomType = serverRoomType || room.dataset.roomType;
+    const roomType = result.roomType || room.dataset.roomType;
 
     if (roomType !== 'out') {
         let trapdoor = document.getElementById('trapDoor');
@@ -174,6 +162,15 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
             break;
         case 'loot':
             //lootGained();
+            const goldAmount = Number(result.lootEvent.gold || 0);
+            const itemName = result.lootEvent.item?.name || 'none';
+            const itemPath =
+                result.lootEvent.item?.img_path || result.lootEvent.item?.img || 'none';
+            const goldPath = result.lootEvent.goldImgPath || 'none';
+            console.log(
+                `[LootEvent] type=${result.lootEvent.type || 'unknown'} | gold=${goldAmount} | goldPath=${goldPath} | item=${itemName} | itemPath=${itemPath}`
+            );
+            createFrontendLootPopup(result.lootEvent);
             break;
         case 'shop':
             //openShop();
