@@ -114,19 +114,17 @@ INSERT INTO `weapons` (`type`, `name`, `img_path`, `tier`, `price`, `attack_mult
     ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 1600, 3.2);
 
 INSERT INTO `user` (`name`, `password`) VALUES
-    ('test_player_1', 'password1'),
-    ('test_player_2', 'password2'),
-    ('test_player_3', 'password3'),
-    ('test_player_4', 'password4'),
-    ('test_player_5', 'password5'),
-    ('test_player_6', 'password6'),
-    ('test_player_7', 'password7'),
-    ('test_player_8', 'password8'),
-    ('test_player_9', 'password9'),
-    ('test_player_10', 'password10'),
-    ('test_player_11', 'password11'),
-    ('test_player_12', 'password12'),
-    ('test_player_13', 'password13');
+    ('test_player_1',  '$2b$12$VF39VlT.u4aYpVfEkEIjReijHK5Vh.W/1fsv/2K/YWLsvaLk8qr1K'),
+    ('test_player_2',  '$2b$12$5/kPX.UYOQDnL6n4TsBWV.29QBYX8MlE3507KsO5qtQs/yhjP2CDq'),
+    ('test_player_3',  '$2b$12$YN/neNEDfcqMRnBmQLGAeeTq3O6mMdWMcxuulFb85FxWMg.CHQz9y'),
+    ('test_player_4',  '$2b$12$fvYI7KXvMT6DNNk8l7uNT.2xlnwuKqGCN7arMQuARDL/fxRgp22/K'),
+    ('test_player_5',  '$2b$12$6xvix2HOLcoUxTlicJCGOOgK7vMhY.7b1pLAFOLxwH6YPXMX/4PGS'),
+    ('test_player_6',  '$2b$12$bzkiZPo0HXhtLCXv2B9qX.S2XBdhJD4EddD8Bm2CzGE/wXmvoBYUa'),
+    ('test_player_7',  '$2b$12$.wv2IzxmcGGfSVV.ufkToeCwvZfueqffyPerYaxDQZPRPbIYzZKVe'),
+    ('test_player_8',  '$2b$12$GoYlITs4oc38MMHKgNhEcOB1zTL8J4qj4f68tNT8NgTkndfClWWZi'),
+    ('test_player_9',  '$2b$12$qKAihZFDuHJiq0SIFjI/Yu8Q1fotlcU4sLFRkVe7PhGqUGhkF.iwi'),
+    ('test_player_10', '$2b$12$CdstJyjCSmG0S6S3jLmc5OtLImYjn1nLOzLTwe46cW2lplpFuEStq');
+ 
 
 INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, `ranged`) VALUES
     (1, 100, 1, 2, 1, 2),

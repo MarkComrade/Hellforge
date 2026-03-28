@@ -1,4 +1,7 @@
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
+
+const SALT_ROUNDS = 10;
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -25,7 +28,9 @@ async function loginUser(username, password) {
 
         const user = rows[0];
 
-        if (user.password !== password) {
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
             return { success: false, message: 'Helytelen jelszó' };
         }
 
@@ -50,16 +55,18 @@ async function registerUser(username, password) {
             };
         }
 
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
         const [result] = await pool.query('INSERT INTO user (name, password) VALUES (?, ?)', [
             username,
-            password
+            hashedPassword
         ]);
 
         await pool.query('INSERT INTO player_inventory (playerId) VALUES (?)', [result.insertId]);
 
         return { success: true, userId: result.insertId, message: 'Sikeres regisztráció' };
     } catch (error) {
-        return { success: false, message: error.message || 'Hiba történt a regisztráció során' };
+        return { success: false, message: 'Hiba történt a regisztráció során' };
     }
 }
 
@@ -73,7 +80,9 @@ async function loginAdmin(username, password) {
 
         const admin = rows[0];
 
-        if (admin.password !== password) {
+        const passwordMatch = await bcrypt.compare(password, admin.password);
+
+        if (!passwordMatch) {
             return { success: false, message: 'Helytelen jelszó' };
         }
 
