@@ -136,10 +136,7 @@ INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, 
     (7, 150, 1, 2, 3, 4),
     (8, 300, 3, 4, 5, 6),
     (9, 650, 5, 6, 7, 8),
-    (10, 950, 7, 8, 9, 10),
-    (11, 777, 7, 8, 9, 10),
-    (12, 555, 9, 4, 1, 5),
-    (13, 333, 5, 8, 6, 1);
+    (10, 950, 7, 8, 9, 10);
 
 
 INSERT INTO `admin` (`name`, `password`) VALUES ('admin1', 'adminpass1'), ('admin2', 'adminpass2');
