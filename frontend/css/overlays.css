@@ -37,7 +37,6 @@
     height: 10vh;
     border: 0.3vh solid rgb(220, 40, 40);
     background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -207,6 +206,74 @@
     font-family: 'MedievalSharp', cursive;
 }
 
+/* Loot popup */
+.lootPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 34vh;
+    max-width: 62vh;
+    padding: 2vh 2.4vh;
+    border: 0.24vh solid rgb(220, 40, 40);
+    border-radius: 0.8vh;
+    background: rgba(8, 8, 8, 0.95);
+    z-index: 12000;
+    pointer-events: none;
+    box-shadow: 0 0 2vh rgba(0, 0, 0, 0.6);
+    animation: lootPopupInOut 3.2s ease forwards;
+}
+
+.lootPopupTitle {
+    margin: 0 0 1.3vh 0;
+    text-align: center;
+    color: rgb(255, 180, 40);
+    font-size: 2.6vh;
+}
+
+.lootPopupContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1vh;
+}
+
+.lootPopupRow {
+    display: flex;
+    align-items: center;
+    gap: 1.2vh;
+}
+
+.lootPopupImg {
+    width: 5.4vh;
+    height: 5.4vh;
+    object-fit: contain;
+}
+
+.lootPopupText {
+    color: rgb(235, 235, 235);
+    font-size: 2.1vh;
+}
+
+@keyframes lootPopupInOut {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    86% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -52%) scale(0.98);
+    }
+}
+
+/* Gold transfer panel */
 .goldTransferPanel {
     display: flex;
     flex-direction: column;

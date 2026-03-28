@@ -736,7 +736,118 @@ async function updateUserInventory(userId, inventoryData) {
     ]);
     return result;
 }
+//dungeonloot algorithm
+async function upgradeWeakestGearDB(weakestSlot, playerId) {
+    const query = `
+        UPDATE player_inventory 
+        SET ? = ? + 1
+        WHERE playerId = ?
+    `;
+    const [result] = await pool.execute(query, [weakestSlot, weakestSlot, playerId]);
+    return result;
+}
+//loot fetches
+async function fetchWeaponByTier(tier) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT weaponId AS id, name, tier, img_path
+             FROM weapons
+             WHERE tier = ?
+             ORDER BY RAND()
+             LIMIT 1`,
+            [tier]
+        );
 
+        return rows[0] || null;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+async function fetchArmorByTier(tier) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT armorId AS id, name, tier, img_path
+             FROM armors
+             WHERE tier = ?
+             ORDER BY RAND()
+             LIMIT 1`,
+            [tier]
+        );
+
+        return rows[0] || null;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+async function fetchRandomMisc() {
+    try {
+        const [rows] = await pool.query(
+            `SELECT itemId AS id, name, img_path
+             FROM misc_items
+             ORDER BY RAND()
+             LIMIT 1`
+        );
+
+        return rows[0] || null;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+async function insertIntoLoadout(playerId, type, itemId) {
+    try {
+        let query;
+        let params;
+
+        if (type === 'weapon') {
+            query = `
+                INSERT INTO player_loadout (playerId, weapon_id)
+                VALUES (?, ?)
+            `;
+        } else if (type === 'armor') {
+            query = `
+                INSERT INTO player_loadout (playerId, armor_id)
+                VALUES (?, ?)
+            `;
+        } else if (type === 'misc') {
+            query = `
+                INSERT INTO player_loadout (playerId, misc_item_id)
+                VALUES (?, ?)
+            `;
+        } else {
+            return { success: false, message: 'Invalid item type.' };
+        }
+
+        params = [playerId, itemId];
+
+        await pool.query(query, params);
+
+        return {
+            success: true,
+            message: 'Item inserted into loadout.'
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: 'Database error while inserting loot.'
+        };
+    }
+}
+//gold add
+async function addGoldToInventory(userId, goldAmount) {
+    const query = `
+        UPDATE player_inventory
+        SET gold = gold + ?
+        WHERE playerId = ?
+    `;
+
+    const [result] = await pool.execute(query, [goldAmount, userId]);
+
+    return result;
+}
 //!Export
 module.exports = {
     pool,
@@ -766,5 +877,11 @@ module.exports = {
     getAllArmors,
     getAllWeapons,
     updateUserInventory,
-    deleteUser
+    deleteUser,
+    upgradeWeakestGearDB,
+    fetchWeaponByTier,
+    fetchArmorByTier,
+    fetchRandomMisc,
+    insertIntoLoadout,
+    addGoldToInventory
 };

@@ -123,7 +123,19 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 renderPlayerPosition(result.position);
                 renderDoors(result.doors, dungeon);
 
-                console.log(`Current position: (${result.position.x}, ${result.position.y})`);
+                if (result.lootEvent) {
+                    const goldAmount = Number(result.lootEvent.gold || 0);
+                    const itemName = result.lootEvent.item?.name || 'none';
+                    const itemPath =
+                        result.lootEvent.item?.img_path || result.lootEvent.item?.img || 'none';
+                    const goldPath = result.lootEvent.goldImgPath || 'none';
+                    console.log(
+                        `[LootEvent] type=${result.lootEvent.type || 'unknown'} | gold=${goldAmount} | goldPath=${goldPath} | item=${itemName} | itemPath=${itemPath}`
+                    );
+                    createFrontendLootPopup(result.lootEvent);
+                }
+
+                //console.log(`Current position: (${result.position.x}, ${result.position.y})`);
 
                 // Handle room events with server-validated data
                 const cell = document.querySelector('#map .cell[data-current="true"]');
@@ -154,27 +166,20 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
         }
     }
 
-    console.log(`Entered room type: ${roomType}`);
-
     switch (roomType) {
         case 'start':
-            console.log('Spawn room entered');
             break;
         case 'combat':
-            console.log('Combat room entered');
-            combatStart();
+            //combatStart();
             break;
         case 'loot':
-            console.log('Loot room entered');
-            lootGained();
+            //lootGained();
             break;
         case 'shop':
-            console.log('Shop room entered');
-            openShop();
+            //openShop();
             break;
         case 'event':
-            console.log('Event room entered');
-            triggerEvent();
+            //triggerEvent();
             break;
         case 'out':
             let trapdoor = document.createElement('img');
