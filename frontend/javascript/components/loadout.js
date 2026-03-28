@@ -1,3 +1,138 @@
+function parseLoadoutGold(value) {
+    const amount = parseInt(value, 10);
+    if (!Number.isFinite(amount) || amount < 0) {
+        return 0;
+    }
+    return amount;
+}
+
+function mapLoadoutGold(gold) {
+    return {
+        stashGold: Math.max(0, parseLoadoutGold(gold.stash)),
+        loadoutGold: Math.max(0, parseLoadoutGold(gold.loadout))
+    };
+}
+
+async function fetchLoadoutGold(playerId) {
+    try {
+        const result = await getMethodFetch(`/api/inventory/gold/${playerId}`);
+        if (result.success && result.gold) {
+            return mapLoadoutGold(result.gold);
+        }
+    } catch (error) {
+        console.error('Failed to load gold balances:', error);
+    }
+
+    return {
+        stashGold: 0,
+        loadoutGold: 0
+    };
+}
+
+async function createLoadoutGoldPanel(playerId) {
+    let goldState = await fetchLoadoutGold(playerId);
+
+    const panel = document.createElement('div');
+    panel.setAttribute('class', 'goldTransferPanel');
+
+    const currentGoldLabel = document.createElement('span');
+    currentGoldLabel.setAttribute('class', 'stashCount goldTransferCurrentGold');
+    panel.appendChild(currentGoldLabel);
+
+    const controlsRow = document.createElement('div');
+    controlsRow.setAttribute('class', 'goldTransferControls');
+
+    const amountSlider = document.createElement('input');
+    amountSlider.setAttribute('class', 'goldTransferAmountSlider');
+    amountSlider.setAttribute('type', 'range');
+    amountSlider.setAttribute('min', '0');
+    amountSlider.value = '0';
+
+    const transferAmountLabel = document.createElement('span');
+    transferAmountLabel.setAttribute('class', 'stashCount goldTransferAmountLabel');
+
+    const transferButton = document.createElement('button');
+    transferButton.setAttribute('class', 'stashEquipBtn');
+    transferButton.textContent = 'Move to Stash';
+
+    controlsRow.appendChild(amountSlider);
+    controlsRow.appendChild(transferAmountLabel);
+    controlsRow.appendChild(transferButton);
+    panel.appendChild(controlsRow);
+
+    const refreshGoldControls = () => {
+        const availableGold = Math.max(0, goldState.loadoutGold);
+        const blockedInGame = typeof isInGame !== 'undefined' && isInGame;
+        amountSlider.max = String(Math.max(1, availableGold));
+
+        controlsRow.style.display = blockedInGame ? 'none' : 'flex';
+
+        let transferAmount = parseLoadoutGold(amountSlider.value);
+        if (transferAmount > availableGold) {
+            transferAmount = availableGold;
+        }
+
+        amountSlider.value = String(transferAmount);
+        amountSlider.title =
+            availableGold > 0
+                ? `Transfer ${transferAmount} gold to stash`
+                : 'No loadout gold available to transfer';
+        transferAmountLabel.textContent = `${transferAmount} gold`;
+        transferButton.disabled = availableGold === 0 || blockedInGame;
+
+        currentGoldLabel.textContent = `Loadout Gold: ${goldState.loadoutGold}`;
+    };
+
+    amountSlider.addEventListener('input', () => {
+        amountSlider.title = `Transfer ${amountSlider.value} gold to stash`;
+        transferAmountLabel.textContent = `${amountSlider.value} gold`;
+    });
+
+    transferButton.addEventListener('click', async () => {
+        if (typeof isInGame !== 'undefined' && isInGame) {
+            alert('You cannot move gold to stash while in game.');
+            refreshGoldControls();
+            return;
+        }
+
+        const transferAmount = parseLoadoutGold(amountSlider.value);
+        if (transferAmount <= 0) {
+            return;
+        }
+        if (transferAmount > goldState.loadoutGold) {
+            alert('Not enough gold in loadout.');
+            refreshGoldControls();
+            return;
+        }
+
+        transferButton.disabled = true;
+        try {
+            const result = await postFetch('/api/inventory/gold/transfer', {
+                playerId: playerId,
+                from: 'loadout',
+                amount: transferAmount
+            });
+
+            if (result.success && result.gold) {
+                goldState = mapLoadoutGold(result.gold);
+            } else {
+                alert(result.message || 'Failed to transfer gold.');
+                goldState = await fetchLoadoutGold(playerId);
+            }
+        } catch (error) {
+            alert('Failed to transfer gold.');
+            goldState = await fetchLoadoutGold(playerId);
+        } finally {
+            amountSlider.value = '0';
+            transferButton.disabled = false;
+            refreshGoldControls();
+        }
+    });
+
+    refreshGoldControls();
+    return panel;
+}
+
 async function openInventory() {
     const body = document.body;
 
@@ -39,9 +174,11 @@ async function openInventory() {
 
     inventoryOverlay.appendChild(header);
 
+    const goldTransferPanel = await createLoadoutGoldPanel(playerId);
+    inventoryOverlay.appendChild(goldTransferPanel);
+
     const equippedTitle = document.createElement('span');
-    equippedTitle.setAttribute('class', 'stashTitle');
-    equippedTitle.style.fontSize = '3vh';
+    equippedTitle.setAttribute('class', 'stashTitle inventorySectionTitle');
     equippedTitle.textContent = 'Equipped';
     inventoryOverlay.appendChild(equippedTitle);
 
@@ -50,9 +187,7 @@ async function openInventory() {
     inventoryOverlay.appendChild(equippedGrid);
 
     const loadoutTitle = document.createElement('span');
-    loadoutTitle.setAttribute('class', 'stashTitle');
-    loadoutTitle.style.fontSize = '3vh';
-    loadoutTitle.style.marginTop = '2vh';
+    loadoutTitle.setAttribute('class', 'stashTitle inventorySectionTitle loadoutSectionTitle');
     loadoutTitle.textContent = 'Carried Items';
     inventoryOverlay.appendChild(loadoutTitle);
 

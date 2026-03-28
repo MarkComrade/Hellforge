@@ -103,7 +103,7 @@ async function getAllUsers() {
 
 //!Stash Queries
 
-const STASH_LIMIT = 60;
+const STASH_LIMIT = 50;
 
 async function getStash(playerId) {
     try {
@@ -116,7 +116,8 @@ async function getStash(playerId) {
              LEFT JOIN armors a ON s.armor_id = a.armorId
              LEFT JOIN weapons w ON s.weapon_id = w.weaponId
              LEFT JOIN misc_items m ON s.misc_item_id = m.itemId
-             WHERE s.playerId = ?`,
+             WHERE s.playerId = ?
+               AND (s.armor_id IS NOT NULL OR s.weapon_id IS NOT NULL OR s.misc_item_id IS NOT NULL)`,
             [playerId]
         );
         return { success: true, stash: rows };
@@ -127,7 +128,10 @@ async function getStash(playerId) {
 
 async function getStashCount(playerId) {
     const [rows] = await pool.query(
-        'SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?',
+        `SELECT COUNT(*) AS count
+         FROM player_stash
+         WHERE playerId = ?
+           AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
         [playerId]
     );
     return rows[0].count;
@@ -231,7 +235,6 @@ async function swapEquipment(playerId, stashId, slot) {
     try {
         await connection.beginTransaction();
 
-        // Get the stash item
         const [stashRows] = await connection.query(
             `SELECT * FROM player_stash WHERE stashId = ? AND playerId = ?`,
             [stashId, playerId]
@@ -242,7 +245,6 @@ async function swapEquipment(playerId, stashId, slot) {
         }
         const stashItem = stashRows[0];
 
-        // Determine new item id from stash based on slot
         let newItemId;
         if (slot === 'helmet' || slot === 'armor') {
             newItemId = stashItem.armor_id;
@@ -258,20 +260,17 @@ async function swapEquipment(playerId, stashId, slot) {
             }
         }
 
-        // Get currently equipped item id
         const [invRows] = await connection.query(
             `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
             [playerId]
         );
         const currentEquippedId = invRows[0].equippedId;
 
-        // Update equipped slot to new item
         await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
             newItemId,
             playerId
         ]);
 
-        // Update the stash row: replace item with old equipped item
         if (slot === 'helmet' || slot === 'armor') {
             await connection.query(
                 `UPDATE player_stash SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE stashId = ?`,
@@ -309,7 +308,8 @@ async function getLoadout(playerId) {
              LEFT JOIN armors a ON l.armor_id = a.armorId
              LEFT JOIN weapons w ON l.weapon_id = w.weaponId
              LEFT JOIN misc_items m ON l.misc_item_id = m.itemId
-             WHERE l.playerId = ?`,
+             WHERE l.playerId = ?
+               AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)`,
             [playerId]
         );
         return { success: true, loadout: rows };
@@ -320,7 +320,10 @@ async function getLoadout(playerId) {
 
 async function getLoadoutCount(playerId) {
     const [rows] = await pool.query(
-        'SELECT COUNT(*) AS count FROM player_loadout WHERE playerId = ?',
+        `SELECT COUNT(*) AS count
+         FROM player_loadout
+         WHERE playerId = ?
+           AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
         [playerId]
     );
     return rows[0].count;
@@ -331,9 +334,11 @@ async function moveStashToLoadout(playerId, stashId) {
     try {
         await connection.beginTransaction();
 
-        // Check loadout limit
         const [countRows] = await connection.query(
-            'SELECT COUNT(*) AS count FROM player_loadout WHERE playerId = ?',
+            `SELECT COUNT(*) AS count
+                         FROM player_loadout
+                         WHERE playerId = ?
+                             AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
             [playerId]
         );
         if (countRows[0].count >= LOADOUT_LIMIT) {
@@ -341,7 +346,6 @@ async function moveStashToLoadout(playerId, stashId) {
             return { success: false, message: 'Inventory is full.' };
         }
 
-        // Get the stash item
         const [stashRows] = await connection.query(
             'SELECT * FROM player_stash WHERE stashId = ? AND playerId = ?',
             [stashId, playerId]
@@ -352,13 +356,11 @@ async function moveStashToLoadout(playerId, stashId) {
         }
         const stashItem = stashRows[0];
 
-        // Insert into loadout
         await connection.query(
             'INSERT INTO player_loadout (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
             [playerId, stashItem.armor_id, stashItem.weapon_id, stashItem.misc_item_id]
         );
 
-        // Remove from stash
         await connection.query('DELETE FROM player_stash WHERE stashId = ? AND playerId = ?', [
             stashId,
             playerId
@@ -384,7 +386,6 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
     try {
         await connection.beginTransaction();
 
-        // Get the loadout item
         const [loadoutRows] = await connection.query(
             'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
             [loadoutId, playerId]
@@ -395,7 +396,6 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
         }
         const loadoutItem = loadoutRows[0];
 
-        // Determine new item id from loadout based on slot
         let newItemId;
         if (slot === 'helmet' || slot === 'armor') {
             newItemId = loadoutItem.armor_id;
@@ -411,20 +411,17 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
             }
         }
 
-        // Get currently equipped item id
         const [invRows] = await connection.query(
             `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
             [playerId]
         );
         const currentEquippedId = invRows[0].equippedId;
 
-        // Update equipped slot to new item
         await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
             newItemId,
             playerId
         ]);
 
-        // Update the loadout row: replace item with old equipped item
         if (slot === 'helmet' || slot === 'armor') {
             await connection.query(
                 'UPDATE player_loadout SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE loadoutId = ?',
@@ -467,9 +464,11 @@ async function moveLoadoutToStash(playerId, loadoutId) {
     try {
         await connection.beginTransaction();
 
-        // Check stash limit
         const [countRows] = await connection.query(
-            'SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?',
+            `SELECT COUNT(*) AS count
+                         FROM player_stash
+                         WHERE playerId = ?
+                             AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
             [playerId]
         );
         if (countRows[0].count >= STASH_LIMIT) {
@@ -477,7 +476,6 @@ async function moveLoadoutToStash(playerId, loadoutId) {
             return { success: false, message: 'Stash is full.' };
         }
 
-        // Get the loadout item
         const [loadoutRows] = await connection.query(
             'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
             [loadoutId, playerId]
@@ -488,13 +486,11 @@ async function moveLoadoutToStash(playerId, loadoutId) {
         }
         const loadoutItem = loadoutRows[0];
 
-        // Insert into stash
         await connection.query(
             'INSERT INTO player_stash (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
             [playerId, loadoutItem.armor_id, loadoutItem.weapon_id, loadoutItem.misc_item_id]
         );
 
-        // Remove from loadout
         await connection.query('DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?', [
             loadoutId,
             playerId
@@ -510,6 +506,138 @@ async function moveLoadoutToStash(playerId, loadoutId) {
     }
 }
 
+async function getGoldBalances(playerId) {
+    try {
+        const [inventoryRows] = await pool.query(
+            `SELECT COALESCE(gold, 0) AS total
+             FROM player_inventory
+             WHERE playerId = ?`,
+            [playerId]
+        );
+
+        const [loadoutRows] = await pool.query(
+            `SELECT COALESCE(SUM(gold_amount), 0) AS total
+             FROM player_loadout
+             WHERE playerId = ?
+               AND gold_amount IS NOT NULL`,
+            [playerId]
+        );
+
+        return {
+            success: true,
+            gold: {
+                stash: inventoryRows.length > 0 ? Number(inventoryRows[0].total) : 0,
+                loadout: Number(loadoutRows[0].total)
+            }
+        };
+    } catch (error) {
+        return { success: false, message: 'Error reading gold balances.' };
+    }
+}
+
+async function transferGoldBetweenStorage(playerId, from, amount) {
+    const normalizedAmount = parseInt(amount, 10);
+    if (from !== 'stash' && from !== 'loadout') {
+        return { success: false, message: 'Invalid source storage.' };
+    }
+
+    if (!Number.isInteger(normalizedAmount) || normalizedAmount <= 0) {
+        return { success: false, message: 'Amount must be a positive whole number.' };
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [inventoryRows] = await connection.query(
+            `SELECT COALESCE(gold, 0) AS gold
+             FROM player_inventory
+             WHERE playerId = ?
+             LIMIT 1
+             FOR UPDATE`,
+            [playerId]
+        );
+
+        if (inventoryRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Player inventory not found.' };
+        }
+
+        const stashGold = Number(inventoryRows[0].gold);
+
+        const [loadoutRows] = await connection.query(
+            `SELECT COALESCE(SUM(gold_amount), 0) AS total
+             FROM player_loadout
+             WHERE playerId = ?
+               AND gold_amount IS NOT NULL
+             FOR UPDATE`,
+            [playerId]
+        );
+        const loadoutGold = Number(loadoutRows[0].total);
+        const initialTotalGold = stashGold + loadoutGold;
+
+        const sourceTotal = from === 'stash' ? stashGold : loadoutGold;
+
+        if (sourceTotal < normalizedAmount) {
+            await connection.rollback();
+            return { success: false, message: 'Not enough gold in source storage.' };
+        }
+
+        let updatedStashGold = stashGold;
+        let updatedLoadoutGold = loadoutGold;
+
+        if (from === 'stash') {
+            updatedStashGold = stashGold - normalizedAmount;
+            updatedLoadoutGold = loadoutGold + normalizedAmount;
+        } else {
+            updatedLoadoutGold = loadoutGold - normalizedAmount;
+            updatedStashGold = stashGold + normalizedAmount;
+        }
+
+        await connection.query(
+            `UPDATE player_inventory
+             SET gold = ?
+             WHERE playerId = ?`,
+            [updatedStashGold, playerId]
+        );
+
+        await connection.query(
+            `DELETE FROM player_loadout
+             WHERE playerId = ?
+               AND gold_amount IS NOT NULL`,
+            [playerId]
+        );
+
+        if (updatedLoadoutGold > 0) {
+            await connection.query(
+                `INSERT INTO player_loadout (playerId, gold_amount) VALUES (?, ?)`,
+                [playerId, updatedLoadoutGold]
+            );
+        }
+
+        const finalTotalGold = updatedStashGold + updatedLoadoutGold;
+        if (finalTotalGold !== initialTotalGold) {
+            await connection.rollback();
+            return { success: false, message: 'Gold total mismatch detected.' };
+        }
+
+        await connection.commit();
+
+        return {
+            success: true,
+            message: 'Gold transferred successfully.',
+            gold: {
+                stash: updatedStashGold,
+                loadout: updatedLoadoutGold
+            }
+        };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error transferring gold.' };
+    } finally {
+        connection.release();
+    }
+}
 // Admin Queries
 async function deleteUser(username) {
     // TODO: In the future, this should add to ban list instead of hard delete
@@ -742,6 +870,8 @@ module.exports = {
     moveLoadoutToStash,
     swapLoadoutEquipment,
     deleteFromLoadout,
+    getGoldBalances,
+    transferGoldBetweenStorage,
     getUserInventory,
     getAllUsers,
     getAllArmors,

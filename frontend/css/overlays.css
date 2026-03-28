@@ -37,7 +37,6 @@
     height: 10vh;
     border: 0.3vh solid rgb(220, 40, 40);
     background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -207,6 +206,7 @@
     font-family: 'MedievalSharp', cursive;
 }
 
+/* Loot popup */
 .lootPopup {
     position: fixed;
     top: 50%;
@@ -271,4 +271,47 @@
         opacity: 0;
         transform: translate(-50%, -52%) scale(0.98);
     }
+}
+
+/* Gold transfer panel */
+.goldTransferPanel {
+    display: flex;
+    flex-direction: column;
+    width: min(56vw, 52vh);
+    padding: 1vh;
+    margin-top: 0.6vh;
+    border: 0.2vh solid rgb(220, 40, 40);
+    border-radius: 0.6vh;
+    background-color: rgba(0, 0, 0, 0.55);
+    gap: 0.6vh;
+}
+
+.goldTransferCurrentGold {
+    font-size: 2vh;
+}
+
+.goldTransferControls {
+    display: flex;
+    align-items: center;
+    gap: 0.8vh;
+}
+
+.goldTransferAmountSlider {
+    flex: 1;
+    min-width: 18vh;
+}
+
+.goldTransferAmountLabel {
+    min-width: 8vh;
+    text-align: right;
+    font-size: 1.8vh;
+    color: rgb(220, 220, 220);
+}
+
+.inventorySectionTitle {
+    font-size: 3vh;
+}
+
+.loadoutSectionTitle {
+    margin-top: 2vh;
 }

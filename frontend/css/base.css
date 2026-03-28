@@ -96,6 +96,24 @@ body.ready {
     border: none;
 }
 
+.homeActionRow .menuButton:hover {
+    font-size: 2vw;
+    align-self: center;
+    flex-wrap: wrap;
+    color: rgb(220, 40, 40);
+    padding: 0.5vh 0.5vh;
+    transform: scale(1.05);
+    text-shadow:
+        -0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw -0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        -0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8),
+        0.15vw 0.15vw 0.3vw rgba(255, 200, 200, 0.8);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
+}
+
 .logOutButton {
     font-size: 2vw;
     align-self: center;
