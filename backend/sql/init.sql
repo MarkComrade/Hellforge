@@ -11,7 +11,6 @@ CREATE TABLE `user`(
 );
 CREATE TABLE `player_inventory`(
     `playerId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `gold` INT NOT NULL DEFAULT 0,
     `helmet` INT UNSIGNED NOT NULL DEFAULT 1,
     `armor` INT UNSIGNED NOT NULL DEFAULT 2,
     `melee` INT UNSIGNED NOT NULL DEFAULT 1,
@@ -46,6 +45,7 @@ CREATE TABLE `misc_items`(
 
 CREATE TABLE `player_stash`(
     `stashId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `gold` INT NOT NULL DEFAULT 0,
     `playerId` INT UNSIGNED NOT NULL,
     `armor_id` INT UNSIGNED DEFAULT NULL,
     `weapon_id` INT UNSIGNED DEFAULT NULL,
@@ -126,26 +126,32 @@ INSERT INTO `user` (`name`, `password`) VALUES
     ('test_player_10', '$2b$12$CdstJyjCSmG0S6S3jLmc5OtLImYjn1nLOzLTwe46cW2lplpFuEStq');
  
 
-INSERT INTO `player_inventory` (`playerId`, `gold`, `helmet`, `armor`, `melee`, `ranged`) VALUES
-    (1, 100, 1, 2, 1, 2),
-    (2, 250, 3, 4, 3, 4),
-    (3, 500, 5, 6, 5, 6),
-    (4, 800, 7, 8, 7, 8),
-    (5, 1200, 9, 10, 9, 10),
-    (6, 2000, 11, 12, 11, 12),
-    (7, 150, 1, 2, 3, 4),
-    (8, 300, 3, 4, 5, 6),
-    (9, 650, 5, 6, 7, 8),
-    (10, 950, 7, 8, 9, 10);
+INSERT INTO `player_inventory` (`playerId`, `helmet`, `armor`, `melee`, `ranged`) VALUES
+    (1, 1, 2, 1, 2),
+    (2, 3, 4, 3, 4),
+    (3, 5, 6, 5, 6),
+    (4, 7, 8, 7, 8),
+    (5, 9, 10, 9, 10),
+    (6, 11, 12, 11, 12),
+    (7, 1, 2, 3, 4),
+    (8, 3, 4, 5, 6),
+    (9, 5, 6, 7, 8),
+    (10, 7, 8, 9, 10);
+
+INSERT INTO `player_stash` (`playerId`, `gold`, `armor_id`, `weapon_id`, `misc_item_id`) VALUES
+    (1, 100, NULL, NULL, NULL),
+    (2, 250, NULL, NULL, NULL),
+    (3, 500, NULL, NULL, NULL),
+    (4, 800, NULL, NULL, NULL),
+    (5, 1200, NULL, NULL, NULL),
+    (6, 2000, NULL, NULL, NULL),
+    (7, 150, NULL, NULL, NULL),
+    (8, 300, NULL, NULL, NULL),
+    (9, 650, NULL, NULL, NULL),
+    (10, 950, NULL, NULL, NULL);
 
 
-INSERT INTO `admin` (`name`, `password`) VALUES ('admin1', 'adminpass1'), ('admin2', 'adminpass2');
+INSERT INTO `admin` (`name`, `password`) VALUES
+    ('admin1', '$2b$12$bFTZ0gRntwWna8QuX1FiOub9S6O6wGI33N39brS8BHfm7sPDqVkeO'),
+    ('admin2', '$2b$12$rQERE5lvalXcpcNIIYnh6eMHlNpZvuc2Xl5qz/O./oO9slbZOYkue');
 
-INSERT INTO `player_stash` (`playerId`, `armor_id`, `weapon_id`, `misc_item_id`) VALUES
-    (1, 3, NULL, NULL),
-    (1, 4, NULL, NULL),
-    (1, 5, NULL, NULL),
-    (1, NULL, 3, NULL),
-    (1, NULL, 4, NULL),
-    (1, NULL, 5, NULL),
-    (1, NULL, 6, NULL);
