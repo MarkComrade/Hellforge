@@ -1,25 +1,27 @@
 const { generateFinalLoot } = require('./lootAlgorithm.js');
 
-const EVENT_TYPES = ['trade', 'loot', 'yesOrNo', 'trap', 'dialogue'];
 const DUNGEON_FALLBACK = 'crypt';
 const MAX_LEVEL = 20;
 
 function generateEventType() {
     const roll = Math.random();
-    let eventType;
     if (roll < 0.2) {
-        eventType = 'trade';
-    } else if (roll < 0.3) {
-        eventType = 'loot';
-    } else if (roll < 0.6) {
-        eventType = 'yesOrNo';
-    } else if (roll < 0.8) {
-        eventType = 'trap';
-    } else {
-        eventType = 'dialogue';
+        return 'trade';
     }
 
-    return eventType;
+    if (roll < 0.3) {
+        return 'loot';
+    }
+
+    if (roll < 0.6) {
+        return 'yesOrNo';
+    }
+
+    if (roll < 0.8) {
+        return 'trap';
+    }
+
+    return 'dialogue';
 }
 
 function normalizeDungeonName(dungeonName) {
@@ -149,10 +151,6 @@ async function eventManager(playerID, dungeonName, dungeonLevel) {
     const eventType = generateEventType();
     const safeDungeon = normalizeDungeonName(dungeonName);
     const safeLevel = sanitizeLevel(dungeonLevel);
-
-    if (!EVENT_TYPES.includes(eventType)) {
-        return createSimpleEventPayload('dialogue', 'Silence', 'Nothing happens.');
-    }
 
     switch (eventType) {
         case 'trade':

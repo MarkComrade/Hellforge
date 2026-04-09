@@ -27,6 +27,11 @@ function setEventChoicePending(isPending) {
     eventUiState.isChoicePending = Boolean(isPending);
 }
 
+function closeEventPopup(popup) {
+    setEventChoicePending(false);
+    popup.remove();
+}
+
 function eventLootPopup(lootEvent) {
     if (!lootEvent || lootEvent.success === false) {
         return;
@@ -108,8 +113,7 @@ function eventLootPopup(lootEvent) {
     button.className = 'eventDialogueButton primary';
     button.textContent = 'Continue';
     button.addEventListener('click', () => {
-        setEventChoicePending(false);
-        popup.remove();
+        closeEventPopup(popup);
     });
     footer.appendChild(button);
 
@@ -158,8 +162,7 @@ function createDialoguePopup(eventPayload) {
             button.className = index === 0 ? 'eventDialogueButton primary' : 'eventDialogueButton';
             button.textContent = sanitizeEventText(choiceText, 'Continue');
             button.addEventListener('click', () => {
-                setEventChoicePending(false);
-                popup.remove();
+                closeEventPopup(popup);
             });
             footer.appendChild(button);
         });
@@ -169,8 +172,7 @@ function createDialoguePopup(eventPayload) {
         button.className = 'eventDialogueButton primary';
         button.textContent = 'Continue';
         button.addEventListener('click', () => {
-            setEventChoicePending(false);
-            popup.remove();
+            closeEventPopup(popup);
         });
         footer.appendChild(button);
     }
