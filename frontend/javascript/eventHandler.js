@@ -16,7 +16,7 @@ function sanitizeEventText(value, fallbackText) {
 function removeEventPopupById(elementId) {
     const existing = document.getElementById(elementId);
     if (existing) {
-        if (elementId === EVENT_DIALOGUE_POPUP_ID) {
+        if (elementId === EVENT_DIALOGUE_POPUP_ID || elementId === LOOT_POPUP_ID) {
             setEventChoicePending(false);
         }
         existing.remove();
@@ -33,6 +33,7 @@ function eventLootPopup(lootEvent) {
     }
 
     removeEventPopupById(LOOT_POPUP_ID);
+    setEventChoicePending(true);
 
     const popup = document.createElement('div');
     popup.id = LOOT_POPUP_ID;
@@ -99,14 +100,22 @@ function eventLootPopup(lootEvent) {
         content.appendChild(goldRow);
     }
 
-    popup.appendChild(content);
-    document.body.appendChild(popup);
+    const footer = document.createElement('div');
+    footer.className = 'eventDialogueFooter';
 
-    setTimeout(() => {
-        if (popup.parentNode) {
-            popup.remove();
-        }
-    }, 3200);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'eventDialogueButton primary';
+    button.textContent = 'Continue';
+    button.addEventListener('click', () => {
+        setEventChoicePending(false);
+        popup.remove();
+    });
+    footer.appendChild(button);
+
+    popup.appendChild(content);
+    popup.appendChild(footer);
+    document.body.appendChild(popup);
 }
 
 function createDialoguePopup(eventPayload) {
