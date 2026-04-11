@@ -1,3 +1,7 @@
+function createFrontendLootPopup(lootEvent) {
+    const defaultGoldImg = '../textures/items/coing.png';
+    const defaultLootImg = '../textures/misc/placeholderloot.png';
+    const lootPopupId = 'loot-popup';
 const DEFAULT_GOLD_IMG = '../textures/items/coing.png';
 const DEFAULT_LOOT_IMG = '../textures/misc/placeholderloot.png';
 const LOOT_POPUP_ID = 'loot-popup';
@@ -317,7 +321,9 @@ function createStatsDisplay() {
         description.textContent = `${categoryLabel} · ${item.type || '—'} · Tier ${item.tier ?? '—'}`;
         lines.type.textContent = `Type: ${item.type || '—'}`;
         lines.tier.textContent = `Tier: ${item.tier ?? '—'}`;
-        lines.price.textContent = `Price: ${item.price ?? '—'} gold`;
+
+        let displayPrice = item.adjustedPrice !== undefined ? item.adjustedPrice : item.price;
+        lines.price.textContent = `Price: ${displayPrice ?? '—'} gold`;
 
         if (item.category === 'weapon') {
             lines.primary.textContent = `Attack Multiplier: ×${item.attack_multiplier ?? '—'}`;
@@ -358,11 +364,19 @@ function createShopGrid(items, onSelect) {
         name.className = 'shopSlotName';
         name.textContent = item.name || 'Unknown';
 
+        let displayPrice =
+            item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0);
+
         const price = document.createElement('span');
         price.className = 'shopSlotValue';
-        price.textContent = `${item.price ?? 0} gold`;
+        price.textContent = `${displayPrice} gold`;
 
         slot.append(img, name, price);
+
+        if (item.sold) {
+            slot.disabled = true;
+            slot.classList.add('isSold');
+        }
 
         slot.addEventListener('click', () => {
             if (slot.disabled) return;
@@ -375,8 +389,10 @@ function createShopGrid(items, onSelect) {
         grid.appendChild(slot);
     });
 
-    function markSold(itemId) {
-        const slot = grid.querySelector(`.shopSlot[data-item-id="${itemId}"]`);
+    function markSold(itemId, category) {
+        const slot = grid.querySelector(
+            `.shopSlot[data-item-id="${itemId}"][data-category="${category}"]`
+        );
         if (!slot) return;
         slot.disabled = true;
         slot.classList.remove('isSelected');
@@ -410,19 +426,25 @@ function createPromptPanel() {
     panel.append(promptText, actions, statusText);
 
     function setItem(item) {
-        promptText.textContent = item
-            ? `Buy ${item.name} for ${item.price ?? 0} gold?`
-            : 'Select an item slot to inspect and buy.';
+        if (item) {
+            let displayPrice =
+                item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0);
+            promptText.textContent = `Buy ${item.name} for ${displayPrice} gold?`;
+        } else {
+            promptText.textContent = 'Select an item slot to inspect and buy.';
+        }
         statusText.textContent = '';
         statusText.className = 'shopStatusText';
         buyButton.disabled = !item;
     }
 
-    function setStatus(message, type = '') {
+    function setStatus(message, type) {
         statusText.textContent = message;
-        statusText.className = ['shopStatusText', type ? `shopStatus--${type}` : '']
-            .filter(Boolean)
-            .join(' ');
+        if (type) {
+            statusText.className = `shopStatusText shopStatus--${type}`;
+        } else {
+            statusText.className = 'shopStatusText';
+        }
     }
 
     return { panel, promptText, buyButton, statusText, setItem, setStatus };
@@ -494,17 +516,23 @@ async function renderShop() {
             const result = await postFetch('/api/events/buy-item', {
                 itemId: selectedItem.itemId,
                 category: selectedItem.category,
-                price: selectedItem.price
+                adjustedPrice:
+                    selectedItem.adjustedPrice !== undefined
+                        ? selectedItem.adjustedPrice
+                        : selectedItem.price
             });
 
-            if (result?.success) {
+            if (result && result.success) {
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
-                markSold(String(selectedItem.itemId));
+                markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
                 updateStats(null);
+                // Refresh sell section with the newly bought item in loadout
+                refreshSellSection();
             } else {
-                setStatus(result?.message || 'Purchase failed.', 'error');
+                let errorMsg = result && result.message ? result.message : 'Purchase failed.';
+                setStatus(errorMsg, 'error');
                 buyButton.disabled = false;
             }
         } catch (error) {
@@ -515,6 +543,170 @@ async function renderShop() {
     });
 
     shopPanel.append(grid, statsPanel, promptPanel);
+
+    // Sell section — fetch player's loadout and render sell UI
+    async function refreshSellSection() {
+        let existingSell = shopPanel.querySelector('.shopSellSection');
+        if (existingSell) existingSell.remove();
+
+        let loadoutItems = await fetchLoadoutForSelling();
+        if (loadoutItems.length > 0) {
+            const sellSection = createSellGrid(loadoutItems, (remainingGold) => {
+                setStatus(`Gold remaining: ${remainingGold}`, 'success');
+            });
+            shopPanel.appendChild(sellSection);
+        }
+    }
+
+    await refreshSellSection();
+}
+
+async function fetchLoadoutForSelling() {
+    try {
+        const session = await getMethodFetch('/api/loginAuthApi/session');
+        if (!session || !session.isLoggedIn || !session.userId) {
+            return [];
+        }
+        const result = await getMethodFetch(`/api/inventory/loadout/${session.userId}`);
+        if (result && result.success) {
+            return result.loadout;
+        }
+        return [];
+    } catch (error) {
+        console.log('Failed to fetch loadout for selling:', error.message);
+        return [];
+    }
+}
+
+function createSellGrid(loadoutItems, onSellComplete) {
+    const FALLBACK_IMG = '../textures/misc/placeholderloot.png';
+
+    const container = document.createElement('div');
+    container.className = 'shopSellSection';
+
+    const sellTitle = document.createElement('h3');
+    sellTitle.className = 'shopStatsTitle';
+    sellTitle.textContent = 'Sell Items From Loadout';
+    container.appendChild(sellTitle);
+
+    const sellDescription = document.createElement('p');
+    sellDescription.className = 'shopTraderText';
+    sellDescription.textContent = 'Items sell for 40-60% of their base value.';
+    container.appendChild(sellDescription);
+
+    const sellStatus = document.createElement('p');
+    sellStatus.className = 'shopStatusText';
+    container.appendChild(sellStatus);
+
+    const sellGrid = document.createElement('div');
+    sellGrid.className = 'shopGrid';
+    container.appendChild(sellGrid);
+
+    function renderItems(items) {
+        sellGrid.innerHTML = '';
+
+        if (items.length === 0) {
+            container.remove();
+            return;
+        }
+
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            let imageSource = FALLBACK_IMG;
+            let itemName = 'Unknown';
+            let basePrice = 0;
+
+            if (item.armor_id) {
+                imageSource = item.armor_img || FALLBACK_IMG;
+                itemName = item.armor_name || 'Unknown Armor';
+                basePrice = item.armor_price || 0;
+            } else if (item.weapon_id) {
+                imageSource = item.weapon_img || FALLBACK_IMG;
+                itemName = item.weapon_name || 'Unknown Weapon';
+                basePrice = item.weapon_price || 0;
+            } else if (item.misc_item_id) {
+                imageSource = item.misc_img || FALLBACK_IMG;
+                itemName = item.misc_name || 'Unknown Item';
+                basePrice = item.misc_value || 0;
+            } else {
+                continue;
+            }
+
+            let minSell = Math.max(1, Math.floor(basePrice * 0.4));
+            let maxSell = Math.max(1, Math.floor(basePrice * 0.6));
+
+            const slot = document.createElement('div');
+            slot.className = 'shopSlot';
+
+            const img = document.createElement('img');
+            img.className = 'shopSlotImage';
+            img.src = imageSource;
+            img.alt = itemName;
+            img.onerror = () => {
+                img.onerror = null;
+                img.src = FALLBACK_IMG;
+            };
+
+            const name = document.createElement('span');
+            name.className = 'shopSlotName';
+            name.textContent = itemName;
+
+            const priceLabel = document.createElement('span');
+            priceLabel.className = 'shopSlotPrice';
+            if (minSell === maxSell) {
+                priceLabel.textContent = `Sells for ${minSell} gold`;
+            } else {
+                priceLabel.textContent = `Sells for ${minSell}-${maxSell} gold`;
+            }
+
+            const sellButton = document.createElement('button');
+            sellButton.className = 'shopPromptButton shopSellButton';
+            sellButton.textContent = 'Sell';
+
+            const capturedLoadoutId = item.loadoutId;
+            sellButton.addEventListener('click', async () => {
+                sellButton.disabled = true;
+                sellButton.textContent = 'Selling...';
+
+                try {
+                    const result = await postFetch('/api/events/sell-item', {
+                        loadoutId: capturedLoadoutId
+                    });
+
+                    if (result && result.success) {
+                        sellStatus.textContent = `Sold ${result.itemName} for ${result.soldFor} gold. Gold: ${result.remainingGold}`;
+                        sellStatus.className = 'shopStatusText shopStatus--success';
+                        if (onSellComplete) {
+                            onSellComplete(result.remainingGold);
+                        }
+                        let updatedLoadout = await fetchLoadoutForSelling();
+                        renderItems(updatedLoadout);
+                    } else {
+                        let msg =
+                            result && result.message ? result.message : 'Failed to sell item.';
+                        sellStatus.textContent = msg;
+                        sellStatus.className = 'shopStatusText shopStatus--error';
+                        sellButton.disabled = false;
+                        sellButton.textContent = 'Sell';
+                    }
+                } catch (error) {
+                    sellStatus.textContent = 'Error selling item. Try again.';
+                    sellStatus.className = 'shopStatusText shopStatus--error';
+                    sellButton.disabled = false;
+                    sellButton.textContent = 'Sell';
+                }
+            });
+
+            slot.appendChild(img);
+            slot.appendChild(name);
+            slot.appendChild(priceLabel);
+            slot.appendChild(sellButton);
+            sellGrid.appendChild(slot);
+        }
+    }
+
+    renderItems(loadoutItems);
+    return container;
 }
 
 window.createFrontendLootPopup = eventLootPopup;

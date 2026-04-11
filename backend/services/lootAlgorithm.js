@@ -259,6 +259,7 @@ async function generateFinalLoot(playerId, dungeon, level) {
 
 module.exports = {
     getBaseTier,
+    normalizeDungeonKey,
     generateAndInsertLoot,
     generateGoldReward,
     generateFinalLoot
