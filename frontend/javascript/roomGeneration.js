@@ -98,6 +98,13 @@ function navigateToRoom(startX, startY, dungeonLevel) {
         span.setAttribute('id', 'navigate' + dir.name);
         body.appendChild(span);
         span.addEventListener('click', async function () {
+            if (
+                typeof window.isEventChoicePending === 'function' &&
+                window.isEventChoicePending()
+            ) {
+                return;
+            }
+
             try {
                 const result = await postFetch('/api/dungeon/move', {
                     dx: dir.dx,
@@ -189,7 +196,9 @@ function roomEventHandler(room, dungeonLevel, result) {
             //combatStart();
             break;
         case 'loot':
-            createFrontendLootPopup(result.Event);
+            if (result.Event && result.Event.success) {
+                createFrontendEvent({ success: true, type: 'loot', loot: result.Event });
+            }
             break;
         case 'shop':
             placeTraderInRoom(room);
