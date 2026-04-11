@@ -264,6 +264,20 @@ async function renderStashContent(playerId, grid, countText) {
                 tooltip.appendChild(tooltipStat);
             }
 
+            if (item.cards && item.cards.length > 0) {
+                const cardsHeader = document.createElement('span');
+                cardsHeader.setAttribute('class', 'tooltipDetail tooltipCardsHeader');
+                cardsHeader.textContent = 'Cards:';
+                tooltip.appendChild(cardsHeader);
+
+                item.cards.forEach((card) => {
+                    const cardEl = document.createElement('span');
+                    cardEl.setAttribute('class', 'tooltipCard');
+                    cardEl.textContent = card.name;
+                    tooltip.appendChild(cardEl);
+                });
+            }
+
             const buttonRow = document.createElement('div');
             buttonRow.setAttribute('class', 'stashTooltipBtnRow');
 

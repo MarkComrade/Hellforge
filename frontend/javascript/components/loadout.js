@@ -205,6 +205,53 @@ async function openInventory() {
     await renderInventoryContent(playerId, equippedGrid, loadoutGrid, loadoutCount);
 }
 
+function logInventoryCards(inventory) {
+    const slots = [
+        {
+            label: 'Helmet',
+            stat: `Defense x${inventory.helmet_defense}`,
+            tier: inventory.helmet_tier,
+            cards: inventory.helmet_cards
+        },
+        {
+            label: 'Armor',
+            stat: `Defense x${inventory.armor_defense}`,
+            tier: inventory.armor_tier,
+            cards: inventory.armor_cards
+        },
+        {
+            label: 'Melee',
+            stat: `Attack x${inventory.melee_attack}`,
+            tier: inventory.melee_tier,
+            cards: inventory.melee_cards
+        },
+        {
+            label: 'Ranged',
+            stat: `Attack x${inventory.ranged_attack}`,
+            tier: inventory.ranged_tier,
+            cards: inventory.ranged_cards
+        }
+    ];
+    console.group('[Inventory] Card State');
+    slots.forEach(({ label, stat, tier, cards }) => {
+        console.group(`  ${label}  |  Tier ${tier}  |  ${stat}`);
+        if (!cards || cards.length === 0) {
+            console.log('    (no cards)');
+        } else {
+            cards.forEach((card, i) => {
+                const effects = Object.entries(card.effects || {})
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join('  ');
+                console.log(
+                    `    [${i + 1}] id=${card.id}  name="${card.name}"  tier=${card.tier}  type=${card.type}  exhaust=${card.exhaust}  |  ${effects || 'no effects'}`
+                );
+            });
+        }
+        console.groupEnd();
+    });
+    console.groupEnd();
+}
+
 async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loadoutCount) {
     equippedGrid.innerHTML = '';
     loadoutGrid.innerHTML = '';
@@ -220,34 +267,40 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
         if (!inventory) return;
     }
 
+    logInventoryCards(inventory);
+
     const slots = [
         {
             label: 'Helmet',
             name: inventory.helmet_name,
             img: inventory.helmet_img,
             stat: `Defense: x${inventory.helmet_defense}`,
-            tier: inventory.helmet_tier
+            tier: inventory.helmet_tier,
+            cards: inventory.helmet_cards || []
         },
         {
             label: 'Armor',
             name: inventory.armor_name,
             img: inventory.armor_img,
             stat: `Defense: x${inventory.armor_defense}`,
-            tier: inventory.armor_tier
+            tier: inventory.armor_tier,
+            cards: inventory.armor_cards || []
         },
         {
             label: 'Melee',
             name: inventory.melee_name,
             img: inventory.melee_img,
             stat: `Attack: x${inventory.melee_attack}`,
-            tier: inventory.melee_tier
+            tier: inventory.melee_tier,
+            cards: inventory.melee_cards || []
         },
         {
             label: 'Ranged',
             name: inventory.ranged_name,
             img: inventory.ranged_img,
             stat: `Attack: x${inventory.ranged_attack}`,
-            tier: inventory.ranged_tier
+            tier: inventory.ranged_tier,
+            cards: inventory.ranged_cards || []
         }
     ];
 
@@ -292,6 +345,20 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
             tooltipTier.setAttribute('class', 'tooltipDetail');
             tooltipTier.textContent = `Tier: ${item.tier}`;
             tooltip.appendChild(tooltipTier);
+
+            if (item.cards && item.cards.length > 0) {
+                const cardsHeader = document.createElement('span');
+                cardsHeader.setAttribute('class', 'tooltipDetail tooltipCardsHeader');
+                cardsHeader.textContent = 'Cards:';
+                tooltip.appendChild(cardsHeader);
+
+                item.cards.forEach((card) => {
+                    const cardEl = document.createElement('span');
+                    cardEl.setAttribute('class', 'tooltipCard');
+                    cardEl.textContent = card.name;
+                    tooltip.appendChild(cardEl);
+                });
+            }
 
             const closeTooltipHandler = (event) => {
                 if (!tooltip.contains(event.target) && !slotElement.contains(event.target)) {
@@ -388,6 +455,20 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                 tooltipStat.setAttribute('class', 'tooltipDetail');
                 tooltipStat.textContent = `Value: ${item.misc_value} gold`;
                 tooltip.appendChild(tooltipStat);
+            }
+
+            if (item.cards && item.cards.length > 0) {
+                const cardsHeader = document.createElement('span');
+                cardsHeader.setAttribute('class', 'tooltipDetail tooltipCardsHeader');
+                cardsHeader.textContent = 'Cards:';
+                tooltip.appendChild(cardsHeader);
+
+                item.cards.forEach((card) => {
+                    const cardEl = document.createElement('span');
+                    cardEl.setAttribute('class', 'tooltipCard');
+                    cardEl.textContent = card.name;
+                    tooltip.appendChild(cardEl);
+                });
             }
 
             const buttonRow = document.createElement('div');

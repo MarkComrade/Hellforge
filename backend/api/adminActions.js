@@ -159,4 +159,40 @@ router.post('/updateUserInventory/:userId', upload.none(), async (request, respo
     }
 });
 
+router.post('/removeUserItems/:userId', async (request, response) => {
+    try {
+        const userId = request.params.userId;
+        if (!userId) {
+            return response.status(400).json({ message: 'User ID is required.', success: false });
+        }
+        await database.removeUserItems(userId);
+        response.status(200).json({ message: 'User items removed.', success: true });
+    } catch (error) {
+        response
+            .status(500)
+            .json({ message: 'Error removing items: ' + error.message, success: false });
+    }
+});
+
+router.post('/updateUserGold/:userId', async (request, response) => {
+    try {
+        const userId = request.params.userId;
+        const amount = parseInt(request.body.gold, 10);
+        if (!userId || isNaN(amount) || amount < 0) {
+            return response
+                .status(400)
+                .json({
+                    message: 'Valid user ID and non-negative gold amount required.',
+                    success: false
+                });
+        }
+        await database.updateUserGold(userId, amount);
+        response.status(200).json({ message: 'Gold updated.', success: true });
+    } catch (error) {
+        response
+            .status(500)
+            .json({ message: 'Error updating gold: ' + error.message, success: false });
+    }
+});
+
 module.exports = router;
