@@ -151,7 +151,17 @@ INSERT INTO `player_stash` (`playerId`, `gold`, `armor_id`, `weapon_id`, `misc_i
     (10, 950, NULL, NULL, NULL);
 
 
-INSERT INTO `admin` (`name`, `password`) VALUES
+INSERT INTO `player_stash` (`playerId`, `armor_id`, `weapon_id`, `misc_item_id`) VALUES
+    (1, 3, NULL, NULL),
+    (1, 4, NULL, NULL),
+    (1, 5, NULL, NULL),
+    (1, NULL, 3, NULL),
+    (1, NULL, 4, NULL),
+    (1, NULL, 5, NULL),
+    (1, NULL, 6, NULL);
+
+INSERT INTO admin (name, password) VALUES
     ('admin1', '$2b$12$bFTZ0gRntwWna8QuX1FiOub9S6O6wGI33N39brS8BHfm7sPDqVkeO'),
     ('admin2', '$2b$12$rQERE5lvalXcpcNIIYnh6eMHlNpZvuc2Xl5qz/O./oO9slbZOYkue');
+
 

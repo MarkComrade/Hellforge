@@ -2,22 +2,7 @@ const express = require('express');
 const router = express.Router();
 const database = require('../sql/database.js');
 const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
-const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');
-//!Multer
-const multer = require('multer'); //?npm install multer
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination: (request, file, callback) => {
-        callback(null, path.join(__dirname, '../uploads'));
-    },
-    filename: (request, file, callback) => {
-        callback(null, Date.now() + '-' + file.originalname); //?egyedi név: dátum - file eredeti neve
-    }
-});
-
-const upload = multer({ storage });
 
 function getDungeonFromSession(request) {
     if (!request.session?.dungeonData) {
@@ -54,6 +39,13 @@ router.get('/lootAlgorithm/:playerId', async (request, response) => {
     const playerId = parseInt(request.params.playerId);
     try {
         const dungeon = getDungeonFromSession(request);
+        if (!dungeon) {
+            return response.status(400).json({
+                success: false,
+                message: 'No active dungeon'
+            });
+        }
+
         const loot = await generateAndInsertLoot(
             playerId,
             dungeon.dungeonName,
