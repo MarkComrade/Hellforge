@@ -1,6 +1,5 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
-const { getCardById, pickCardsForItem } = require('../services/cardPool.js');
 
 const SALT_ROUNDS = 12;
 
@@ -42,74 +41,32 @@ async function loginUser(username, password) {
 }
 
 async function registerUser(username, password) {
-    const [existingRows] = await pool.query('SELECT userId FROM user WHERE name = ?', [username]);
-    if (existingRows.length > 0) {
-        return { success: false, message: 'A felhasználónév már létezik' };
-    }
-
-    if (password.length < 5) {
-        return {
-            success: false,
-            message: 'A jelszónak legalább 5 karakter hosszúnak kell lennie'
-        };
-    }
-
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-    const connection = await pool.getConnection();
     try {
-        await connection.beginTransaction();
+        const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
-        const [result] = await connection.query('INSERT INTO user (name, password) VALUES (?, ?)', [
+        if (rows.length > 0) {
+            return { success: false, message: 'A felhasználónév már létezik' };
+        }
+
+        if (password.length < 5) {
+            return {
+                success: false,
+                message: 'A jelszónak legalább 5 karakter hosszúnak kell lennie'
+            };
+        }
+
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+        const [result] = await pool.query('INSERT INTO user (name, password) VALUES (?, ?)', [
             username,
             hashedPassword
         ]);
-        const userId = result.insertId;
 
-        // Starter gear: Rusty Helmet (armorId=1), Rusty Chestplate (armorId=2),
-        //               Rusty Sword (weaponId=1), Rusty Bow (weaponId=2)
-        const starterGear = [
-            { dbType: 'armor', itemType: 'Helmet', itemId: 1 },
-            { dbType: 'armor', itemType: 'Armor', itemId: 2 },
-            { dbType: 'weapon', itemType: 'Melee', itemId: 1 },
-            { dbType: 'weapon', itemType: 'Ranged', itemId: 2 }
-        ];
+        await pool.query('INSERT INTO player_inventory (playerId) VALUES (?)', [result.insertId]);
 
-        const instanceIds = [];
-        for (const gear of starterGear) {
-            const [ins] = await connection.query(
-                'INSERT INTO item_instances (item_type, item_ref_id) VALUES (?, ?)',
-                [gear.dbType, gear.itemId]
-            );
-            const instanceId = ins.insertId;
-            instanceIds.push(instanceId);
-
-            const cards = pickCardsForItem(gear.itemType, 1);
-            if (cards.length > 0) {
-                const vals = cards.map((c, i) => [instanceId, c.id, i + 1]);
-                await connection.query(
-                    'INSERT INTO item_instance_cards (instance_id, card_id, slot) VALUES ?',
-                    [vals]
-                );
-            }
-        }
-
-        const [helmetInst, armorInst, meleeInst, rangedInst] = instanceIds;
-        await connection.query(
-            `INSERT INTO player_inventory
-                (playerId, helmet, armor, melee, ranged,
-                 helmet_instance, armor_instance, melee_instance, ranged_instance)
-             VALUES (?, 1, 2, 1, 2, ?, ?, ?, ?)`,
-            [userId, helmetInst, armorInst, meleeInst, rangedInst]
-        );
-
-        await connection.commit();
-        return { success: true, userId, message: 'Sikeres regisztráció' };
+        return { success: true, userId: result.insertId, message: 'Sikeres regisztráció' };
     } catch (error) {
-        await connection.rollback();
         return { success: false, message: 'Hiba történt a regisztráció során' };
-    } finally {
-        connection.release();
     }
 }
 
@@ -186,27 +143,19 @@ const STASH_LIMIT = 50;
 async function getStash(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT s.stashId, s.instance_id, s.armor_id, s.weapon_id, s.misc_item_id,
+            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
-                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value,
-                    GROUP_CONCAT(iic.card_id ORDER BY iic.slot) AS card_ids
+                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
              FROM player_stash s
              LEFT JOIN armors a ON s.armor_id = a.armorId
              LEFT JOIN weapons w ON s.weapon_id = w.weaponId
              LEFT JOIN misc_items m ON s.misc_item_id = m.itemId
-             LEFT JOIN item_instance_cards iic ON s.instance_id = iic.instance_id
              WHERE s.playerId = ?
-               AND (s.armor_id IS NOT NULL OR s.weapon_id IS NOT NULL OR s.misc_item_id IS NOT NULL)
-             GROUP BY s.stashId`,
+               AND (s.armor_id IS NOT NULL OR s.weapon_id IS NOT NULL OR s.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        const stash = rows.map((row) => {
-            const cardIds = row.card_ids ? row.card_ids.split(',').map(Number) : [];
-            const { card_ids, ...rest } = row;
-            return { ...rest, cards: cardIds.map((id) => getCardById(id)).filter(Boolean) };
-        });
-        return { success: true, stash };
+        return { success: true, stash: rows };
     } catch (error) {
         return { success: false, message: 'Hiba történt a stash lekérése során' };
     }
@@ -272,40 +221,17 @@ async function addMiscToStash(playerId, miscItemId) {
 }
 
 async function removeFromStash(stashId, playerId) {
-    const connection = await pool.getConnection();
     try {
-        await connection.beginTransaction();
-
-        const [itemRows] = await connection.query(
-            'SELECT instance_id FROM player_stash WHERE stashId = ? AND playerId = ?',
-            [stashId, playerId]
-        );
-        if (itemRows.length === 0) {
-            await connection.rollback();
-            return { success: false, message: 'A tárgy nem található a stash-ben' };
-        }
-        const instanceId = itemRows[0].instance_id;
-
-        const [result] = await connection.query(
+        const [result] = await pool.query(
             'DELETE FROM player_stash WHERE stashId = ? AND playerId = ?',
             [stashId, playerId]
         );
         if (result.affectedRows === 0) {
-            await connection.rollback();
             return { success: false, message: 'A tárgy nem található a stash-ben' };
         }
-
-        if (instanceId) {
-            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [instanceId]);
-        }
-
-        await connection.commit();
         return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
     } catch (error) {
-        await connection.rollback();
         return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
-    } finally {
-        connection.release();
     }
 }
 
@@ -313,15 +239,10 @@ async function getPlayerInventory(playerId) {
     try {
         const [rows] = await pool.query(
             `SELECT pi.helmet, pi.armor, pi.melee, pi.ranged,
-                    pi.helmet_instance, pi.armor_instance, pi.melee_instance, pi.ranged_instance,
                     h.name AS helmet_name, h.img_path AS helmet_img, h.tier AS helmet_tier, h.defense_multiplier AS helmet_defense,
                     a.name AS armor_name, a.img_path AS armor_img, a.tier AS armor_tier, a.defense_multiplier AS armor_defense,
                     m.name AS melee_name, m.img_path AS melee_img, m.tier AS melee_tier, m.attack_multiplier AS melee_attack,
-                    r.name AS ranged_name, r.img_path AS ranged_img, r.tier AS ranged_tier, r.attack_multiplier AS ranged_attack,
-                    (SELECT GROUP_CONCAT(c.card_id ORDER BY c.slot) FROM item_instance_cards c WHERE c.instance_id = pi.helmet_instance) AS helmet_card_ids,
-                    (SELECT GROUP_CONCAT(c.card_id ORDER BY c.slot) FROM item_instance_cards c WHERE c.instance_id = pi.armor_instance) AS armor_card_ids,
-                    (SELECT GROUP_CONCAT(c.card_id ORDER BY c.slot) FROM item_instance_cards c WHERE c.instance_id = pi.melee_instance) AS melee_card_ids,
-                    (SELECT GROUP_CONCAT(c.card_id ORDER BY c.slot) FROM item_instance_cards c WHERE c.instance_id = pi.ranged_instance) AS ranged_card_ids
+                    r.name AS ranged_name, r.img_path AS ranged_img, r.tier AS ranged_tier, r.attack_multiplier AS ranged_attack
              FROM player_inventory pi
              LEFT JOIN armors h ON pi.helmet = h.armorId
              LEFT JOIN armors a ON pi.armor = a.armorId
@@ -333,43 +254,7 @@ async function getPlayerInventory(playerId) {
         if (rows.length === 0) {
             return { success: false, message: 'Játékos nem található' };
         }
-        const row = rows[0];
-        const inventory = {
-            ...row,
-            helmet_cards: row.helmet_card_ids
-                ? row.helmet_card_ids
-                      .split(',')
-                      .map(Number)
-                      .map((id) => getCardById(id))
-                      .filter(Boolean)
-                : [],
-            armor_cards: row.armor_card_ids
-                ? row.armor_card_ids
-                      .split(',')
-                      .map(Number)
-                      .map((id) => getCardById(id))
-                      .filter(Boolean)
-                : [],
-            melee_cards: row.melee_card_ids
-                ? row.melee_card_ids
-                      .split(',')
-                      .map(Number)
-                      .map((id) => getCardById(id))
-                      .filter(Boolean)
-                : [],
-            ranged_cards: row.ranged_card_ids
-                ? row.ranged_card_ids
-                      .split(',')
-                      .map(Number)
-                      .map((id) => getCardById(id))
-                      .filter(Boolean)
-                : []
-        };
-        delete inventory.helmet_card_ids;
-        delete inventory.armor_card_ids;
-        delete inventory.melee_card_ids;
-        delete inventory.ranged_card_ids;
-        return { success: true, inventory };
+        return { success: true, inventory: rows[0] };
     } catch (error) {
         return { success: false, message: 'Hiba történt a felszerelés lekérése során' };
     }
@@ -410,28 +295,26 @@ async function swapEquipment(playerId, stashId, slot) {
             }
         }
 
-        const instanceCol = `${slot}_instance`;
         const [invRows] = await connection.query(
-            `SELECT \`${slot}\` AS equippedId, \`${instanceCol}\` AS equippedInstanceId FROM player_inventory WHERE playerId = ?`,
+            `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
             [playerId]
         );
         const currentEquippedId = invRows[0].equippedId;
-        const currentEquippedInstanceId = invRows[0].equippedInstanceId;
 
-        await connection.query(
-            `UPDATE player_inventory SET \`${slot}\` = ?, \`${instanceCol}\` = ? WHERE playerId = ?`,
-            [newItemId, stashItem.instance_id, playerId]
-        );
+        await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
+            newItemId,
+            playerId
+        ]);
 
         if (slot === 'helmet' || slot === 'armor') {
             await connection.query(
-                `UPDATE player_stash SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL, instance_id = ? WHERE stashId = ?`,
-                [currentEquippedId, currentEquippedInstanceId, stashId]
+                `UPDATE player_stash SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE stashId = ?`,
+                [currentEquippedId, stashId]
             );
         } else {
             await connection.query(
-                `UPDATE player_stash SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL, instance_id = ? WHERE stashId = ?`,
-                [currentEquippedId, currentEquippedInstanceId, stashId]
+                `UPDATE player_stash SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL WHERE stashId = ?`,
+                [currentEquippedId, stashId]
             );
         }
 
@@ -452,27 +335,19 @@ const LOADOUT_LIMIT = 10;
 async function getLoadout(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT l.loadoutId, l.instance_id, l.armor_id, l.weapon_id, l.misc_item_id,
+            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
-                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value,
-                    GROUP_CONCAT(iic.card_id ORDER BY iic.slot) AS card_ids
+                    m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
              FROM player_loadout l
              LEFT JOIN armors a ON l.armor_id = a.armorId
              LEFT JOIN weapons w ON l.weapon_id = w.weaponId
              LEFT JOIN misc_items m ON l.misc_item_id = m.itemId
-             LEFT JOIN item_instance_cards iic ON l.instance_id = iic.instance_id
              WHERE l.playerId = ?
-               AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)
-             GROUP BY l.loadoutId`,
+               AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        const loadout = rows.map((row) => {
-            const cardIds = row.card_ids ? row.card_ids.split(',').map(Number) : [];
-            const { card_ids, ...rest } = row;
-            return { ...rest, cards: cardIds.map((id) => getCardById(id)).filter(Boolean) };
-        });
-        return { success: true, loadout };
+        return { success: true, loadout: rows };
     } catch (error) {
         return { success: false, message: 'Hiba történt a loadout lekérése során' };
     }
@@ -517,14 +392,8 @@ async function moveStashToLoadout(playerId, stashId) {
         const stashItem = stashRows[0];
 
         await connection.query(
-            'INSERT INTO player_loadout (playerId, armor_id, weapon_id, misc_item_id, instance_id) VALUES (?, ?, ?, ?, ?)',
-            [
-                playerId,
-                stashItem.armor_id,
-                stashItem.weapon_id,
-                stashItem.misc_item_id,
-                stashItem.instance_id
-            ]
+            'INSERT INTO player_loadout (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
+            [playerId, stashItem.armor_id, stashItem.weapon_id, stashItem.misc_item_id]
         );
 
         await connection.query('DELETE FROM player_stash WHERE stashId = ? AND playerId = ?', [
@@ -577,28 +446,26 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
             }
         }
 
-        const instanceCol = `${slot}_instance`;
         const [invRows] = await connection.query(
-            `SELECT \`${slot}\` AS equippedId, \`${instanceCol}\` AS equippedInstanceId FROM player_inventory WHERE playerId = ?`,
+            `SELECT \`${slot}\` AS equippedId FROM player_inventory WHERE playerId = ?`,
             [playerId]
         );
         const currentEquippedId = invRows[0].equippedId;
-        const currentEquippedInstanceId = invRows[0].equippedInstanceId;
 
-        await connection.query(
-            `UPDATE player_inventory SET \`${slot}\` = ?, \`${instanceCol}\` = ? WHERE playerId = ?`,
-            [newItemId, loadoutItem.instance_id, playerId]
-        );
+        await connection.query(`UPDATE player_inventory SET \`${slot}\` = ? WHERE playerId = ?`, [
+            newItemId,
+            playerId
+        ]);
 
         if (slot === 'helmet' || slot === 'armor') {
             await connection.query(
-                'UPDATE player_loadout SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL, instance_id = ? WHERE loadoutId = ?',
-                [currentEquippedId, currentEquippedInstanceId, loadoutId]
+                'UPDATE player_loadout SET armor_id = ?, weapon_id = NULL, misc_item_id = NULL WHERE loadoutId = ?',
+                [currentEquippedId, loadoutId]
             );
         } else {
             await connection.query(
-                'UPDATE player_loadout SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL, instance_id = ? WHERE loadoutId = ?',
-                [currentEquippedId, currentEquippedInstanceId, loadoutId]
+                'UPDATE player_loadout SET weapon_id = ?, armor_id = NULL, misc_item_id = NULL WHERE loadoutId = ?',
+                [currentEquippedId, loadoutId]
             );
         }
 
@@ -613,40 +480,17 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
 }
 
 async function deleteFromLoadout(playerId, loadoutId) {
-    const connection = await pool.getConnection();
     try {
-        await connection.beginTransaction();
-
-        const [itemRows] = await connection.query(
-            'SELECT instance_id FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
-            [loadoutId, playerId]
-        );
-        if (itemRows.length === 0) {
-            await connection.rollback();
-            return { success: false, message: 'Item not found in inventory.' };
-        }
-        const instanceId = itemRows[0].instance_id;
-
-        const [result] = await connection.query(
+        const [result] = await pool.query(
             'DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
             [loadoutId, playerId]
         );
         if (result.affectedRows === 0) {
-            await connection.rollback();
             return { success: false, message: 'Item not found in inventory.' };
         }
-
-        if (instanceId) {
-            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [instanceId]);
-        }
-
-        await connection.commit();
         return { success: true, message: 'Item deleted from inventory.' };
     } catch (error) {
-        await connection.rollback();
         return { success: false, message: 'Error deleting item from inventory.' };
-    } finally {
-        connection.release();
     }
 }
 
@@ -678,14 +522,8 @@ async function moveLoadoutToStash(playerId, loadoutId) {
         const loadoutItem = loadoutRows[0];
 
         await connection.query(
-            'INSERT INTO player_stash (playerId, armor_id, weapon_id, misc_item_id, instance_id) VALUES (?, ?, ?, ?, ?)',
-            [
-                playerId,
-                loadoutItem.armor_id,
-                loadoutItem.weapon_id,
-                loadoutItem.misc_item_id,
-                loadoutItem.instance_id
-            ]
+            'INSERT INTO player_stash (playerId, armor_id, weapon_id, misc_item_id) VALUES (?, ?, ?, ?)',
+            [playerId, loadoutItem.armor_id, loadoutItem.weapon_id, loadoutItem.misc_item_id]
         );
 
         await connection.query('DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?', [
@@ -865,146 +703,12 @@ async function deleteUser(username) {
 
         const userId = userRows[0].userId;
 
-        // Collect all instance IDs owned by this player before deleting rows
-        const [stashInstances] = await connection.execute(
-            'SELECT instance_id FROM player_stash WHERE playerId = ? AND instance_id IS NOT NULL',
-            [userId]
-        );
-        const [loadoutInstances] = await connection.execute(
-            'SELECT instance_id FROM player_loadout WHERE playerId = ? AND instance_id IS NOT NULL',
-            [userId]
-        );
-        const [invInstances] = await connection.execute(
-            `SELECT helmet_instance, armor_instance, melee_instance, ranged_instance
-             FROM player_inventory WHERE playerId = ?`,
-            [userId]
-        );
-
-        // Delete all storage rows first
-        await connection.execute('DELETE FROM player_stash WHERE playerId = ?', [userId]);
-        await connection.execute('DELETE FROM player_loadout WHERE playerId = ?', [userId]);
         await connection.execute('DELETE FROM player_inventory WHERE playerId = ?', [userId]);
-
-        // Delete all item instances (CASCADE will remove item_instance_cards automatically)
-        const instanceIds = [
-            ...stashInstances.map((r) => r.instance_id),
-            ...loadoutInstances.map((r) => r.instance_id),
-            ...invInstances.flatMap((r) => [
-                r.helmet_instance,
-                r.armor_instance,
-                r.melee_instance,
-                r.ranged_instance
-            ])
-        ].filter(Boolean);
-
-        if (instanceIds.length > 0) {
-            await connection.execute(
-                `DELETE FROM item_instances WHERE instanceId IN (${instanceIds.map(() => '?').join(',')})`,
-                instanceIds
-            );
-        }
 
         const [result] = await connection.execute('DELETE FROM user WHERE userId = ?', [userId]);
 
         await connection.commit();
         return result;
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
-}
-
-async function removeUserItems(userId) {
-    const connection = await pool.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        // Collect all instance IDs owned by this player
-        const [stashRows] = await connection.execute(
-            'SELECT instance_id FROM player_stash WHERE playerId = ? AND instance_id IS NOT NULL',
-            [userId]
-        );
-        const [loadoutRows] = await connection.execute(
-            'SELECT instance_id FROM player_loadout WHERE playerId = ? AND instance_id IS NOT NULL',
-            [userId]
-        );
-        const [invRows] = await connection.execute(
-            `SELECT helmet_instance, armor_instance, melee_instance, ranged_instance
-             FROM player_inventory WHERE playerId = ?`,
-            [userId]
-        );
-
-        // Delete item rows from stash and loadout (keep gold rows)
-        await connection.execute(
-            `DELETE FROM player_stash WHERE playerId = ? AND instance_id IS NOT NULL`,
-            [userId]
-        );
-        await connection.execute(
-            `DELETE FROM player_loadout WHERE playerId = ? AND instance_id IS NOT NULL`,
-            [userId]
-        );
-
-        // Clear equipped slots in player_inventory
-        await connection.execute(
-            `UPDATE player_inventory
-             SET helmet = NULL, armor = NULL, melee = NULL, ranged = NULL,
-                 helmet_instance = NULL, armor_instance = NULL,
-                 melee_instance = NULL, ranged_instance = NULL
-             WHERE playerId = ?`,
-            [userId]
-        );
-
-        // Delete all item_instances (CASCADE removes item_instance_cards)
-        const instanceIds = [
-            ...stashRows.map((r) => r.instance_id),
-            ...loadoutRows.map((r) => r.instance_id),
-            ...invRows.flatMap((r) => [
-                r.helmet_instance,
-                r.armor_instance,
-                r.melee_instance,
-                r.ranged_instance
-            ])
-        ].filter(Boolean);
-
-        if (instanceIds.length > 0) {
-            await connection.execute(
-                `DELETE FROM item_instances WHERE instanceId IN (${instanceIds.map(() => '?').join(',')})`,
-                instanceIds
-            );
-        }
-
-        await connection.commit();
-        return { success: true };
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
-}
-
-async function updateUserGold(userId, amount) {
-    const connection = await pool.getConnection();
-    try {
-        await connection.beginTransaction();
-
-        // Remove all existing gold rows for this player from stash
-        await connection.execute(
-            `DELETE FROM player_stash WHERE playerId = ? AND gold IS NOT NULL AND armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL AND instance_id IS NULL`,
-            [userId]
-        );
-
-        if (amount > 0) {
-            await connection.execute(`INSERT INTO player_stash (playerId, gold) VALUES (?, ?)`, [
-                userId,
-                amount
-            ]);
-        }
-
-        await connection.commit();
-        return { success: true };
     } catch (error) {
         await connection.rollback();
         throw error;
@@ -1033,13 +737,7 @@ async function getUserInventory(userId) {
             pi.ranged as ranged_id,
             r.name as ranged_name,
             r.img_path as ranged_img,
-            r.tier as ranged_tier,
-            COALESCE((
-                SELECT SUM(ps.gold) FROM player_stash ps
-                WHERE ps.playerId = u.userId AND ps.gold IS NOT NULL
-                  AND ps.armor_id IS NULL AND ps.weapon_id IS NULL
-                  AND ps.misc_item_id IS NULL AND ps.instance_id IS NULL
-            ), 0) AS gold
+            r.tier as ranged_tier
         FROM user u
         JOIN player_inventory pi ON u.userId = pi.playerId
         LEFT JOIN armors h ON pi.helmet = h.armorId
@@ -1118,7 +816,7 @@ async function upgradeWeakestGearDB(weakestSlot, playerId) {
 async function fetchWeaponByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT weaponId AS id, name, type, tier, img_path
+            `SELECT weaponId AS id, name, tier, img_path
              FROM weapons
              WHERE tier = ?
              ORDER BY RAND()
@@ -1136,7 +834,7 @@ async function fetchWeaponByTier(tier) {
 async function fetchArmorByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT armorId AS id, name, type, tier, img_path
+            `SELECT armorId AS id, name, tier, img_path
              FROM armors
              WHERE tier = ?
              ORDER BY RAND()
@@ -1215,57 +913,26 @@ async function getRandomShopItems(limit = 5) {
     }
 }
 
-// itemSubtype: 'Melee'|'Ranged'|'Helmet'|'Armor' for card assignment (omit for misc)
-async function insertIntoLoadout(playerId, type, itemId, itemSubtype, tier) {
-    const connection = await pool.getConnection();
+async function insertIntoLoadout(playerId, type, itemId) {
     try {
-        await connection.beginTransaction();
-
-        let instanceId = null;
-        if (type !== 'misc') {
-            const [result] = await connection.query(
-                'INSERT INTO item_instances (item_type, item_ref_id) VALUES (?, ?)',
-                [type, itemId]
-            );
-            instanceId = result.insertId;
-
-            if (itemSubtype && tier != null) {
-                const cards = pickCardsForItem(itemSubtype, tier);
-                if (cards.length > 0) {
-                    const values = cards.map((card, i) => [instanceId, card.id, i + 1]);
-                    await connection.query(
-                        'INSERT INTO item_instance_cards (instance_id, card_id, slot) VALUES ?',
-                        [values]
-                    );
-                }
-            }
-        }
-
         let query;
-        let params;
+
         if (type === 'weapon') {
-            query = `INSERT INTO player_loadout (playerId, weapon_id, instance_id) VALUES (?, ?, ?)`;
-            params = [playerId, itemId, instanceId];
+            query = `INSERT INTO player_loadout (playerId, weapon_id) VALUES (?, ?)`;
         } else if (type === 'armor') {
-            query = `INSERT INTO player_loadout (playerId, armor_id, instance_id) VALUES (?, ?, ?)`;
-            params = [playerId, itemId, instanceId];
+            query = `INSERT INTO player_loadout (playerId, armor_id) VALUES (?, ?)`;
         } else if (type === 'misc') {
             query = `INSERT INTO player_loadout (playerId, misc_item_id) VALUES (?, ?)`;
-            params = [playerId, itemId];
         } else {
-            await connection.rollback();
             return { success: false, message: 'Invalid item type.' };
         }
 
-        await connection.query(query, params);
-        await connection.commit();
-        return { success: true, message: 'Item inserted into loadout.', instanceId };
+        await pool.query(query, [playerId, itemId]);
+
+        return { success: true, message: 'Item inserted into loadout.' };
     } catch (error) {
-        await connection.rollback();
         console.error(error);
         return { success: false, message: 'Database error while inserting loot.' };
-    } finally {
-        connection.release();
     }
 }
 
@@ -1292,13 +959,13 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
         let itemRow;
         if (category === 'weapon') {
             const [rows] = await connection.query(
-                'SELECT weaponId AS id, price, tier, type FROM weapons WHERE weaponId = ?',
+                'SELECT weaponId AS id, price FROM weapons WHERE weaponId = ?',
                 [itemId]
             );
             itemRow = rows[0];
         } else {
             const [rows] = await connection.query(
-                'SELECT armorId AS id, price, tier, type FROM armors WHERE armorId = ?',
+                'SELECT armorId AS id, price FROM armors WHERE armorId = ?',
                 [itemId]
             );
             itemRow = rows[0];
@@ -1336,30 +1003,15 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
             }
         }
 
-        const [instanceResult] = await connection.query(
-            'INSERT INTO item_instances (item_type, item_ref_id) VALUES (?, ?)',
-            [category, itemId]
-        );
-        const instanceId = instanceResult.insertId;
-
-        const cards = pickCardsForItem(itemRow.type, itemRow.tier);
-        if (cards.length > 0) {
-            const cardValues = cards.map((card, i) => [instanceId, card.id, i + 1]);
-            await connection.query(
-                'INSERT INTO item_instance_cards (instance_id, card_id, slot) VALUES ?',
-                [cardValues]
-            );
-        }
-
         if (category === 'weapon') {
             await connection.query(
-                'INSERT INTO player_loadout (playerId, weapon_id, instance_id) VALUES (?, ?, ?)',
-                [playerId, itemId, instanceId]
+                'INSERT INTO player_loadout (playerId, weapon_id) VALUES (?, ?)',
+                [playerId, itemId]
             );
         } else {
             await connection.query(
-                'INSERT INTO player_loadout (playerId, armor_id, instance_id) VALUES (?, ?, ?)',
-                [playerId, itemId, instanceId]
+                'INSERT INTO player_loadout (playerId, armor_id) VALUES (?, ?)',
+                [playerId, itemId]
             );
         }
 
@@ -1475,9 +1127,9 @@ async function getItemBaseInfo(itemId, category) {
     try {
         let query;
         if (category === 'weapon') {
-            query = 'SELECT price, tier, type FROM weapons WHERE weaponId = ?';
+            query = 'SELECT price, tier FROM weapons WHERE weaponId = ?';
         } else if (category === 'armor') {
-            query = 'SELECT price, tier, type FROM armors WHERE armorId = ?';
+            query = 'SELECT price, tier FROM armors WHERE armorId = ?';
         } else {
             return null;
         }
@@ -1520,8 +1172,6 @@ module.exports = {
     getAllArmors,
     getAllWeapons,
     updateUserInventory,
-    removeUserItems,
-    updateUserGold,
     deleteUser,
     upgradeWeakestGearDB,
     fetchWeaponByTier,

@@ -118,13 +118,7 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
             return { success: false, message: 'Loot generation failed.' };
         }
 
-        const dbResult = await insertIntoLoadout(
-            playerId,
-            loot.item.type,
-            loot.item.item.id,
-            loot.item.item.type,
-            loot.tier
-        );
+        const dbResult = await insertIntoLoadout(playerId, loot.item.type, loot.item.item.id);
 
         if (!dbResult.success) {
             return dbResult;
