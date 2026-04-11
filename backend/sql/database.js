@@ -976,17 +976,15 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
             return { success: false, message: 'Item not found.' };
         }
 
-        const actualPrice = itemRow.price;
-
-        if (totalGold < actualPrice) {
+        if (totalGold < price) {
             await connection.rollback();
             return {
                 success: false,
-                message: `Not enough gold. Need ${actualPrice}, have ${totalGold}.`
+                message: `Not enough gold. Need ${price}, have ${totalGold}.`
             };
         }
 
-        let remaining = actualPrice;
+        let remaining = price;
         for (const row of loadoutGoldRows) {
             if (remaining <= 0) break;
             const deduct = Math.min(row.gold_amount, remaining);
@@ -1018,11 +1016,108 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
         }
 
         await connection.commit();
-        return { success: true, remainingGold: totalGold - actualPrice };
+        return { success: true, remainingGold: totalGold - price };
     } catch (error) {
         await connection.rollback();
         console.error('purchaseItemToLoadout error:', error);
         return { success: false, message: 'Database error during purchase.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function sellItemFromLoadout(playerId, loadoutId) {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [loadoutRows] = await connection.query(
+            'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ?',
+            [loadoutId, playerId]
+        );
+        if (loadoutRows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in loadout.' };
+        }
+        const loadoutItem = loadoutRows[0];
+
+        let sellPrice = 0;
+        let itemName = 'Unknown';
+        let basePrice = 0;
+
+        if (loadoutItem.armor_id) {
+            const [armorRows] = await connection.query(
+                'SELECT name, price FROM armors WHERE armorId = ?',
+                [loadoutItem.armor_id]
+            );
+            if (armorRows.length === 0) {
+                await connection.rollback();
+                return { success: false, message: 'Armor data not found.' };
+            }
+            basePrice = armorRows[0].price;
+            itemName = armorRows[0].name;
+        } else if (loadoutItem.weapon_id) {
+            const [weaponRows] = await connection.query(
+                'SELECT name, price FROM weapons WHERE weaponId = ?',
+                [loadoutItem.weapon_id]
+            );
+            if (weaponRows.length === 0) {
+                await connection.rollback();
+                return { success: false, message: 'Weapon data not found.' };
+            }
+            basePrice = weaponRows[0].price;
+            itemName = weaponRows[0].name;
+        } else if (loadoutItem.misc_item_id) {
+            const [miscRows] = await connection.query(
+                'SELECT name, value FROM misc_items WHERE itemId = ?',
+                [loadoutItem.misc_item_id]
+            );
+            if (miscRows.length === 0) {
+                await connection.rollback();
+                return { success: false, message: 'Misc item data not found.' };
+            }
+            basePrice = miscRows[0].value;
+            itemName = miscRows[0].name;
+        } else {
+            await connection.rollback();
+            return { success: false, message: 'Loadout entry has no sellable item.' };
+        }
+
+        // Sell for 40-60% of base value
+        let sellPercent = 40 + Math.floor(Math.random() * 21);
+        sellPrice = Math.floor((basePrice * sellPercent) / 100);
+        if (sellPrice < 1) {
+            sellPrice = 1;
+        }
+
+        await connection.query('DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?', [
+            loadoutId,
+            playerId
+        ]);
+
+        await connection.query('INSERT INTO player_loadout (playerId, gold_amount) VALUES (?, ?)', [
+            playerId,
+            sellPrice
+        ]);
+
+        const [goldRows] = await connection.query(
+            'SELECT COALESCE(SUM(gold_amount), 0) AS gold FROM player_loadout WHERE playerId = ? AND gold_amount IS NOT NULL',
+            [playerId]
+        );
+        let newTotalGold = goldRows[0].gold;
+
+        await connection.commit();
+        return {
+            success: true,
+            message: `Sold ${itemName} for ${sellPrice} gold.`,
+            soldFor: sellPrice,
+            itemName: itemName,
+            remainingGold: newTotalGold
+        };
+    } catch (error) {
+        await connection.rollback();
+        console.error('sellItemFromLoadout error:', error);
+        return { success: false, message: 'Database error during sale.' };
     } finally {
         connection.release();
     }
@@ -1085,5 +1180,6 @@ module.exports = {
     getRandomShopItems,
     insertIntoLoadout,
     purchaseItemToLoadout,
+    sellItemFromLoadout,
     getItemBaseInfo
 };

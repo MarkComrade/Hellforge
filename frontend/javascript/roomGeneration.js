@@ -138,9 +138,30 @@ function navigateToRoom(startX, startY, dungeonLevel) {
     });
 }
 
-// Room event handler — uses server-provided roomType instead of client DOM data
+function placeTraderInRoom(room) {
+    let existing = document.getElementById('shopTraderRoom');
+    if (existing) existing.remove();
+
+    const traderImg = document.createElement('img');
+    traderImg.id = 'shopTraderRoom';
+    traderImg.src = '../textures/UI/trader.png';
+    traderImg.className = 'shopTraderRoom';
+    traderImg.alt = 'Trader';
+    traderImg.title = 'Open shop';
+    traderImg.onerror = () => {
+        traderImg.onerror = null;
+        traderImg.src = '../textures/misc/placeholder.png';
+    };
+    traderImg.addEventListener('click', () => {
+        const shopOverlay = document.getElementById('shop-overlay');
+        if (!shopOverlay) {
+            renderShop();
+        }
+    });
+    room.appendChild(traderImg);
+}
+
 function roomEventHandler(room, dungeonLevel, result) {
-    // Use server-provided roomType if available, fall back to DOM (for start room)
     const roomType = result.roomType || room.dataset.roomType;
 
     if (roomType !== 'out') {
@@ -157,6 +178,8 @@ function roomEventHandler(room, dungeonLevel, result) {
     if (roomType !== 'shop') {
         const shopOverlay = document.getElementById('shop-overlay');
         if (shopOverlay) shopOverlay.remove();
+        const existingTrader = document.getElementById('shopTraderRoom');
+        if (existingTrader) existingTrader.remove();
     }
 
     switch (roomType) {
@@ -169,6 +192,7 @@ function roomEventHandler(room, dungeonLevel, result) {
             createFrontendLootPopup(result.Event);
             break;
         case 'shop':
+            placeTraderInRoom(room);
             renderShop();
             break;
         case 'event':
