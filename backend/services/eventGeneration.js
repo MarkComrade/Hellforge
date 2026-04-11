@@ -1,0 +1,428 @@
+const { generateFinalLoot } = require('./lootAlgorithm.js');
+
+const DUNGEON_FALLBACK = 'crypt';
+const MAX_LEVEL = 20;
+
+function generateEventType() {
+    const roll = Math.random();
+    if (roll < 0.2) {
+        return 'trade';
+    }
+
+    if (roll < 0.3) {
+        return 'loot';
+    }
+
+    if (roll < 0.6) {
+        return 'yesOrNo';
+    }
+
+    if (roll < 0.8) {
+        return 'trap';
+    }
+
+    return 'dialogue';
+}
+
+function normalizeDungeonName(dungeonName) {
+    const normalized = String(dungeonName || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_');
+
+    if (!normalized) {
+        return DUNGEON_FALLBACK;
+    }
+
+    return normalized;
+}
+
+function sanitizeLevel(dungeonLevel) {
+    const parsed = Number(dungeonLevel);
+    if (!Number.isInteger(parsed)) {
+        return 1;
+    }
+
+    return Math.min(Math.max(parsed, 1), MAX_LEVEL);
+}
+
+function randomFromArray(values) {
+    if (!Array.isArray(values) || values.length === 0) {
+        return null;
+    }
+    return values[Math.floor(Math.random() * values.length)] || null;
+}
+
+function createSimpleEventPayload(type, title, description, choices = []) {
+    return {
+        success: true,
+        type,
+        title,
+        description,
+        choices,
+        eventId: `${Date.now()}-${Math.floor(Math.random() * 1e6)}`
+    };
+}
+
+function generateLootDialogue(dungeonName, dungeonLevel) {
+    const level = Math.max(1, Number(dungeonLevel) || 1);
+    const levelBand = level <= 3 ? 'low' : level <= 7 ? 'mid' : level <= 12 ? 'high' : 'endgame';
+
+    const lootDialogueByDungeon = {
+        crypt: {
+            low: [
+                'You brush dust from a cracked chest and find something still untouched.',
+                'A loose skull rolls aside, revealing a hidden stash beneath it.'
+            ],
+            mid: [
+                'A bone-locked reliquary snaps open with a dry crack.',
+                'Between broken sarcophagi, a forgotten cache glints in torchlight.'
+            ],
+            high: [
+                'You pry open a cursed coffer while whispers rise from the walls.',
+                'A grave-sealed vault yields relics that should have stayed buried.'
+            ],
+            endgame: [
+                "An ancient tomb king's tribute spills out at your feet.",
+                'The crypt grants a blood-price reward to the one still standing.'
+            ]
+        },
+        labyrinth: {
+            low: [
+                'A false wall shifts, exposing supplies left by someone less lucky.',
+                'You find a hidden niche where the maze keeps its offerings.'
+            ],
+            mid: [
+                'Behind a turning slab, a sealed satchel waits untouched.',
+                'You follow fresh scrape marks to a cache behind the stone.'
+            ],
+            high: [
+                'At a dead-end shrine, you uncover loot meant for the maze champion.',
+                'A trapped alcove opens just long enough for you to claim its prize.'
+            ],
+            endgame: [
+                "At the maze core, a victor's hoard waits beneath shattered horns.",
+                'The labyrinth yields a final tribute to your persistence.'
+            ]
+        },
+        laboratory: {
+            low: [
+                'You crack open a supply crate marked with faded hazard runes.',
+                'A maintenance locker pops open with useful salvage inside.'
+            ],
+            mid: [
+                'A specimen drawer hides loot beside shattered vials.',
+                'You recover a secured bundle from under a scorched console.'
+            ],
+            high: [
+                'A containment rack unlocks, releasing valuable experimental gear.',
+                "You tear open an emergency vault and claim the lab's reserves."
+            ],
+            endgame: [
+                "From the director's cache, prototype treasures spill into your hands.",
+                'The final reactor vault opens and yields a forbidden reward.'
+            ]
+        },
+        gates_of_hell: {
+            low: [
+                'Among smoldering ash, you spot valuables not yet consumed by fire.',
+                "A sinner's cache lies hidden beneath blackened chains."
+            ],
+            mid: [
+                'A scorched war chest cracks open under your blade.',
+                'You claim a tribute pile abandoned in the infernal rush.'
+            ],
+            high: [
+                "A demon captain's spoils are yours after a brutal search.",
+                'From a molten altar, you pull loot still burning at the edges.'
+            ],
+            endgame: [
+                "Hell's tribute chest bursts open under crimson lightning.",
+                'At the gate itself, the abyss offers one final prize.'
+            ]
+        }
+    };
+
+    const lines = (lootDialogueByDungeon[dungeonName] || lootDialogueByDungeon.crypt)[levelBand];
+    return randomFromArray(lines) || 'You uncover a small cache of loot.';
+}
+
+async function eventManager(playerID, dungeonName, dungeonLevel) {
+    const eventType = generateEventType();
+    const safeDungeon = normalizeDungeonName(dungeonName);
+    const safeLevel = sanitizeLevel(dungeonLevel);
+
+    switch (eventType) {
+        case 'trade':
+            return createSimpleEventPayload(
+                'trade',
+                'Traveling Merchant',
+                'A robed merchant offers wares from a hidden satchel.',
+                ['Inspect goods', 'Decline and move on']
+            );
+        case 'loot': {
+            const safePlayerId = Number(playerID);
+            if (!Number.isInteger(safePlayerId) || safePlayerId <= 0) {
+                return createSimpleEventPayload(
+                    'dialogue',
+                    'Locked Cache',
+                    'You find a sealed cache, but without a registered adventurer profile it remains closed.'
+                );
+            }
+
+            const lootResult = await generateFinalLoot(safePlayerId, safeDungeon, safeLevel);
+            if (!lootResult || lootResult.success === false) {
+                return createSimpleEventPayload(
+                    'dialogue',
+                    'Empty Chamber',
+                    'You search the room, but nothing of value remains.'
+                );
+            }
+
+            return {
+                ...lootResult,
+                type: 'loot',
+                title: 'Hidden Cache',
+                description: generateLootDialogue(safeDungeon, safeLevel)
+            };
+        }
+        case 'yesOrNo':
+            return createSimpleEventPayload(
+                'yesOrNo',
+                'Ancient Lever',
+                'A rusted lever juts from the wall. Pulling it could open a hidden path... or trigger a trap.',
+                ['Pull lever', 'Leave it']
+            );
+        case 'trap':
+            return createSimpleEventPayload(
+                'trap',
+                'Pressure Plate',
+                'You hear a click underfoot. The mechanism resets before it can fire, but your pulse spikes.'
+            );
+        case 'dialogue': {
+            const dungeonDialogues = generateDialogue(safeDungeon, safeLevel);
+            const pickedDialogue =
+                randomFromArray(dungeonDialogues) || 'The dungeon watches in silence.';
+            return createSimpleEventPayload('dialogue', 'Dungeon Whisper', pickedDialogue);
+        }
+        default:
+            return createSimpleEventPayload('dialogue', 'Silence', 'Nothing happens.');
+    }
+}
+function generateDialogue(dungeonName, dungeonLevel) {
+    const level = Math.max(1, Number(dungeonLevel) || 1);
+    const levelBand = level <= 3 ? 'low' : level <= 7 ? 'mid' : level <= 12 ? 'high' : 'endgame';
+
+    // Each dungeon tier contains at least 10 lines.
+    const dialoguesByDungeon = {
+        crypt: {
+            low: [
+                ` Dust-choked coffins crack as old bones begin to stir.`,
+                ` A cold draft crawls through the crypt and extinguishes your torch.`,
+                ` Candlelight trembles as tiny skulls roll across the floor.`,
+                ` You brush aside cobwebs and uncover a freshly disturbed grave.`,
+                ` A rusted bell rings once, though no living hand touched it.`,
+                ` Loose bones clatter from the shelves when you pass.`,
+                ` Moist soil leaks between cracked tiles beneath your boots.`,
+                ` A faded epitaph glows faintly, then fades into darkness.`,
+                ` Your breath fogs in the sudden grave-cold air.`,
+                ` A broken sarcophagus lid scrapes open by itself.`
+            ],
+            mid: [
+                ` Rattling skeletons patrol the aisles as if guarding a secret rite.`,
+                ` The smell of rot thickens, and claw marks scar the stone sarcophagi.`,
+                ` Rotting banners sway over a corridor lined with black urns.`,
+                ` Bone totems stitched with sinew mark a forbidden chamber.`,
+                ` A necromancer's chant echoes from below the crypt floor.`,
+                ` Funeral braziers flare green as shadowy forms gather.`,
+                ` A sealed tomb leaks dark mist that coils around your ankles.`,
+                ` Fresh claw marks lead toward a newly broken reliquary.`,
+                ` You find boot prints that end abruptly at a wall.`,
+                ` Dozens of empty eye sockets seem fixed on your movement.`
+            ],
+            high: [
+                ` Necrotic runes pulse across the walls, feeding on every heartbeat.`,
+                ` A mass grave has split open, and something ancient is awake below.`,
+                ` Graveknights kneel in a ring around a blood-stained altar.`,
+                ` A tomb guardian drags a chained blade through shattered bones.`,
+                ` Purple-black flame crawls over coffins without consuming them.`,
+                ` A cursed crown rests on a skull that still whispers.`,
+                ` The ceiling cracks, dropping fistfuls of funeral ash.`,
+                ` A choir of the dead hums from behind sealed walls.`,
+                ` Your shadow lags behind, as if reluctant to follow.`,
+                ` An ossuary gate unlocks with a sound like breaking ribs.`
+            ],
+            endgame: [
+                ` Funeral bells echo from nowhere as the crypt itself seems alive.`,
+                ` The dead kneel in silence, waiting for a command not meant for mortals.`,
+                ` A lich throne rises from the floor, carved from fused skeletons.`,
+                ` Rivers of grave-light pour from cracks in the mausoleum walls.`,
+                ` Thousand-year-old kings open their eyes in unison.`,
+                ` A death sigil blooms overhead and smothers all sound.`,
+                ` The catacombs rearrange into a ritual labyrinth of bones.`,
+                ` A colossal sarcophagus unlocks with a scream of metal.`,
+                ` Every corpse in sight turns to face you at once.`,
+                ` The crypt's heart beats beneath your feet like a war drum.`
+            ]
+        },
+        labyrinth: {
+            low: [
+                ` The maze shifts behind you, erasing the path you just walked.`,
+                ` Whispering voices trade your name between the stone corridors.`,
+                ` Chalk arrows you drew moments ago have vanished.`,
+                ` A dead-end wall slides away when you look elsewhere.`,
+                ` A faint laugh travels down three passages at once.`,
+                ` Wind whistles from a corridor that does not exist on your map.`,
+                ` Old carvings shift into new symbols while you watch.`,
+                ` Footprints appear ahead of you, matching your boots.`,
+                ` A lantern at the far turn goes dark as you approach.`,
+                ` Pebbles roll uphill toward the maze center.`
+            ],
+            mid: [
+                ` Marked walls twist into unfamiliar angles as the labyrinth learns your route.`,
+                ` Footsteps follow at a distance, always one turn out of sight.`,
+                ` Stone teeth grind inside the walls whenever you hesitate.`,
+                ` You hear chains dragging from beyond a locked archway.`,
+                ` False doors lure you into rooms that seal behind you.`,
+                ` Dust spirals form arrows that point in different directions.`,
+                ` Hidden pressure plates click beneath loose gravel.`,
+                ` A horn blast echoes, and the maze falls eerily silent.`,
+                ` Broken spears line a corridor like warning stakes.`,
+                ` A mirrored hall reflects a version of you that stands still.`
+            ],
+            high: [
+                ` Echoes split in two directions, but only one of them is yours.`,
+                ` The center feels close, yet every archway bends you farther away.`,
+                ` Minotaur runes glow red on the walls near each junction.`,
+                ` The floor trembles as something massive charges nearby.`,
+                ` Spiked gates slam shut behind you without warning.`,
+                ` A blood trail loops back to where it began.`,
+                ` Blade traps reset with clockwork precision around you.`,
+                ` The ceiling lowers in pulses like a giant heartbeat.`,
+                ` Roars bounce through the maze and shake loose stone dust.`,
+                ` A shattered shrine marks territory you were never meant to enter.`
+            ],
+            endgame: [
+                ` The maze seals itself in a thunder of stone and hunting horns.`,
+                ` A colossal shadow crosses the ceiling, matching your turns perfectly.`,
+                ` Crimson torches ignite one by one toward the final arena.`,
+                ` A gigantic gate etched with horns unlocks from within.`,
+                ` Every corridor narrows, funneling you to the heart.`,
+                ` Drums boom from under the stone as the walls begin to close.`,
+                ` The maze redraws itself into a kill-path around you.`,
+                ` Ancient judges carved in stone turn their heads as you pass.`,
+                ` A beast's breath steams through cracks in the central doors.`,
+                ` The labyrinth's core opens like the jaws of a titan.`
+            ]
+        },
+        laboratory: {
+            low: [
+                ` Glass tubes bubble with unstable mixtures and acrid green vapor.`,
+                ` A half-finished construct twitches on a metal slab as lightning flickers.`,
+                ` Copper pipes hiss as coolant leaks onto cracked tiles.`,
+                ` A notebook describes experiments in hurried, panicked handwriting.`,
+                ` Rows of jars hold organs that should not still be beating.`,
+                ` Tiny servo-spiders scatter into vents as you enter.`,
+                ` A test chamber window is smeared from inside.`,
+                ` Coils spark overhead and throw strobing shadows.`,
+                ` A chemical spill eats slowly through a steel grate.`,
+                ` An autopsy table is still warm to the touch.`
+            ],
+            mid: [
+                ` Alchemical fires burn blue while notes describe forbidden human trials.`,
+                ` Clockwork limbs clatter in the dark, searching for missing components.`,
+                ` A restraint chair jerks as if someone is still bound in it.`,
+                ` Mutagen tanks pulse with bioluminescent sludge.`,
+                ` Lab alarms blink red but emit no sound.`,
+                ` A grafted hound snarls from behind cracked glass.`,
+                ` Steel shutters drop and lock sections of the hall.`,
+                ` Surgical drones hover silently above blood-marked trays.`,
+                ` A pressure gauge spikes when you step near the reactor wing.`,
+                ` Prototype armor stands stand in formation, tracking your movement.`
+            ],
+            high: [
+                ` A giant reactor throbs against its chains, ready to rupture.`,
+                ` Mutated specimens claw at reinforced glass, drawn by your movement.`,
+                ` Containment doors cycle open and shut on corrupted commands.`,
+                ` Arc lightning leaps across catwalks with lethal precision.`,
+                ` A fusion vat overflows with flesh-metal hybrids.`,
+                ` The central AI repeats one phrase: Subject escaped.`,
+                ` A hulking construct tears free from magnetic clamps.`,
+                ` Shock lances descend from the ceiling in timed bursts.`,
+                ` Your compass spins as gravity pulses through the chamber.`,
+                ` Failed prototypes line the walls, still reaching for you.`
+            ],
+            endgame: [
+                ` The master experiment has escaped containment and stalks the upper gantries.`,
+                ` Reality warps around cracked apparatus, as if the lab rewrote natural law.`,
+                ` The final reactor begins a catastrophic overload countdown.`,
+                ` A colossal bio-engineered horror drags chains through molten steel.`,
+                ` Emergency sirens chant evacuation orders in a dead language.`,
+                ` Antimatter coils hum while gravity folds around the core.`,
+                ` The director's chamber unlocks and floods with sterile fog.`,
+                ` Every monitor displays your vitals and projected death time.`,
+                ` Autonomous turrets switch to purge protocol on your location.`,
+                ` The lab collapses inward as its experiments tear open space.`
+            ]
+        },
+        gates_of_hell: {
+            low: [
+                ` Sulfurous wind blasts through the iron gate and chars the ground.`,
+                ` Distant screams rise and fall like a choir from the abyss.`,
+                ` Ember rain falls softly and burns through cloth.`,
+                ` Black ash drifts from above like cursed snow.`,
+                ` A cracked obelisk oozes molten runes onto the path.`,
+                ` Chains rattle beneath the basalt floor with each step.`,
+                ` A distant infernal horn announces your arrival.`,
+                ` Flame vents erupt from fissures at random intervals.`,
+                ` Charred statues of sinners bow toward the gate.`,
+                ` A demon sigil smolders where your shadow falls.`
+            ],
+            mid: [
+                ` Infernal chains drag across basalt as lesser demons prowl the rim.`,
+                ` Rivers of ember-light divide the path, boiling with cursed souls.`,
+                ` Hellhounds patrol the bridges between burning pits.`,
+                ` War drums pulse from fortified towers of obsidian.`,
+                ` Fire imps dive from broken battlements above.`,
+                ` A branded execution ground crackles with fresh heat.`,
+                ` Demonic standards snap in a wind that smells of blood.`,
+                ` A pit warden drags a hooked chain through the dust.`,
+                ` Lava geysers erupt beside narrow causeways.`,
+                ` The sky darkens with winged scavengers circling overhead.`
+            ],
+            high: [
+                ` War banners of the damned ignite above battlements carved from bone.`,
+                ` A horned sentinel watches in silence, hand resting on a runed blade.`,
+                ` Siege engines hurl burning skulls across the horizon.`,
+                ` A legion marshal marks your name in brimstone.`,
+                ` Abyssal portals crack open and spit out elite hunters.`,
+                ` A molten colossus rises from a pit and roars.`,
+                ` Cursed artillery locks onto your movement from afar.`,
+                ` The road is paved with shattered halos and broken chains.`,
+                ` A blood moon hangs low, feeding the flames below.`,
+                ` Demon captains chant battle hymns around a black altar.`
+            ],
+            endgame: [
+                ` The gates yawn wide, and the heat feels like a god's wrath.`,
+                ` Archdemons chant your fate while the sky fractures with red lightning.`,
+                ` A throne of magma rises as the final court convenes.`,
+                ` Chains of the damned tighten around a world-sized seal.`,
+                ` Infernal choirs scream as reality thins at the gate.`,
+                ` A prince of hell descends with a blade of living fire.`,
+                ` Meteoric embers rain down and reshape the battlefield.`,
+                ` The abyss opens beneath you, revealing endless war below.`,
+                ` Every bell in hell tolls once for your arrival.`,
+                `The final seal cracks, and the legion surges forward.`
+            ]
+        }
+    };
+
+    const dungeonDialogues = (dialoguesByDungeon[dungeonName] || dialoguesByDungeon.crypt)[
+        levelBand
+    ];
+    return dungeonDialogues;
+}
+
+module.exports = {
+    eventManager
+};

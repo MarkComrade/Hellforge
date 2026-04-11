@@ -28,7 +28,7 @@ router.get('/stash/count/:playerId', async (request, response) => {
     }
     try {
         const count = await database.getStashCount(playerId);
-        response.status(200).json({ success: true, count, limit: 60 });
+        response.status(200).json({ success: true, count, limit: 50 });
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });
     }
@@ -183,14 +183,13 @@ router.post('/loadout/moveToStash', async (request, response) => {
 
 router.get('/gold/:playerId', async (request, response) => {
     const playerId = parseInt(request.params.playerId, 10);
-    if (!playerId) {
+    if (!playerId || isNaN(playerId)) {
         return response
             .status(400)
             .json({ success: false, message: 'Érvénytelen játékos azonosító' });
     }
-
     try {
-        const result = await database.getGoldBalances(playerId);
+        const result = await database.getTotalGold(playerId);
         response.status(result.success ? 200 : 500).json(result);
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });
