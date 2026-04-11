@@ -3,6 +3,7 @@ async function Home() {
 
     document.body.style.backgroundImage = "url('../menuImages/home.jpg')";
 
+    // Fetch session and player data
     let playerName = 'Guest';
     let playerId = null;
     let gold = 0;
@@ -14,16 +15,10 @@ async function Home() {
             playerId = session.userId;
             playerName = session.userName;
 
-            const [equipmentResult, goldResult] = await Promise.all([
-                getMethodFetch(`/api/inventory/equipment/${playerId}`),
-                getMethodFetch(`/api/inventory/gold/${playerId}`)
-            ]);
-
-            if (equipmentResult.success) {
-                equippedGear = equipmentResult.inventory;
-            }
-            if (goldResult.success) {
-                gold = Number(goldResult.gold.stash) + Number(goldResult.gold.loadout);
+            const result = await getMethodFetch(`/api/inventory/equipment/${playerId}`);
+            if (result.success) {
+                gold = result.inventory.gold;
+                equippedGear = result.inventory;
             }
         }
     } catch (error) {
@@ -54,6 +49,8 @@ async function Home() {
     userImg.setAttribute('src', '../textures/misc/defaultportrait.png');
     userImg.setAttribute('class', 'characterImage img-fluid');
     homeUI[0].appendChild(userImg);
+
+    //? Custom user image upload
 
     let goldAmount = document.createElement('h3');
     goldAmount.setAttribute('class', 'menuText');
