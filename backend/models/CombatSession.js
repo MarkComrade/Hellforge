@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const { CARDS_PER_TURN } = require('../services/cardPool.js');
 
+const HAND_SIZE = 5; // hand is always maintained at this size during combat
+
 const TURN_OWNERS = {
     PLAYER: 'player',
     ENEMY: 'enemy'
@@ -35,7 +37,6 @@ class CombatSession {
             hp: this._clamp(playerCurrentHp, 0, playerMaxHp),
             maxHp: playerMaxHp,
             block: 0,
-            drawPerTurn: 5,
             statuses: [],
             equipmentSnapshot: options.equipmentSnapshot || {}
         };
@@ -121,10 +122,64 @@ class CombatSession {
         this.turnNumber += 1;
     }
 
+    // Remove a card from hand by index, route it to discard or exhaust,
+    // then immediately draw one replacement to keep the hand at HAND_SIZE.
+    // Returns the removed card so the caller can apply its effects, or null if index is invalid.
+    removeCardFromHand(cardIndex, exhaust = false) {
+        if (cardIndex < 0 || cardIndex >= this.deck.hand.length) return null;
+        const [card] = this.deck.hand.splice(cardIndex, 1);
+        if (exhaust) {
+            this.deck.exhaustPile.push(card);
+        } else {
+            this.deck.discardPile.push(card);
+        }
+        this.drawCard(); // immediately refill the empty slot
+        return card;
+    }
+
+    // Fill hand up to HAND_SIZE by drawing cards one at a time.
+    // Used at combat start to deal the opening hand.
+    // During combat, drawCard() is called once per card played instead.
+    refillHand() {
+        while (this.deck.hand.length < HAND_SIZE) {
+            if (this.drawCard() === null) break; // draw + discard both empty
+        }
+    }
+
+    // Draw one card from the draw pile into hand.
+    // If the draw pile is empty, shuffle the discard pile back into the draw pile first.
+    // Exhausted cards are never reshuffled — they stay in exhaustPile permanently.
+    drawCard() {
+        if (this.deck.drawPile.length === 0) {
+            if (this.deck.discardPile.length === 0) return null; // nothing left to draw
+            // Fisher-Yates shuffle of the discard pile → becomes the new draw pile
+            const reshuffled = [...this.deck.discardPile];
+            for (let i = reshuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [reshuffled[i], reshuffled[j]] = [reshuffled[j], reshuffled[i]];
+            }
+            this.deck.drawPile = reshuffled;
+            this.deck.discardPile = [];
+        }
+        const card = this.deck.drawPile.shift();
+        this.deck.hand.push(card);
+        return card;
+    }
+
+    // Draw n cards, stopping early if both draw and discard piles run out.
+    drawCards(n) {
+        const count = Math.max(0, Math.floor(Number(n) || 0));
+        for (let i = 0; i < count; i++) {
+            if (this.drawCard() === null) break;
+        }
+    }
+
     startPlayerTurn() {
         this.setTurnOwner(TURN_OWNERS.PLAYER);
         this.turnRules.cardsPlayedThisTurn = 0;
         this.turnRules.bonusCardsThisTurn = 0;
+        // No draw here — hand is always maintained at HAND_SIZE:
+        // one card is drawn automatically every time a card is played.
     }
 
     getMaxCardsThisTurn() {
@@ -251,7 +306,6 @@ class CombatSession {
             hp: 100,
             maxHp: 100,
             block: 0,
-            drawPerTurn: 5,
             statuses: [],
             equipmentSnapshot: {}
         };

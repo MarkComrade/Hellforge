@@ -18,7 +18,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 2, extraPlays: 1 }
+            effects: { damage: 1, extraPlays: 1 }
         },
         {
             id: 3,
@@ -51,7 +51,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'melee',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 1 }
+            effects: { extraPlays: 2, backfire: 8 }
         },
         {
             id: 8,
@@ -125,7 +125,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'melee',
             exhaust: false,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, strength: 3 }
         },
         {
             id: 17,
@@ -183,7 +183,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'melee',
             exhaust: false,
-            effects: { extraPlays: 1, backfire: 2 }
+            effects: { extraPlays: 1, strength: 4, backfire: 2 }
         },
         {
             id: 24,
@@ -273,15 +273,15 @@ const CARD_POOL = {
             tier: 4,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 7, extraPlays: 2, backfire: 2 }
+            effects: { damage: 7, extraPlays: 1, backfire: 2 }
         },
         {
             id: 35,
-            name: 'Bladestorm',
+            name: "Mama's Chili Oil",
             tier: 4,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 10, bleed: 2, extraPlays: 1, backfire: 4 }
+            effects: { damage: 10, scorch: 2, extraPlays: 1, backfire: 4 }
         },
         {
             id: 36,
@@ -289,7 +289,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 13, backfire: 4 }
+            effects: { damage: 13, vulnerable: { pct: 20, turns: 1 }, backfire: 4 }
         },
         {
             id: 37,
@@ -321,7 +321,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'melee',
             exhaust: true,
-            effects: { damage: 18, bleed: 4, extraPlays: 1, backfire: 5 }
+            effects: { damage: 8, bleed: 4, extraPlays: 1, backfire: 5 }
         },
 
         // ── T5 ──────────────────────────────────────────────────────────
@@ -347,7 +347,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 15, backfire: 5 }
+            effects: { damage: 15, vulnerable: { pct: 25, turns: 2 }, backfire: 5 }
         },
         {
             id: 44,
@@ -363,7 +363,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 14, block: 6, backfire: 4 }
+            effects: { damage: 14, block: 6 }
         },
         {
             id: 46,
@@ -371,7 +371,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 9, bleed: 3, extraPlays: 2 }
+            effects: { damage: 9, bleed: 3, extraPlays: 1 }
         },
         {
             id: 47,
@@ -395,7 +395,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 10, bleed: 5, healing: 4 }
+            effects: { damage: 10, bleed: 5, lifesteal: { pct: 20, turns: 2 } }
         },
         {
             id: 50,
@@ -420,8 +420,8 @@ const CARD_POOL = {
             name: 'Obliterate',
             tier: 6,
             type: 'melee',
-            exhaust: false,
-            effects: { damage: 20, bleed: 5, backfire: 6 }
+            exhaust: true,
+            effects: { damage: 20, bleed: 5, vulnerable: { pct: 30, turns: 2 }, backfire: 6 }
         },
         {
             id: 53,
@@ -445,7 +445,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 15, bleed: 5, healing: 5, backfire: 5 }
+            effects: { damage: 15, bleed: 5, healing: 5 }
         },
         {
             id: 56,
@@ -461,7 +461,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 20, healing: 8, backfire: 7 }
+            effects: { damage: 20, healing: 8, lifesteal: { pct: 25, turns: 2 } }
         },
         {
             id: 58,
@@ -469,7 +469,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 25, backfire: 10 }
+            effects: { damage: 25, vulnerable: { pct: 30, turns: 3 }, backfire: 10 }
         },
         {
             id: 59,
@@ -477,7 +477,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'melee',
             exhaust: false,
-            effects: { damage: 14, bleed: 4, extraPlays: 2, backfire: 5 }
+            effects: { damage: 14, bleed: 4, extraPlays: 1, backfire: 5 }
         },
         {
             id: 60,
@@ -485,7 +485,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'melee',
             exhaust: true,
-            effects: { damage: 30, bleed: 8, extraPlays: 2, backfire: 12 }
+            effects: { damage: 30, bleed: 8, extraPlays: 1, backfire: 12 }
         }
     ],
 
@@ -524,7 +524,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 2, bleed: 1 }
+            effects: { damage: 2, scorch: 1 }
         },
         {
             id: 65,
@@ -606,7 +606,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 6, extraPlays: 1, backfire: 1 }
+            effects: { damage: 6, vulnerable: { pct: 15, turns: 1 }, extraPlays: 1, backfire: 1 }
         },
         {
             id: 75,
@@ -638,7 +638,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 4, bleed: 3, backfire: 1 }
+            effects: { damage: 4, scorch: 3, backfire: 1 }
         },
         {
             id: 79,
@@ -664,7 +664,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 6 }
+            effects: { damage: 6, vulnerable: { pct: 20, turns: 1 } }
         },
         {
             id: 82,
@@ -712,7 +712,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 7, bleed: 3, backfire: 2 }
+            effects: { damage: 7, scorch: 3, backfire: 2 }
         },
         {
             id: 88,
@@ -746,7 +746,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 7, extraPlays: 1 }
+            effects: { damage: 5, vulnerable: { pct: 20, turns: 2 }, extraPlays: 1 }
         },
         {
             id: 92,
@@ -762,7 +762,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 8, extraPlays: 2 }
+            effects: { damage: 8, extraPlays: 1 }
         },
         {
             id: 94,
@@ -770,7 +770,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 7, bleed: 4, backfire: 2 }
+            effects: { damage: 7, scorch: 4, backfire: 2 }
         },
         {
             id: 95,
@@ -802,7 +802,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 8, extraPlays: 2, backfire: 4 }
+            effects: { damage: 8, extraPlays: 1, backfire: 4 }
         },
         {
             id: 99,
@@ -836,7 +836,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 13, bleed: 4 }
+            effects: { damage: 13, scorch: 4 }
         },
         {
             id: 103,
@@ -852,7 +852,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 12, extraPlays: 2, backfire: 3 }
+            effects: { damage: 12, extraPlays: 1, backfire: 3 }
         },
         {
             id: 105,
@@ -860,7 +860,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 9, bleed: 6, backfire: 2 }
+            effects: { damage: 9, scorch: 6, backfire: 2 }
         },
         {
             id: 106,
@@ -868,7 +868,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 15, backfire: 5 }
+            effects: { damage: 15, vulnerable: { pct: 25, turns: 2 }, backfire: 5 }
         },
         {
             id: 107,
@@ -884,7 +884,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 8, bleed: 3, extraPlays: 2, backfire: 3 }
+            effects: { damage: 8, bleed: 3, extraPlays: 1, backfire: 3 }
         },
         {
             id: 109,
@@ -918,7 +918,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 20, bleed: 5, backfire: 6 }
+            effects: { damage: 20, scorch: 5, backfire: 6 }
         },
         {
             id: 113,
@@ -942,7 +942,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 10, bleed: 3, extraPlays: 3, backfire: 4 }
+            effects: { damage: 10, bleed: 3, extraPlays: 1, backfire: 4 }
         },
         {
             id: 116,
@@ -958,7 +958,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 16, bleed: 5, extraPlays: 2, backfire: 5 }
+            effects: { damage: 16, bleed: 5, extraPlays: 1, backfire: 5 }
         },
         {
             id: 118,
@@ -974,7 +974,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'ranged',
             exhaust: false,
-            effects: { damage: 13, bleed: 4, extraPlays: 2, backfire: 5 }
+            effects: { damage: 13, scorch: 4, extraPlays: 1, backfire: 5 }
         },
         {
             id: 120,
@@ -982,7 +982,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'ranged',
             exhaust: true,
-            effects: { damage: 30, bleed: 9, extraPlays: 2, backfire: 12 }
+            effects: { damage: 30, bleed: 9, extraPlays: 1, backfire: 12 }
         }
     ],
 
@@ -997,7 +997,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, strength: 1 }
         },
         {
             id: 122,
@@ -1029,7 +1029,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 2 }
+            effects: { extraPlays: 2, backfire: 5 }
         },
         {
             id: 126,
@@ -1037,7 +1037,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'helmet',
             exhaust: false,
-            effects: { healing: 3 }
+            effects: { healing: 2, regen: 1 }
         },
         {
             id: 127,
@@ -1053,7 +1053,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1, backfire: 1 }
+            effects: { extraPlays: 1, strength: 2, backfire: 2 }
         },
         {
             id: 129,
@@ -1069,7 +1069,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, strength: 2, vulnerable: { pct: 10, turns: 1 }, backfire: 3 }
         },
 
         // ── T2 ──────────────────────────────────────────────────────────
@@ -1087,7 +1087,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 1 }
+            effects: { extraPlays: 2, backfire: 6 }
         },
         {
             id: 133,
@@ -1111,7 +1111,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'helmet',
             exhaust: false,
-            effects: { healing: 5 }
+            effects: { healing: 4, regen: 3 }
         },
         {
             id: 136,
@@ -1119,7 +1119,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 2 }
+            effects: { extraPlays: 1, backfire: 2 }
         },
         {
             id: 137,
@@ -1151,7 +1151,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 1, backfire: 3 }
+            effects: { extraPlays: 1, strength: 3, backfire: 2 }
         },
 
         // ── T3 ──────────────────────────────────────────────────────────
@@ -1161,7 +1161,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, strength: 3 }
         },
         {
             id: 142,
@@ -1169,7 +1169,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1, backfire: 2 }
+            effects: { extraPlays: 1, strength: 3, backfire: 3 }
         },
         {
             id: 143,
@@ -1185,7 +1185,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, healing: 3 }
+            effects: { healing: 4, regen: 4 }
         },
         {
             id: 145,
@@ -1193,7 +1193,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, block: 5 }
+            effects: { extraPlays: 1, block: 3 }
         },
         {
             id: 146,
@@ -1201,7 +1201,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1, backfire: 3 }
+            effects: { extraPlays: 1, backfire: 2 }
         },
         {
             id: 147,
@@ -1217,7 +1217,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { healing: 9 }
+            effects: { healing: 6, regen: 5 }
         },
         {
             id: 149,
@@ -1225,7 +1225,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1, healing: 3, backfire: 2 }
+            effects: { extraPlays: 1, healing: 6 }
         },
         {
             id: 150,
@@ -1233,7 +1233,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 2, backfire: 4 }
+            effects: { extraPlays: 2, strength: 4 }
         },
 
         // ── T4 ──────────────────────────────────────────────────────────
@@ -1243,7 +1243,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2 }
+            effects: { extraPlays: 2, strength: 1 }
         },
         {
             id: 152,
@@ -1251,7 +1251,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, backfire: 2 }
+            effects: { extraPlays: 2, backfire: 2 }
         },
         {
             id: 153,
@@ -1267,15 +1267,15 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, healing: 5, backfire: 3 }
+            effects: { extraPlays: 2 }
         },
         {
             id: 155,
             name: "Warlord's Mind",
             tier: 4,
             type: 'helmet',
-            exhaust: false,
-            effects: { extraPlays: 2, backfire: 3 }
+            exhaust: true,
+            effects: { extraPlays: 2, strength: 5 }
         },
         {
             id: 156,
@@ -1283,7 +1283,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 4, backfire: 4 }
+            effects: { extraPlays: 3, backfire: 9 }
         },
         {
             id: 157,
@@ -1291,7 +1291,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { block: 10, extraPlays: 2 }
+            effects: { block: 7, extraPlays: 1 }
         },
         {
             id: 158,
@@ -1299,7 +1299,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { healing: 12, extraPlays: 1 }
+            effects: { healing: 8, regen: 5, extraPlays: 1 }
         },
         {
             id: 159,
@@ -1307,7 +1307,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, healing: 4, backfire: 4 }
+            effects: { extraPlays: 1, healing: 3, strength: 3, block: 3 }
         },
         {
             id: 160,
@@ -1315,7 +1315,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 2, backfire: 5 }
+            effects: { extraPlays: 1, regen: 4, block: 4 }
         },
 
         // ── T5 ──────────────────────────────────────────────────────────
@@ -1325,7 +1325,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 2 }
+            effects: { extraPlays: 1, healing: 2 }
         },
         {
             id: 162,
@@ -1333,7 +1333,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 4 }
+            effects: { extraPlays: 2, strength: 4 }
         },
         {
             id: 163,
@@ -1341,7 +1341,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, healing: 8 }
+            effects: { extraPlays: 1, healing: 5, regen: 5 }
         },
         {
             id: 164,
@@ -1349,7 +1349,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { block: 12, extraPlays: 2 }
+            effects: { block: 10, extraPlays: 1, vulnerable: { pct: 20, turns: 2 } }
         },
         {
             id: 165,
@@ -1357,7 +1357,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, backfire: 5 }
+            effects: { extraPlays: 2, strength: 3 }
         },
         {
             id: 166,
@@ -1365,7 +1365,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 1, backfire: 4 }
+            effects: { extraPlays: 1, strength: 5, backfire: 5 }
         },
         {
             id: 167,
@@ -1373,7 +1373,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, healing: 10, backfire: 3 }
+            effects: { extraPlays: 1, healing: 6, regen: 6 }
         },
         {
             id: 168,
@@ -1381,7 +1381,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, block: 5, backfire: 5 }
+            effects: { extraPlays: 2, strength: 5 }
         },
         {
             id: 169,
@@ -1389,7 +1389,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, block: 10, healing: 5 }
+            effects: { extraPlays: 1, block: 10 }
         },
         {
             id: 170,
@@ -1397,17 +1397,17 @@ const CARD_POOL = {
             tier: 5,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 3, backfire: 7 }
+            effects: { extraPlays: 2, strength: 5, block: 5 }
         },
 
         // ── T6 ──────────────────────────────────────────────────────────
         {
             id: 171,
-            name: 'Overmind Helm',
+            name: 'Holy Trinity',
             tier: 6,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 3 }
+            effects: { extraPlays: 3, healing: 3, block: 3 }
         },
         {
             id: 172,
@@ -1415,7 +1415,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, backfire: 6 }
+            effects: { extraPlays: 2, vulnerable: { pct: 15, turns: 2 } }
         },
         {
             id: 173,
@@ -1423,7 +1423,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 5, healing: 10, backfire: 5 }
+            effects: { extraPlays: 1, healing: 6, regen: 6 }
         },
         {
             id: 174,
@@ -1431,7 +1431,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 3, block: 8, backfire: 6 }
+            effects: { extraPlays: 2, strength: 6 }
         },
         {
             id: 175,
@@ -1439,7 +1439,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, healing: 8 }
+            effects: { extraPlays: 1, healing: 5, regen: 8 }
         },
         {
             id: 176,
@@ -1447,23 +1447,23 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, backfire: 8 }
+            effects: { extraPlays: 2, strength: 6, backfire: 6 }
         },
         {
             id: 177,
             name: 'Absolute Focus',
             tier: 6,
             type: 'helmet',
-            exhaust: false,
-            effects: { extraPlays: 3, block: 12, healing: 12 }
+            exhaust: true,
+            effects: { extraPlays: 3, strength: 6, healing: 12 }
         },
         {
             id: 178,
             name: 'Overvolt',
             tier: 6,
             type: 'helmet',
-            exhaust: false,
-            effects: { extraPlays: 4, backfire: 8 }
+            exhaust: true,
+            effects: { extraPlays: 4, backfire: 10 }
         },
         {
             id: 179,
@@ -1471,7 +1471,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: false,
-            effects: { extraPlays: 2, healing: 6, backfire: 5 }
+            effects: { extraPlays: 1, strength: 3, healing: 5 }
         },
         {
             id: 180,
@@ -1479,7 +1479,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'helmet',
             exhaust: true,
-            effects: { extraPlays: 4, block: 10, backfire: 10 }
+            effects: { extraPlays: 1, healing: 5, block: 5, bleed: 5 }
         }
     ],
 
@@ -1526,7 +1526,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 2, block: 2, backfire: 1 }
+            effects: { healing: 2, block: 2 }
         },
         {
             id: 186,
@@ -1534,7 +1534,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'armour',
             exhaust: false,
-            effects: { block: 3, extraPlays: 1, backfire: 1 }
+            effects: { block: 3, extraPlays: 1 }
         },
         {
             id: 187,
@@ -1558,7 +1558,7 @@ const CARD_POOL = {
             tier: 1,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 3, backfire: 2 }
+            effects: { healing: 3 }
         },
         {
             id: 190,
@@ -1576,7 +1576,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 5 }
+            effects: { block: 4, regen: 1 }
         },
         {
             id: 192,
@@ -1584,7 +1584,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'armour',
             exhaust: false,
-            effects: { block: 6, backfire: 1 }
+            effects: { block: 6 }
         },
         {
             id: 193,
@@ -1592,7 +1592,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 3, block: 4, backfire: 2 }
+            effects: { damage: 3, block: 4 }
         },
         {
             id: 194,
@@ -1608,7 +1608,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 6, backfire: 2 }
+            effects: { healing: 6 }
         },
         {
             id: 196,
@@ -1632,7 +1632,7 @@ const CARD_POOL = {
             tier: 2,
             type: 'armour',
             exhaust: false,
-            effects: { block: 7, backfire: 2 }
+            effects: { block: 7 }
         },
         {
             id: 199,
@@ -1674,7 +1674,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 7, backfire: 2 }
+            effects: { healing: 7 }
         },
         {
             id: 204,
@@ -1698,7 +1698,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'armour',
             exhaust: false,
-            effects: { block: 7, healing: 4, backfire: 2 }
+            effects: { block: 6, healing: 3, regen: 3 }
         },
         {
             id: 207,
@@ -1706,7 +1706,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 8, backfire: 3 }
+            effects: { healing: 5, regen: 4 }
         },
         {
             id: 208,
@@ -1714,7 +1714,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'armour',
             exhaust: false,
-            effects: { block: 8, damage: 4, backfire: 2 }
+            effects: { block: 8, damage: 4 }
         },
         {
             id: 209,
@@ -1722,7 +1722,7 @@ const CARD_POOL = {
             tier: 3,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 5, extraPlays: 2 }
+            effects: { healing: 5, extraPlays: 1 }
         },
         {
             id: 210,
@@ -1756,7 +1756,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 6, block: 8, backfire: 3 }
+            effects: { damage: 6, block: 8 }
         },
         {
             id: 214,
@@ -1772,15 +1772,15 @@ const CARD_POOL = {
             tier: 4,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 5, block: 9, bleed: 2, backfire: 3 }
+            effects: { damage: 5, block: 9, bleed: 2 }
         },
         {
             id: 216,
             name: 'Indomitable',
             tier: 4,
             type: 'armour',
-            exhaust: false,
-            effects: { healing: 9, block: 6, backfire: 3 }
+            exhaust: true,
+            effects: { healing: 6, block: 6, regen: 5 }
         },
         {
             id: 217,
@@ -1796,7 +1796,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'armour',
             exhaust: false,
-            effects: { block: 14, backfire: 3 }
+            effects: { block: 14 }
         },
         {
             id: 219,
@@ -1804,7 +1804,7 @@ const CARD_POOL = {
             tier: 4,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 8, extraPlays: 2, backfire: 2 }
+            effects: { healing: 8, extraPlays: 1 }
         },
         {
             id: 220,
@@ -1838,7 +1838,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 14, backfire: 5 }
+            effects: { healing: 8, regen: 6 }
         },
         {
             id: 224,
@@ -1854,7 +1854,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 8, block: 10, bleed: 3, backfire: 4 }
+            effects: { damage: 8, block: 10, bleed: 3 }
         },
         {
             id: 226,
@@ -1870,7 +1870,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 13, damage: 5, backfire: 4 }
+            effects: { healing: 8, damage: 5, regen: 5 }
         },
         {
             id: 228,
@@ -1878,7 +1878,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'armour',
             exhaust: false,
-            effects: { block: 16, backfire: 4 }
+            effects: { block: 16 }
         },
         {
             id: 229,
@@ -1886,7 +1886,7 @@ const CARD_POOL = {
             tier: 5,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 10, extraPlays: 2, backfire: 3 }
+            effects: { healing: 10, extraPlays: 1 }
         },
         {
             id: 230,
@@ -1904,7 +1904,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: true,
-            effects: { healing: 15 }
+            effects: { healing: 9, regen: 6, block: 9 }
         },
         {
             id: 232,
@@ -1912,7 +1912,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { block: 20, healing: 8, backfire: 5 }
+            effects: { block: 20, healing: 8 }
         },
         {
             id: 233,
@@ -1920,7 +1920,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 20, extraPlays: 2 }
+            effects: { healing: 20, extraPlays: 1 }
         },
         {
             id: 234,
@@ -1928,7 +1928,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 10, block: 16, bleed: 4, backfire: 6 }
+            effects: { damage: 10, block: 16, bleed: 4 }
         },
         {
             id: 235,
@@ -1936,7 +1936,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { healing: 18, block: 10, backfire: 6 }
+            effects: { healing: 12, block: 10, regen: 6 }
         },
         {
             id: 236,
@@ -1944,7 +1944,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { block: 22, damage: 8, backfire: 5 }
+            effects: { block: 22, damage: 8 }
         },
         {
             id: 237,
@@ -1960,15 +1960,15 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: false,
-            effects: { damage: 12, block: 14, bleed: 5, healing: 6, backfire: 8 }
+            effects: { damage: 12, block: 14, bleed: 5, healing: 6 }
         },
         {
             id: 239,
             name: 'Undying Legion',
             tier: 6,
             type: 'armour',
-            exhaust: false,
-            effects: { healing: 16, extraPlays: 2, block: 12, backfire: 5 }
+            exhaust: true,
+            effects: { healing: 16, extraPlays: 1, block: 12, damage: 6 }
         },
         {
             id: 240,
@@ -1976,7 +1976,7 @@ const CARD_POOL = {
             tier: 6,
             type: 'armour',
             exhaust: true,
-            effects: { healing: 28, block: 20, extraPlays: 2, damage: 6 }
+            effects: { block: 1000 }
         }
     ]
 };
