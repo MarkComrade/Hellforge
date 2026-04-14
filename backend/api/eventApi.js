@@ -141,12 +141,10 @@ router.post('/buy-item', async (request, response) => {
     }
 
     if (!itemId || !category || adjustedPrice == null) {
-        return response
-            .status(400)
-            .json({
-                success: false,
-                message: 'Missing required fields: itemId, category, adjustedPrice.'
-            });
+        return response.status(400).json({
+            success: false,
+            message: 'Missing required fields: itemId, category, adjustedPrice.'
+        });
     }
 
     if (category !== 'weapon' && category !== 'armor') {

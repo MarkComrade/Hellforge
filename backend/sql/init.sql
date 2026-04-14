@@ -40,6 +40,7 @@ CREATE TABLE `misc_items`(
     `itemId` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `img_path` VARCHAR(255) NOT NULL,
+    `tier` INT NOT NULL,
     `value` INT NOT NULL
 );
 
@@ -112,6 +113,27 @@ INSERT INTO `weapons` (`type`, `name`, `img_path`, `tier`, `price`, `attack_mult
     ('Ranged', 'Legendary Bow', '../textures/items/weapons/bow_legendary.png', 5, 700, 2.6),
     ('Melee', 'Hellish Sword', '../textures/items/weapons/sword_hellish.png', 6, 2100, 3.6),
     ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 1600, 3.2);
+
+INSERT INTO `misc_items` (`name`, `img_path`, `tier`, `value`) VALUES
+    ('Bag of Potatoes', '../textures/items/misc/misc_potatoes.png', 1, 20),
+    ('Old Broom', '../textures/items/misc/misc_broom.png', 1, 24),
+    ('Bronze Cup', '../textures/items/misc/misc_cup.png', 1, 32),
+        ('Severed Hand', '../textures/items/misc/misc_hand.png', 1, 38),
+    ('Traveller Boots', '../textures/items/misc/misc_boots.png', 2, 48),
+    ('Ancient Book', '../textures/items/misc/misc_book.png', 2, 56),
+    ('Vintage Wine', '../textures/items/misc/misc_wine.png', 2, 70),
+    ('Silk Carpet', '../textures/items/misc/misc_silk.png', 3, 88),
+    ('Iron Cross', '../textures/items/misc/misc_cross.png', 3, 98),
+    ('Alchemist Potion', '../textures/items/misc/misc_potion.png', 3, 112),
+    ('Arcane Scroll', '../textures/items/misc/misc_scroll.png', 4, 154),
+    ('Gold Chalice', '../textures/items/misc/misc_chalice.png', 4, 172),
+    ('Golden Ring', '../textures/items/misc/misc_ring.png', 5, 205),
+    ('Amethyst', '../textures/items/misc/misc_amethyst.png', 5, 232),
+    ('Sapphire', '../textures/items/misc/misc_sapphire.png', 5, 258),
+    ('Emerald', '../textures/items/misc/misc_emerald.png', 6, 292),
+    ('Ruby', '../textures/items/misc/misc_ruby.png', 6, 328),
+    ('Jeweled Crown', '../textures/items/misc/misc_crown.png', 6, 368),
+    ('Golden Egg', '../textures/items/misc/misc_goldenegg.png', 6, 410);
 
 INSERT INTO `user` (`name`, `password`) VALUES
     ('test_player_1',  '$2b$12$VF39VlT.u4aYpVfEkEIjReijHK5Vh.W/1fsv/2K/YWLsvaLk8qr1K'),
