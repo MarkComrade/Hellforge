@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
 const { generateFinalLoot } = require('../services/lootAlgorithm.js');
+const { eventManager } = require('../services/eventGeneration.js');
 
 // Valid dungeon names — reject anything not in this list
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
@@ -10,6 +11,7 @@ const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
 const MOVE_COOLDOWN_MS = 150; // minimum ms between moves
 const lastMoveTime = new Map(); // sessionId → timestamp
 const GOLD_IMG_PATH = '../textures/items/coing.png';
+const MAX_DUNGEON_LEVEL = 20;
 
 // ───── Middleware ─────
 // These functions run BEFORE the actual route handler.
@@ -111,34 +113,44 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
             return res.json({ success: false, message: 'Invalid move' });
         }
 
-        let lootEvent = null;
-        if (result.roomType === 'loot' && !wasVisited) {
+        let Event = null;
+        if (!wasVisited) {
             const playerId = Number(req.session.userId);
 
-            if (Number.isInteger(playerId) && playerId > 0) {
-                lootEvent = await generateFinalLoot(
+            if (result.roomType === 'loot') {
+                if (Number.isInteger(playerId) && playerId > 0) {
+                    Event = await generateFinalLoot(
+                        playerId,
+                        req.dungeon.dungeonName,
+                        req.dungeon.dungeonLevel
+                    );
+                } else {
+                    Event = {
+                        success: false,
+                        message: 'Loot event skipped: no logged-in player.'
+                    };
+                }
+            }
+
+            if (result.roomType === 'event') {
+                Event = await eventManager(
                     playerId,
                     req.dungeon.dungeonName,
                     req.dungeon.dungeonLevel
                 );
-            } else {
-                lootEvent = {
-                    success: false,
-                    message: 'Loot event skipped: no logged-in player.'
-                };
             }
-        }
 
-        if (lootEvent && lootEvent.success) {
-            lootEvent.goldImgPath = lootEvent.goldImgPath || GOLD_IMG_PATH;
-            if (lootEvent.item) {
-                lootEvent.item.img_path = lootEvent.item.img_path || lootEvent.item.img || null;
+            if (Event && Event.success) {
+                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
+                if (Event.item) {
+                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
+                }
             }
         }
 
         saveDungeon(req);
         // Spread result into response (position, roomType, doors, visited)
-        res.json({ success: true, ...result, lootEvent });
+        res.json({ success: true, ...result, Event });
     } catch (error) {
         console.error('Move error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -157,6 +169,13 @@ router.post('/next-level', allowGuest, requireDungeon, (req, res) => {
         // Reject if player isn't on the exit room — prevents skipping via modified requests
         if (!currentRoom || currentRoom.roomType !== 'out') {
             return res.status(400).json({ success: false, message: 'Not on exit room' });
+        }
+
+        if (dungeon.dungeonLevel >= MAX_DUNGEON_LEVEL) {
+            return res.status(400).json({
+                success: false,
+                message: `Maximum dungeon level reached (${MAX_DUNGEON_LEVEL})`
+            });
         }
 
         // Generate a brand-new map for the next level.
