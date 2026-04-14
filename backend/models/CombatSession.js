@@ -37,6 +37,7 @@ class CombatSession {
             hp: this._clamp(playerCurrentHp, 0, playerMaxHp),
             maxHp: playerMaxHp,
             block: 0,
+            strength: 0,
             statuses: [],
             equipmentSnapshot: options.equipmentSnapshot || {}
         };
@@ -47,6 +48,7 @@ class CombatSession {
             hp: 0,
             maxHp: 0,
             block: 0,
+            strength: 0,
             statuses: [],
             currentIntent: null
         };
@@ -96,8 +98,11 @@ class CombatSession {
             hp: this._clamp(hp, 0, maxHp),
             maxHp,
             block: Number(enemyData.block || 0),
+            strength: Number(enemyData.strength || 0),
             statuses: Array.isArray(enemyData.statuses) ? enemyData.statuses : [],
-            currentIntent: enemyData.currentIntent || null
+            currentIntent: enemyData.currentIntent || null,
+            cards: Array.isArray(enemyData.cards) ? enemyData.cards : [],
+            cardsPerTurn: enemyData.cardsPerTurn || { min: 1, max: 2 }
         };
     }
 
@@ -178,8 +183,18 @@ class CombatSession {
         this.setTurnOwner(TURN_OWNERS.PLAYER);
         this.turnRules.cardsPlayedThisTurn = 0;
         this.turnRules.bonusCardsThisTurn = 0;
+        // Block and strength accumulated last turn expire at the start of the next player turn
+        this.player.block = 0;
+        this.player.strength = 0;
         // No draw here — hand is always maintained at HAND_SIZE:
         // one card is drawn automatically every time a card is played.
+    }
+
+    startEnemyTurn() {
+        this.setTurnOwner(TURN_OWNERS.ENEMY);
+        // Block and strength accumulated by the enemy last turn expire now
+        this.enemy.block = 0;
+        this.enemy.strength = 0;
     }
 
     getMaxCardsThisTurn() {
@@ -306,6 +321,7 @@ class CombatSession {
             hp: 100,
             maxHp: 100,
             block: 0,
+            strength: 0,
             statuses: [],
             equipmentSnapshot: {}
         };
@@ -315,8 +331,11 @@ class CombatSession {
             hp: 0,
             maxHp: 0,
             block: 0,
+            strength: 0,
             statuses: [],
-            currentIntent: null
+            currentIntent: null,
+            cards: [],
+            cardsPerTurn: { min: 1, max: 2 }
         };
         c.deck = data.deck || {
             drawPile: [],

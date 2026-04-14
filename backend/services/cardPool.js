@@ -2048,8 +2048,11 @@ function pickCardsForItem(itemType, tier) {
     return picked;
 }
 
+const CARDS_PER_TURN = 5;
+
 module.exports = {
     CARD_POOL,
+    CARDS_PER_TURN,
     getCardById,
     pickCardsForItem
 };
