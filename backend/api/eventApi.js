@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../sql/database.js');
-<<<<<<< Updated upstream
-const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
-=======
 const {
     generateAndInsertLoot,
     getBaseTier,
     normalizeDungeonKey
 } = require('../services/lootAlgorithm.js');
->>>>>>> Stashed changes
 const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');
 //!Multer
@@ -79,8 +75,6 @@ router.get('/lootAlgorithm/:playerId', async (request, response) => {
     }
 });
 
-<<<<<<< Updated upstream
-=======
 router.get('/shop-items', async (request, response) => {
     try {
         const dungeon = getDungeonFromSession(request);
@@ -310,5 +304,4 @@ router.post('/sell-item', async (request, response) => {
     }
 });
 
->>>>>>> Stashed changes
 module.exports = router;
