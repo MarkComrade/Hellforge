@@ -232,7 +232,7 @@ async function generateFinalLoot(playerId, dungeon, level) {
             return {
                 success: true,
                 type: 'item_drop',
-                message: 'Item found! Gold reduced.',
+                message: 'Item found and some gold.',
                 gold,
                 item: lootResult.item,
                 tier: lootResult.tier,
@@ -258,6 +258,8 @@ async function generateFinalLoot(playerId, dungeon, level) {
 }
 
 module.exports = {
+    getBaseTier,
+    normalizeDungeonKey,
     generateAndInsertLoot,
     generateGoldReward,
     generateFinalLoot

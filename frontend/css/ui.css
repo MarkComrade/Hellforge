@@ -1,4 +1,3 @@
-/* Game UI elements */
 #ui {
     position: fixed;
     inset: 0;
@@ -13,9 +12,9 @@
     background: rgba(0, 0, 0, 0.65);
     pointer-events: auto;
     box-sizing: border-box;
-     display : flex;
-    align-items : center;
-    justify-content :center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
 }
 
@@ -96,4 +95,339 @@
     right: 3vh;
     width: 22vh;
     font-size: 1.8vh;
+}
+
+/* Shop overlay */
+.shopOverlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 78vw;
+    max-height: 80vh;
+    display: grid;
+    grid-template-columns: 16vw 1fr;
+    background: linear-gradient(150deg, #0a0606 0%, #100808 100%);
+    border: 0.22vh solid rgb(220, 40, 40);
+    z-index: 5000;
+    overflow: hidden;
+}
+
+.shopTraderPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2vh 1.2vw 2.5vh;
+    border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
+    background: rgba(0, 0, 0, 0.3);
+    gap: 1.2vh;
+}
+
+.shopTraderImage {
+    width: 100%;
+    max-height: 48vh;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 2vh 3vh rgba(0, 0, 0, 0.8));
+}
+
+.shopTraderText {
+    text-align: center;
+    color: #f4d6d6;
+    font-size: 1.4vh;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.shopPanel {
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: 1.4vh;
+    padding: 2vh 2vw;
+    overflow-y: auto;
+    position: relative;
+}
+
+.shopTitle {
+    margin: 0;
+    color: #ffe8d6;
+    font-size: 2vh;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 0.15vh solid rgba(220, 40, 40, 0.35);
+    padding-bottom: 0.8vh;
+}
+
+.shopCloseButton {
+    position: absolute;
+    top: 2vh;
+    right: 2vw;
+    background: transparent;
+    border: 0.2vh solid rgba(220, 40, 40, 0.4);
+    color: #9a7060;
+    width: 3vh;
+    height: 3vh;
+    font-size: 1.4vh;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.shopCloseButton:hover {
+    border-color: rgb(220, 40, 40);
+    color: #f0e0d6;
+}
+
+.shopGrid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8vw;
+    align-content: start;
+}
+
+.shopSlot {
+    position: relative;
+    border: 0.2vh solid rgba(220, 40, 40, 0.45);
+    background: rgba(14, 8, 8, 0.9);
+    color: #f4e7e7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5vh;
+    padding: 0.8vh 0.4vw;
+    cursor: pointer;
+    aspect-ratio: 3 / 4;
+    justify-content: flex-start;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.shopSlot:hover:not(:disabled) {
+    border-color: rgb(220, 40, 40);
+    box-shadow: 0 0 1.2vh rgba(220, 40, 40, 0.35);
+}
+
+.shopSlot.isSelected {
+    border-color: rgb(220, 175, 60);
+    box-shadow: 0 0 1.2vh rgba(220, 175, 60, 0.3);
+}
+
+.shopSlot.isSold {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.shopSlotImage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0.4vh;
+    box-sizing: border-box;
+}
+
+.shopSlotName {
+    font-size: 1.2vh;
+    text-align: center;
+    line-height: 1.3;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shopSlotValue {
+    font-size: 1.15vh;
+    color: #ffc847;
+}
+
+.shopSlotPrice {
+    font-size: 1.1vh;
+    color: #5abf85;
+    text-align: center;
+}
+
+.shopSellSection {
+    border-top: 0.2vh solid rgba(220, 40, 40, 0.35);
+    padding-top: 1.2vh;
+    margin-top: 0.8vh;
+}
+
+.shopSellButton {
+    font-size: 1.1vh;
+    padding: 0.4vh 0.8vw;
+}
+
+.shopStats {
+    border: 0.15vh solid rgba(220, 40, 40, 0.35);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1vh 1.2vw;
+}
+
+.shopStatsTitle {
+    margin: 0 0 0.4vh;
+    color: #f4d6d6;
+    font-size: 1.3vh;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.shopStatsDescription {
+    margin: 0 0 0.5vh;
+    color: #e4d2d2;
+    font-size: 1.4vh;
+    font-style: italic;
+}
+
+.shopStatsNumbers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3vh 1vw;
+    color: #ffc847;
+    font-size: 1.3vh;
+}
+
+.shopPrompt {
+    border-top: 0.15vh solid rgba(220, 40, 40, 0.35);
+    padding-top: 1.2vh;
+    display: flex;
+    align-items: center;
+    gap: 1.2vw;
+    flex-wrap: wrap;
+}
+
+.shopPromptText {
+    margin: 0;
+    color: #fff1e3;
+    font-size: 1.6vh;
+    flex: 1;
+}
+
+.shopPromptActions {
+    display: flex;
+    gap: 0.6vw;
+}
+
+.shopPromptButton {
+    border: 0.2vh solid rgb(220, 40, 40);
+    background: rgba(220, 40, 40, 0.1);
+    color: #ffe5d2;
+    padding: 0.6vh 1.6vw;
+    cursor: pointer;
+    font-size: 1.4vh;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition:
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.shopPromptButton:hover:not(:disabled) {
+    background: rgba(220, 40, 40, 0.22);
+    box-shadow: 0 0 1.2vh rgba(220, 40, 40, 0.4);
+}
+
+.shopPromptButton:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.shopStatusText {
+    width: 100%;
+    min-height: 2vh;
+    margin: 0;
+    font-size: 1.3vh;
+    color: #f8d39b;
+}
+
+.shopStatus--success {
+    color: #5abf85;
+}
+.shopStatus--error {
+    color: #ff5252;
+}
+
+.shopLoading,
+.shopEmpty {
+    color: #9a7060;
+    font-size: 1.5vh;
+    font-style: italic;
+    padding: 1.5vh 0;
+}
+
+/* Loot popup */
+.lootPopup {
+    position: fixed;
+    bottom: 12vh;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 20vw;
+    background: rgba(10, 6, 6, 0.95);
+    border: 0.2vh solid rgb(220, 40, 40);
+    padding: 1.6vh 2vw;
+    z-index: 6000;
+    box-shadow: 0 1vh 3vh rgba(0, 0, 0, 0.7);
+    animation:
+        lootFadeIn 0.25s ease,
+        lootFadeOut 0.4s ease 2.8s forwards;
+}
+
+.lootPopupTitle {
+    margin: 0 0 1vh;
+    color: #ffe8d6;
+    font-size: 1.5vh;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 0.15vh solid rgba(220, 40, 40, 0.35);
+    padding-bottom: 0.6vh;
+}
+
+.lootPopupContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+}
+
+.lootPopupRow {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+.lootPopupImg {
+    width: 4vh;
+    height: 4vh;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.3vh;
+    flex-shrink: 0;
+}
+
+.lootPopupText {
+    color: #f4e7e7;
+    font-size: 1.5vh;
+}
+
+@keyframes lootFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(1vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes lootFadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-1vh);
+    }
 }

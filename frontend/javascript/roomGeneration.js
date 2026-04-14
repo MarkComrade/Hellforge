@@ -98,6 +98,13 @@ function navigateToRoom(startX, startY, dungeonLevel) {
         span.setAttribute('id', 'navigate' + dir.name);
         body.appendChild(span);
         span.addEventListener('click', async function () {
+            if (
+                typeof window.isEventChoicePending === 'function' &&
+                window.isEventChoicePending()
+            ) {
+                return;
+            }
+
             try {
                 const result = await postFetch('/api/dungeon/move', {
                     dx: dir.dx,
@@ -123,25 +130,13 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 renderPlayerPosition(result.position);
                 renderDoors(result.doors, dungeon);
 
-                if (result.lootEvent) {
-                    const goldAmount = Number(result.lootEvent.gold || 0);
-                    const itemName = result.lootEvent.item?.name || 'none';
-                    const itemPath =
-                        result.lootEvent.item?.img_path || result.lootEvent.item?.img || 'none';
-                    const goldPath = result.lootEvent.goldImgPath || 'none';
-                    console.log(
-                        `[LootEvent] type=${result.lootEvent.type || 'unknown'} | gold=${goldAmount} | goldPath=${goldPath} | item=${itemName} | itemPath=${itemPath}`
-                    );
-                    createFrontendLootPopup(result.lootEvent);
-                }
-
                 //console.log(`Current position: (${result.position.x}, ${result.position.y})`);
 
                 // Handle room events with server-validated data
                 const cell = document.querySelector('#map .cell[data-current="true"]');
                 if (cell && result.roomType) {
                     cell.dataset.roomType = result.roomType;
-                    roomEventHandler(cell, dungeonLevel, result.roomType);
+                    roomEventHandler(cell, dungeonLevel, result);
                 }
             } catch (error) {
                 console.log('Move failed:', error.message);
@@ -150,10 +145,31 @@ function navigateToRoom(startX, startY, dungeonLevel) {
     });
 }
 
-// Room event handler — uses server-provided roomType instead of client DOM data
-function roomEventHandler(room, dungeonLevel, serverRoomType) {
-    // Use server-provided roomType if available, fall back to DOM (for start room)
-    const roomType = serverRoomType || room.dataset.roomType;
+function placeTraderInRoom(room) {
+    let existing = document.getElementById('shopTraderRoom');
+    if (existing) existing.remove();
+
+    const traderImg = document.createElement('img');
+    traderImg.id = 'shopTraderRoom';
+    traderImg.src = '../textures/UI/trader.png';
+    traderImg.className = 'shopTraderRoom';
+    traderImg.alt = 'Trader';
+    traderImg.title = 'Open shop';
+    traderImg.onerror = () => {
+        traderImg.onerror = null;
+        traderImg.src = '../textures/misc/placeholder.png';
+    };
+    traderImg.addEventListener('click', () => {
+        const shopOverlay = document.getElementById('shop-overlay');
+        if (!shopOverlay) {
+            renderShop();
+        }
+    });
+    room.appendChild(traderImg);
+}
+
+function roomEventHandler(room, dungeonLevel, result) {
+    const roomType = result.roomType || room.dataset.roomType;
 
     if (roomType !== 'out') {
         let trapdoor = document.getElementById('trapDoor');
@@ -166,6 +182,13 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
         }
     }
 
+    if (roomType !== 'shop') {
+        const shopOverlay = document.getElementById('shop-overlay');
+        if (shopOverlay) shopOverlay.remove();
+        const existingTrader = document.getElementById('shopTraderRoom');
+        if (existingTrader) existingTrader.remove();
+    }
+
     switch (roomType) {
         case 'start':
             break;
@@ -173,63 +196,19 @@ function roomEventHandler(room, dungeonLevel, serverRoomType) {
             //combatStart();
             break;
         case 'loot':
-            //lootGained();
+            if (result.Event && result.Event.success) {
+                createFrontendEvent({ success: true, type: 'loot', loot: result.Event });
+            }
             break;
         case 'shop':
-            //openShop();
+            placeTraderInRoom(room);
+            renderShop();
             break;
         case 'event':
-            //triggerEvent();
+            createFrontendEvent(result.Event);
             break;
         case 'out':
-            let trapdoor = document.createElement('img');
-            trapdoor.src = '../textures/rooms/trapdoor.png';
-            trapdoor.id = 'trapDoor';
-            room.appendChild(trapdoor);
-
-            trapdoor.addEventListener('click', () => {
-                let exitButton = document.createElement('button');
-                exitButton.id = 'exitButton';
-                exitButton.className = 'menuButton';
-                exitButton.textContent = 'Exit the dungeon';
-                document.body.appendChild(exitButton);
-                exitButton.addEventListener('click', async () => {
-                    // Server validates exit is from 'out' room
-                    try {
-                        await postFetch('/api/dungeon/exit', {
-                            sessionToken: sessionStorage.getItem('dungeonSessionToken')
-                        });
-                        exitDungeon();
-                    } catch (error) {
-                        console.log('Exit failed:', error.message);
-                    }
-                });
-
-                let continueButton = document.createElement('button');
-                continueButton.id = 'continueButton';
-                continueButton.className = 'menuButton';
-                continueButton.textContent = 'Continue dungeon';
-                document.body.appendChild(continueButton);
-                continueButton.addEventListener('click', async () => {
-                    // Server generates next level and validates we're at exit
-                    try {
-                        const result = await postFetch('/api/dungeon/next-level', {
-                            sessionToken: sessionStorage.getItem('dungeonSessionToken')
-                        });
-                        if (result.success) {
-                            dungeonLevel = result.dungeonLevel;
-                            document.getElementById('level-number').textContent = dungeonLevel;
-                            newLevelFromServer(
-                                sessionStorage.getItem('currentDungeon'),
-                                result,
-                                100
-                            );
-                        }
-                    } catch (error) {
-                        console.log('Next level failed:', error.message);
-                    }
-                });
-            });
+            outRoom(room, dungeonLevel);
             break;
     }
 }

@@ -134,6 +134,12 @@ async function createLoadoutGoldPanel(playerId) {
 }
 
 async function openInventory() {
+    const shopOverlay = document.getElementById('shop-overlay');
+    if (shopOverlay) {
+        alert('Close the shop before opening your inventory.');
+        return;
+    }
+
     const body = document.body;
 
     let playerId;
@@ -217,6 +223,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
         }
     } catch (error) {
         console.error('Failed to load inventory:', error);
+        if (!inventory) return;
     }
 
     const slots = [
