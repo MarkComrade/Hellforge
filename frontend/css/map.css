@@ -80,3 +80,17 @@
     box-shadow: 0 0 0.5vh #ffcc00;
     border-radius: 6%;
 }
+
+.lootRoomPickupButton {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 58%;
+    max-width: 7vh;
+    aspect-ratio: 1;
+    object-fit: contain;
+    cursor: pointer;
+    z-index: 4;
+    filter: drop-shadow(0 0 0.35vh rgba(0, 0, 0, 0.9));
+}

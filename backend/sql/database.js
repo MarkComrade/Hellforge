@@ -94,10 +94,13 @@ async function loginAdmin(username, password) {
 
 async function selectleadboard() {
     const query = `
-        SELECT u.name, COALESCE(SUM(pl.gold_amount), 0) AS score
+        SELECT u.name,
+               COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0) AS score
         FROM user u
         JOIN player_inventory pi ON u.userId = pi.playerId
         LEFT JOIN player_loadout pl ON u.userId = pl.playerId AND pl.gold_amount IS NOT NULL
+        LEFT JOIN player_stash ps ON u.userId = ps.playerId
+            AND ps.armor_id IS NULL AND ps.weapon_id IS NULL AND ps.misc_item_id IS NULL
         GROUP BY u.userId, u.name
         ORDER BY score DESC
         LIMIT 10
@@ -109,20 +112,25 @@ async function selectleadboard() {
 async function getUserRankAndScore(username) {
     const query = `
         SELECT u.name,
-               COALESCE(SUM(pl.gold_amount), 0) AS score,
+               COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0) AS score,
                (
                    SELECT COUNT(*) + 1
                    FROM (
-                       SELECT SUM(pl2.gold_amount) AS g
-                       FROM player_loadout pl2
-                       WHERE pl2.gold_amount IS NOT NULL
-                       GROUP BY pl2.playerId
+                       SELECT u2.userId,
+                              COALESCE(SUM(pl2.gold_amount), 0) + COALESCE(SUM(ps2.gold), 0) AS g
+                       FROM user u2
+                       LEFT JOIN player_loadout pl2 ON u2.userId = pl2.playerId AND pl2.gold_amount IS NOT NULL
+                       LEFT JOIN player_stash ps2 ON u2.userId = ps2.playerId
+                           AND ps2.armor_id IS NULL AND ps2.weapon_id IS NULL AND ps2.misc_item_id IS NULL
+                       GROUP BY u2.userId
                    ) AS totals
-                   WHERE totals.g > COALESCE(SUM(pl.gold_amount), 0)
+                   WHERE totals.g > COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0)
                ) AS \`rank\`
         FROM user u
         JOIN player_inventory pi ON u.userId = pi.playerId
         LEFT JOIN player_loadout pl ON u.userId = pl.playerId AND pl.gold_amount IS NOT NULL
+        LEFT JOIN player_stash ps ON u.userId = ps.playerId
+            AND ps.armor_id IS NULL AND ps.weapon_id IS NULL AND ps.misc_item_id IS NULL
         WHERE u.name = ?
         GROUP BY u.userId, u.name
     `;
@@ -176,7 +184,7 @@ async function addArmorToStash(playerId, armorId) {
     try {
         const count = await getStashCount(playerId);
         if (count >= STASH_LIMIT) {
-            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
         }
         await pool.query('INSERT INTO player_stash (playerId, armor_id) VALUES (?, ?)', [
             playerId,
@@ -544,7 +552,7 @@ async function moveLoadoutToStash(playerId, loadoutId) {
 async function getTotalGold(playerId) {
     try {
         const [stashRows] = await pool.query(
-            `SELECT COALESCE(SUM(gold), 0) AS gold FROM player_stash WHERE playerId = ? AND gold IS NOT NULL`,
+            `SELECT COALESCE(SUM(gold), 0) AS gold FROM player_stash WHERE playerId = ? AND armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL`,
             [playerId]
         );
         const [loadoutRows] = await pool.query(
@@ -599,7 +607,7 @@ async function transferGoldBetweenStorage(playerId, from, amount) {
 
         const [stashRows] = await connection.query(
             `SELECT stashId, gold FROM player_stash
-             WHERE playerId = ? AND gold IS NOT NULL
+             WHERE playerId = ? AND armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
              FOR UPDATE`,
             [playerId]
         );
@@ -686,6 +694,50 @@ async function transferGoldBetweenStorage(playerId, from, amount) {
     }
 }
 
+async function adminSetStashGold(userId, amount) {
+    const normalizedAmount = parseInt(amount, 10);
+    if (!Number.isInteger(normalizedAmount) || normalizedAmount < 0) {
+        return { success: false, message: 'Amount must be a non-negative whole number.' };
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [existing] = await connection.query(
+            'SELECT stashId FROM player_stash WHERE playerId = ? AND armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL FOR UPDATE',
+            [userId]
+        );
+
+        if (existing.length > 0) {
+            // Update the first gold row to the exact new amount
+            await connection.query('UPDATE player_stash SET gold = ? WHERE stashId = ?', [
+                normalizedAmount,
+                existing[0].stashId
+            ]);
+            // Remove any duplicate gold rows
+            for (let i = 1; i < existing.length; i++) {
+                await connection.query('DELETE FROM player_stash WHERE stashId = ?', [
+                    existing[i].stashId
+                ]);
+            }
+        } else if (normalizedAmount > 0) {
+            await connection.query('INSERT INTO player_stash (playerId, gold) VALUES (?, ?)', [
+                userId,
+                normalizedAmount
+            ]);
+        }
+
+        await connection.commit();
+        return { success: true, message: 'Stash gold updated.' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error updating stash gold.' };
+    } finally {
+        connection.release();
+    }
+}
+
 // Admin Queries
 async function deleteUser(username) {
     const connection = await pool.getConnection();
@@ -703,6 +755,8 @@ async function deleteUser(username) {
 
         const userId = userRows[0].userId;
 
+        await connection.execute('DELETE FROM player_stash WHERE playerId = ?', [userId]);
+        await connection.execute('DELETE FROM player_loadout WHERE playerId = ?', [userId]);
         await connection.execute('DELETE FROM player_inventory WHERE playerId = ?', [userId]);
 
         const [result] = await connection.execute('DELETE FROM user WHERE userId = ?', [userId]);
@@ -767,7 +821,7 @@ async function updateUserInventory(userId, inventoryData) {
     try {
         await connection.beginTransaction();
 
-        await connection.execute(
+        const [result] = await connection.execute(
             `UPDATE player_inventory SET helmet = ?, armor = ?, melee = ?, ranged = ? WHERE playerId = ?`,
             [
                 inventoryData.helmet,
@@ -779,20 +833,12 @@ async function updateUserInventory(userId, inventoryData) {
         );
 
         await connection.execute(
-            `DELETE FROM player_stash
-             WHERE playerId = ? AND armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL`,
+            `DELETE FROM player_loadout WHERE playerId = ? AND gold_amount IS NOT NULL`,
             [userId]
         );
 
-        if (inventoryData.gold > 0) {
-            await connection.execute(`INSERT INTO player_stash (playerId, gold) VALUES (?, ?)`, [
-                userId,
-                inventoryData.gold
-            ]);
-        }
-
         await connection.commit();
-        return { affectedRows: 1 };
+        return { affectedRows: result.affectedRows };
     } catch (error) {
         await connection.rollback();
         throw error;
@@ -803,12 +849,12 @@ async function updateUserInventory(userId, inventoryData) {
 
 //dungeonloot algorithm
 async function upgradeWeakestGearDB(weakestSlot, playerId) {
-    const query = `
-        UPDATE player_inventory 
-        SET ? = ? + 1
-        WHERE playerId = ?
-    `;
-    const [result] = await pool.execute(query, [weakestSlot, weakestSlot, playerId]);
+    const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
+    if (!validSlots.includes(weakestSlot)) {
+        throw new Error(`Invalid slot: ${weakestSlot}`);
+    }
+    const query = `UPDATE player_inventory SET \`${weakestSlot}\` = \`${weakestSlot}\` + 1 WHERE playerId = ?`;
+    const [result] = await pool.execute(query, [playerId]);
     return result;
 }
 
@@ -1173,6 +1219,7 @@ module.exports = {
     getAllWeapons,
     updateUserInventory,
     deleteUser,
+    adminSetStashGold,
     upgradeWeakestGearDB,
     fetchWeaponByTier,
     fetchArmorByTier,

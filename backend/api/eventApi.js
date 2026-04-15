@@ -7,7 +7,6 @@ const {
     normalizeDungeonKey
 } = require('../services/lootAlgorithm.js');
 const fs = require('fs/promises');
-const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
 const DungeonSession = require('../models/DungeonSession.js');
 
 function getDungeonFromSession(request) {

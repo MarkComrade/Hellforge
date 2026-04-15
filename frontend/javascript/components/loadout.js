@@ -140,6 +140,11 @@ async function openInventory() {
         return;
     }
 
+    if (typeof isEventChoicePending === 'function' && isEventChoicePending()) {
+        alert('Dismiss the current event before opening your inventory.');
+        return;
+    }
+
     const body = document.body;
 
     let playerId;
