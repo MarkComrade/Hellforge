@@ -9,10 +9,14 @@ async function Admin() {
         console.error('Session check hiba:', error);
     }
 
+    renderAdminLogin();
+}
+
+function renderAdminLogin() {
     clearBody();
 
     generateBootStrapGrid(1, 1, 12, 'adminHeader');
-    let menuTitle = document.createElement('h1');
+    const menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle adminMenu');
     menuTitle.textContent = 'Admin Login';
     document.querySelector('.adminHeader').appendChild(menuTitle);
@@ -20,12 +24,12 @@ async function Admin() {
     generateBootStrapGrid(2, 1, 12, 'loginFormContainer');
     const loginRows = document.querySelectorAll('.loginFormContainer');
 
-    const forms = [
+    const fields = [
         { label: 'Username:', type: 'text', id: 'adminUsernameInput' },
         { label: 'Password:', type: 'password', id: 'adminPasswordInput' }
     ];
 
-    forms.forEach((form, i) => {
+    fields.forEach(({ label, type, id }, i) => {
         const row = document.createElement('div');
         row.setAttribute('class', 'row');
         loginRows[i].appendChild(row);
@@ -35,11 +39,11 @@ async function Admin() {
             'class',
             'col-sm-6 col-md-6 d-flex justify-content-end align-items-center'
         );
-        const label = document.createElement('label');
-        label.setAttribute('class', 'menuText');
-        label.textContent = form.label;
-        label.setAttribute('for', form.id);
-        labelCol.appendChild(label);
+        const labelEl = document.createElement('label');
+        labelEl.setAttribute('class', 'menuText');
+        labelEl.textContent = label;
+        labelEl.setAttribute('for', id);
+        labelCol.appendChild(labelEl);
         row.appendChild(labelCol);
 
         const inputCol = document.createElement('div');
@@ -49,43 +53,38 @@ async function Admin() {
         );
         const input = document.createElement('input');
         input.setAttribute('class', 'menuInput');
-        input.setAttribute('type', form.type);
-        input.setAttribute('id', form.id);
+        input.setAttribute('type', type);
+        input.setAttribute('id', id);
         inputCol.appendChild(input);
         row.appendChild(inputCol);
     });
 
     generateBootStrapGrid(1, 1, 12, 'adminButtonRow');
-    const buttonContainer = document.querySelector('.adminButtonRow');
-
-    let loginButton = document.createElement('input');
+    const loginButton = document.createElement('input');
     loginButton.setAttribute('type', 'button');
     loginButton.setAttribute('value', 'Login');
     loginButton.setAttribute('class', 'menuButton');
-    buttonContainer.appendChild(loginButton);
+    document.querySelector('.adminButtonRow').appendChild(loginButton);
+
     loginButton.addEventListener('click', async function () {
-        let username = document.querySelector('#adminUsernameInput').value;
-        let password = document.querySelector('#adminPasswordInput').value;
+        const username = document.querySelector('#adminUsernameInput').value;
+        const password = document.querySelector('#adminPasswordInput').value;
 
-        if (username && password) {
-            try {
-                const result = await postFetch('/api/loginAuthApi/loginAdmin', {
-                    username,
-                    password
-                });
-
-                if (result.success) {
-                    console.log(result.message);
-                    adminTools();
-                } else {
-                    alert(result.message);
-                }
-            } catch (error) {
-                alert('Hiba történt az admin bejelentkezés során');
-                console.error(error);
-            }
-        } else {
+        if (!username || !password) {
             alert('Kérlek töltsd ki az összes mezőt!');
+            return;
+        }
+
+        try {
+            const result = await postFetch('/api/loginAuthApi/loginAdmin', { username, password });
+            if (result.success) {
+                adminTools();
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            alert('Hiba történt az admin bejelentkezés során');
+            console.error(error);
         }
     });
 
@@ -94,134 +93,104 @@ async function Admin() {
 
 async function adminTools() {
     clearBody();
+
     generateBootStrapGrid(1, 1, 12, 'adminToolsTitle');
-    let menuTitle = document.createElement('h1');
+    const menuTitle = document.createElement('h1');
     menuTitle.setAttribute('class', 'menuTitle adminMenu');
     menuTitle.textContent = 'Admin Tools';
     document.querySelector('.adminToolsTitle').appendChild(menuTitle);
 
-    const buttons = [
-        { text: 'Manage Users', id: 'manageUsersButton', class: 'menuButton' },
-        { text: 'View appeals', id: 'viewAppealsButton', class: 'menuButton' }
-    ];
+    const buttons = [{ text: 'Manage Users', onClick: renderUserManagement }];
 
     generateBootStrapGrid(buttons.length + 1, 1, 12, 'adminToolsButtons');
+    const rows = document.querySelectorAll('.adminToolsButtons');
 
-    let i = 0;
-    buttons.forEach(({ text, id, class: className }) => {
-        let button = document.createElement('input');
+    buttons.forEach(({ text, onClick }, i) => {
+        const button = document.createElement('input');
         button.setAttribute('type', 'button');
         button.setAttribute('value', text);
-        button.setAttribute('id', id);
-        button.setAttribute('class', className);
-
-        document.querySelectorAll('.adminToolsButtons')[i].appendChild(button);
-        i++;
+        button.setAttribute('class', 'menuButton');
+        button.addEventListener('click', onClick);
+        rows[i].appendChild(button);
     });
-    document.getElementById('manageUsersButton').addEventListener('click', async function () {
-        document.querySelector('body').innerHTML = '';
-        generateBootStrapGrid(1, 1, 12, 'adminToolsTitle');
-        let menuTitle = document.createElement('h1');
-        menuTitle.setAttribute('class', 'menuTitle adminMenu');
-        menuTitle.textContent = 'User Management';
-        document.querySelector('.adminToolsTitle').appendChild(menuTitle);
 
-        try {
-            const userArray = await getMethodFetch('/api/adminActions/getAllUsers');
+    generateBackToMenu();
+}
 
-            // Create custom grid with col-4 and col-8
-            const containerFluid = document.createElement('div');
-            containerFluid.setAttribute('class', 'container-fluid');
+async function renderUserManagement() {
+    clearBody();
 
-            const rowDiv = document.createElement('div');
-            rowDiv.setAttribute('class', 'row');
-            containerFluid.appendChild(rowDiv);
+    generateBootStrapGrid(1, 1, 12, 'adminToolsTitle');
+    const menuTitle = document.createElement('h1');
+    menuTitle.setAttribute('class', 'menuTitle adminMenu');
+    menuTitle.textContent = 'User Management';
+    document.querySelector('.adminToolsTitle').appendChild(menuTitle);
 
-            // First column (col-4) for user select
-            const col4 = document.createElement('div');
-            col4.setAttribute(
-                'class',
-                'col-sm-4 col-md-4 d-flex justify-content-center userSelectContainer'
-            );
-            rowDiv.appendChild(col4);
+    try {
+        const userArray = await getMethodFetch('/api/adminActions/getAllUsers');
 
-            // Second column (col-8) for inventory
-            const col8 = document.createElement('div');
-            col8.setAttribute(
-                'class',
-                'col-sm-8 col-md-8 d-flex justify-content-center inventoryContainer'
-            );
-            rowDiv.appendChild(col8);
+        const container = document.createElement('div');
+        container.setAttribute('class', 'container-fluid');
+        const row = document.createElement('div');
+        row.setAttribute('class', 'row');
+        container.appendChild(row);
 
-            document.body.appendChild(containerFluid);
-
-            const selectContainer = document.querySelector('.userSelectContainer');
-
-            // Create label
-            const label = document.createElement('label');
-            label.setAttribute('class', 'menuText');
-            label.textContent = 'Select User:';
-            label.setAttribute('for', 'userSelect');
-            selectContainer.appendChild(label);
-
-            // Create select element
-            const select = document.createElement('select');
-            select.setAttribute('class', 'menuSelect');
-            select.setAttribute('id', 'userSelect');
-            select.setAttribute('size', '10'); // Show 10 users at once
-
-            // Add default option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = '- Choose a user -';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            select.appendChild(defaultOption);
-
-            // Populate select with users from array
-            userArray.results.forEach((user) => {
-                const option = document.createElement('option');
-                option.value = user.userId;
-                option.textContent = user.name || `User ${user.userId}`;
-                select.appendChild(option);
-            });
-
-            selectContainer.appendChild(select);
-
-            // Add event listener for selection
-            select.addEventListener('change', async function () {
-                const selectedUserId = this.value;
-                console.log('Selected user:', selectedUserId);
-
-                // Validate that a user is actually selected
-                if (!selectedUserId || selectedUserId === '') {
-                    const inventoryContainer = document.querySelector('.inventoryContainer');
-                    if (inventoryContainer) {
-                        inventoryContainer.innerHTML =
-                            '<p class="menuText">Please select a user to view their inventory.</p>';
-                    }
-                    return;
-                }
-
-                // Display inventory
-                await displayUserInventory(selectedUserId);
-            });
-        } catch (error) {
-            console.error('Session check hiba:', error.message);
-        }
-
-        const containerFluid = document.createElement('div');
-        containerFluid.setAttribute('class', 'container-fluid');
-
-        const rowDiv = document.createElement('div');
-        rowDiv.setAttribute('class', 'row');
-        containerFluid.appendChild(rowDiv);
-
-        const col61 = document.createElement('div');
-        col61.setAttribute(
+        const col4 = document.createElement('div');
+        col4.setAttribute(
             'class',
-            'col-sm-6 col-md-6 d-flex justify-content-center deleteButtonContainer'
+            'col-sm-4 col-md-4 d-flex flex-column align-items-center userSelectContainer'
         );
+        row.appendChild(col4);
+
+        const col8 = document.createElement('div');
+        col8.setAttribute(
+            'class',
+            'col-sm-8 col-md-8 d-flex justify-content-center inventoryContainer'
+        );
+        row.appendChild(col8);
+
+        document.body.appendChild(container);
+
+        const selectLabel = document.createElement('label');
+        selectLabel.setAttribute('class', 'menuText');
+        selectLabel.setAttribute('for', 'userSelect');
+        selectLabel.textContent = 'Select User:';
+        col4.appendChild(selectLabel);
+
+        const select = document.createElement('select');
+        select.setAttribute('class', 'menuSelect');
+        select.setAttribute('id', 'userSelect');
+        select.setAttribute('size', '10');
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '- Choose a user -';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        select.appendChild(defaultOption);
+
+        userArray.results.forEach((user) => {
+            const option = document.createElement('option');
+            option.value = user.userId;
+            option.textContent = user.name;
+            select.appendChild(option);
+        });
+
+        col4.appendChild(select);
+
+        select.addEventListener('change', async function () {
+            if (!this.value) return;
+            await displayUserInventory(this.value);
+        });
+
+        const actionsContainer = document.createElement('div');
+        actionsContainer.setAttribute('class', 'container-fluid');
+        const actionsRow = document.createElement('div');
+        actionsRow.setAttribute('class', 'row');
+        actionsContainer.appendChild(actionsRow);
+
+        const deleteCol = document.createElement('div');
+        deleteCol.setAttribute('class', 'col-sm-6 col-md-6 d-flex justify-content-center');
         const deleteButton = document.createElement('input');
         deleteButton.setAttribute('type', 'button');
         deleteButton.setAttribute('value', 'Delete User');
@@ -234,40 +203,23 @@ async function adminTools() {
             }
 
             const userId = form.getAttribute('data-user-id');
-            const userSelect = document.getElementById('userSelect');
-            const selectedOption = userSelect.options[userSelect.selectedIndex];
+            const selectedOption = select.options[select.selectedIndex];
             const username = selectedOption ? selectedOption.textContent : 'this user';
 
             // TODO: In the future, this will add user to ban list instead of deleting
-            // Confirmation dialog
             const confirmed = confirm(
                 `Are you sure you want to delete ${username}?\n\nThis action cannot be undone and will permanently remove:\n- User account\n- Inventory data\n\nNote: This will be replaced with a ban system in the future.`
             );
-
-            if (!confirmed) {
-                return;
-            }
+            if (!confirmed) return;
 
             try {
                 const response = await postFetch(`/api/adminActions/deleteUser/${userId}`, {});
-
                 if (response.success) {
                     alert('User deleted successfully!');
-
-                    // Clear the inventory display
-                    const inventoryContainer = document.querySelector('.inventoryContainer');
-                    if (inventoryContainer) {
-                        inventoryContainer.innerHTML =
-                            '<p class="menuText">User deleted. Select another user.</p>';
-                    }
-
-                    // Remove the user from the select dropdown
-                    if (selectedOption) {
-                        selectedOption.remove();
-                    }
-
-                    // Reset to default option
-                    userSelect.value = '';
+                    document.querySelector('.inventoryContainer').innerHTML =
+                        '<p class="menuText">User deleted. Select another user.</p>';
+                    selectedOption?.remove();
+                    select.value = '';
                 } else {
                     alert('Error deleting user: ' + response.message);
                 }
@@ -276,49 +228,76 @@ async function adminTools() {
                 alert('Error deleting user: ' + error.message);
             }
         });
-        col61.appendChild(deleteButton);
-        rowDiv.appendChild(col61);
+        deleteCol.appendChild(deleteButton);
+        actionsRow.appendChild(deleteCol);
 
-        const col62 = document.createElement('div');
-        col62.setAttribute(
-            'class',
-            'col-sm-6 col-md-6 d-flex justify-content-center editButtonContainer'
-        );
-        const removeItemsButton = document.createElement('input');
-        removeItemsButton.setAttribute('type', 'button');
-        removeItemsButton.setAttribute('value', 'Remove Items');
-        removeItemsButton.setAttribute('class', 'menuButton');
-        removeItemsButton.addEventListener('click', async function () {
-            const panel = document.getElementById('userAdminPanel');
-            if (!panel) {
+        const saveCol = document.createElement('div');
+        saveCol.setAttribute('class', 'col-sm-6 col-md-6 d-flex justify-content-center');
+        const saveButton = document.createElement('input');
+        saveButton.setAttribute('type', 'button');
+        saveButton.setAttribute('value', 'Save Changes');
+        saveButton.setAttribute('class', 'menuButton');
+        saveButton.addEventListener('click', async function () {
+            const form = document.getElementById('inventoryForm');
+            if (!form) {
                 alert('Please select a user first!');
                 return;
             }
-            const userId = panel.getAttribute('data-user-id');
-            const username = panel.getAttribute('data-username');
-            if (!confirm(`Remove all items from ${username}? This cannot be undone.`)) return;
+
+            const userId = form.getAttribute('data-user-id');
+            const helmet = document.getElementById('helmetSelect').value;
+            const armor = document.getElementById('armorSelect').value;
+            const melee = document.getElementById('meleeSelect').value;
+            const ranged = document.getElementById('rangedSelect').value;
+            const goldRaw = document.getElementById('stashGoldInput').value;
+
+            if (!helmet || !armor || !melee || !ranged) {
+                alert('All equipment fields are required!');
+                return;
+            }
+
+            const goldParsed = parseInt(goldRaw, 10);
+            if (isNaN(goldParsed) || goldParsed < 0) {
+                alert('Gold must be a non-negative whole number.');
+                return;
+            }
+
             try {
-                const response = await postFetch(`/api/adminActions/removeUserItems/${userId}`, {});
-                if (response.success) {
-                    alert('Items removed.');
+                const formData = new FormData();
+                formData.append('helmet', helmet);
+                formData.append('armor', armor);
+                formData.append('melee', melee);
+                formData.append('ranged', ranged);
+
+                const [equipResponse, goldResponse] = await Promise.all([
+                    postFetchForm(`/api/adminActions/updateUserInventory/${userId}`, formData),
+                    postFetch(`/api/adminActions/setUserStashGold/${userId}`, { gold: goldParsed })
+                ]);
+
+                if (equipResponse.success && goldResponse.success) {
+                    alert('User updated successfully!');
                     await displayUserInventory(userId);
                 } else {
-                    alert('Error: ' + response.message);
+                    const msg = [equipResponse, goldResponse]
+                        .filter((r) => !r.success)
+                        .map((r) => r.message)
+                        .join('\n');
+                    alert('Error saving changes:\n' + msg);
                 }
             } catch (error) {
-                alert('Error removing items: ' + error.message);
+                console.error('Error updating user:', error);
+                alert('Error updating user: ' + error.message);
             }
         });
-        col62.appendChild(removeItemsButton);
-        rowDiv.appendChild(col62);
+        saveCol.appendChild(saveButton);
+        actionsRow.appendChild(saveCol);
 
-        document.body.appendChild(containerFluid);
+        document.body.appendChild(actionsContainer);
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
 
-        generateBackToAdminTools();
-    });
-
-    generateBackToMenu();
-    //TODO: Implementation of admin tools
+    generateBackToAdminTools();
 }
 
 async function displayUserInventory(userId) {
@@ -326,83 +305,102 @@ async function displayUserInventory(userId) {
     inventoryContainer.innerHTML = '';
 
     try {
-        const inventoryResponse = await getMethodFetch(
-            `/api/adminActions/getUserInventory/${userId}`
-        );
-        const inventory = inventoryResponse.inventory;
+        const [inventoryResponse, armorsResponse, weaponsResponse, goldResponse] =
+            await Promise.all([
+                getMethodFetch(`/api/adminActions/getUserInventory/${userId}`),
+                getMethodFetch('/api/adminActions/getAllArmors'),
+                getMethodFetch('/api/adminActions/getAllWeapons'),
+                getMethodFetch(`/api/adminActions/getUserGold/${userId}`)
+            ]);
 
-        const panel = document.createElement('div');
-        panel.setAttribute('id', 'userAdminPanel');
-        panel.setAttribute('data-user-id', userId);
-        panel.setAttribute('data-username', inventory.username);
+        const inventory = inventoryResponse.inventory;
+        const armors = armorsResponse.armors;
+        const weapons = weaponsResponse.weapons;
+        const stashGold = goldResponse.stashGold ?? 0;
 
         const title = document.createElement('h2');
         title.setAttribute('class', 'menuText');
-        title.textContent = `${inventory.username}'s Inventory`;
-        panel.appendChild(title);
+        title.textContent = `${inventory.username}'s Equipment`;
+        inventoryContainer.appendChild(title);
 
-        // Read-only item display
-        const itemSlots = [
-            { label: 'Helmet', name: inventory.helmet_name, tier: inventory.helmet_tier },
-            { label: 'Armor', name: inventory.armor_name, tier: inventory.armor_tier },
-            { label: 'Melee', name: inventory.melee_name, tier: inventory.melee_tier },
-            { label: 'Ranged', name: inventory.ranged_name, tier: inventory.ranged_tier }
-        ];
-        itemSlots.forEach(({ label, name, tier }) => {
-            const row = document.createElement('div');
-            row.setAttribute('class', 'inventoryItem');
-            const text = document.createElement('span');
-            text.setAttribute('class', 'menuText');
-            text.textContent = name ? `${label}: ${name} (Tier ${tier})` : `${label}: (none)`;
-            row.appendChild(text);
-            panel.appendChild(row);
-        });
+        const form = document.createElement('form');
+        form.setAttribute('class', 'inventoryDisplay');
+        form.setAttribute('id', 'inventoryForm');
+        form.setAttribute('data-user-id', userId);
 
-        // Gold editor
-        const goldRow = document.createElement('div');
-        goldRow.setAttribute('class', 'inventoryItem');
+        const goldDiv = document.createElement('div');
+        goldDiv.setAttribute('class', 'inventoryItem');
         const goldLabel = document.createElement('label');
         goldLabel.setAttribute('class', 'menuText');
-        goldLabel.setAttribute('for', 'adminGoldInput');
-        goldLabel.textContent = 'Gold:';
-        goldRow.appendChild(goldLabel);
+        goldLabel.setAttribute('for', 'stashGoldInput');
+        goldLabel.textContent = 'Stash Gold:';
+        goldDiv.appendChild(goldLabel);
         const goldInput = document.createElement('input');
         goldInput.setAttribute('type', 'number');
-        goldInput.setAttribute('id', 'adminGoldInput');
+        goldInput.setAttribute('id', 'stashGoldInput');
         goldInput.setAttribute('class', 'menuInput inventoryInput');
-        goldInput.setAttribute('min', '0');
-        goldInput.value = inventory.gold ?? 0;
-        goldRow.appendChild(goldInput);
-        const goldBtn = document.createElement('input');
-        goldBtn.setAttribute('type', 'button');
-        goldBtn.setAttribute('value', 'Update Gold');
-        goldBtn.setAttribute('class', 'menuButton');
-        goldBtn.addEventListener('click', async function () {
-            const amount = parseInt(goldInput.value, 10);
-            if (isNaN(amount) || amount < 0) {
-                alert('Enter a valid non-negative gold amount.');
-                return;
-            }
-            try {
-                const response = await postFetch(`/api/adminActions/updateUserGold/${userId}`, {
-                    gold: amount
-                });
-                if (response.success) {
-                    alert('Gold updated.');
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            } catch (error) {
-                alert('Error updating gold: ' + error.message);
-            }
-        });
-        goldRow.appendChild(goldBtn);
-        panel.appendChild(goldRow);
+        goldInput.value = stashGold;
+        goldDiv.appendChild(goldInput);
+        form.appendChild(goldDiv);
 
-        inventoryContainer.appendChild(panel);
+        const slots = [
+            {
+                label: 'Helmet:',
+                id: 'helmetSelect',
+                currentId: inventory.helmet_id,
+                items: armors.filter((a) => a.type === 'Helmet'),
+                idKey: 'armorId'
+            },
+            {
+                label: 'Armor:',
+                id: 'armorSelect',
+                currentId: inventory.armor_id,
+                items: armors.filter((a) => a.type === 'Armor'),
+                idKey: 'armorId'
+            },
+            {
+                label: 'Melee:',
+                id: 'meleeSelect',
+                currentId: inventory.melee_id,
+                items: weapons.filter((w) => w.type === 'Melee'),
+                idKey: 'weaponId'
+            },
+            {
+                label: 'Ranged:',
+                id: 'rangedSelect',
+                currentId: inventory.ranged_id,
+                items: weapons.filter((w) => w.type === 'Ranged'),
+                idKey: 'weaponId'
+            }
+        ];
+
+        slots.forEach(({ label, id, currentId, items, idKey }) => {
+            const div = document.createElement('div');
+            div.setAttribute('class', 'inventoryItem');
+
+            const labelEl = document.createElement('label');
+            labelEl.setAttribute('class', 'menuText');
+            labelEl.setAttribute('for', id);
+            labelEl.textContent = label;
+            div.appendChild(labelEl);
+
+            const selectEl = document.createElement('select');
+            selectEl.setAttribute('id', id);
+            selectEl.setAttribute('class', 'menuSelect inventorySelect');
+            items.forEach((item) => {
+                const option = document.createElement('option');
+                option.value = item[idKey];
+                option.textContent = `${item.name} (Tier ${item.tier})`;
+                if (item[idKey] === currentId) option.selected = true;
+                selectEl.appendChild(option);
+            });
+            div.appendChild(selectEl);
+            form.appendChild(div);
+        });
+
+        inventoryContainer.appendChild(form);
     } catch (error) {
         console.error('Error loading inventory:', error);
         inventoryContainer.innerHTML = '<p class="menuText">Error loading inventory</p>';
     }
 }
-//asdsadasddsd

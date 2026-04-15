@@ -74,6 +74,40 @@ router.post('/deleteUser/:userId', async (request, response) => {
     }
 });
 
+router.get('/getUserGold/:userId', async (request, response) => {
+    try {
+        const userId = request.params.userId;
+        const result = await database.getTotalGold(userId);
+        if (!result.success) {
+            return response.status(500).json({ message: result.message });
+        }
+        response.status(200).json({
+            message: 'Gold retrieved.',
+            stashGold: result.gold.stash
+        });
+    } catch (error) {
+        response.status(500).json({ message: 'Error retrieving gold.', error: error.message });
+    }
+});
+
+router.post('/setUserStashGold/:userId', async (request, response) => {
+    try {
+        const userId = request.params.userId;
+        const { gold } = request.body;
+
+        if (gold === undefined || gold === null || gold === '') {
+            return response
+                .status(400)
+                .json({ message: 'Gold value is required.', success: false });
+        }
+
+        const result = await database.adminSetStashGold(userId, gold);
+        response.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+        response.status(500).json({ message: 'Error setting gold.', success: false });
+    }
+});
+
 router.get('/getUserInventory/:userId', async (request, response) => {
     try {
         const userId = request.params.userId;
@@ -130,17 +164,15 @@ router.get('/getAllWeapons', async (request, response) => {
 router.post('/updateUserInventory/:userId', upload.none(), async (request, response) => {
     try {
         const userId = request.params.userId;
-        const { gold, helmet, armor, melee, ranged } = request.body;
+        const { helmet, armor, melee, ranged } = request.body;
 
-        // Validate input
-        if (gold === undefined || !helmet || !armor || !melee || !ranged) {
+        if (!helmet || !armor || !melee || !ranged) {
             return response.status(400).json({
                 message: 'All inventory fields are required.'
             });
         }
 
         await database.updateUserInventory(userId, {
-            gold: parseInt(gold),
             helmet: parseInt(helmet),
             armor: parseInt(armor),
             melee: parseInt(melee),
@@ -156,42 +188,6 @@ router.post('/updateUserInventory/:userId', upload.none(), async (request, respo
             message: 'Error updating inventory.',
             error: error.message
         });
-    }
-});
-
-router.post('/removeUserItems/:userId', async (request, response) => {
-    try {
-        const userId = request.params.userId;
-        if (!userId) {
-            return response.status(400).json({ message: 'User ID is required.', success: false });
-        }
-        await database.removeUserItems(userId);
-        response.status(200).json({ message: 'User items removed.', success: true });
-    } catch (error) {
-        response
-            .status(500)
-            .json({ message: 'Error removing items: ' + error.message, success: false });
-    }
-});
-
-router.post('/updateUserGold/:userId', async (request, response) => {
-    try {
-        const userId = request.params.userId;
-        const amount = parseInt(request.body.gold, 10);
-        if (!userId || isNaN(amount) || amount < 0) {
-            return response
-                .status(400)
-                .json({
-                    message: 'Valid user ID and non-negative gold amount required.',
-                    success: false
-                });
-        }
-        await database.updateUserGold(userId, amount);
-        response.status(200).json({ message: 'Gold updated.', success: true });
-    } catch (error) {
-        response
-            .status(500)
-            .json({ message: 'Error updating gold: ' + error.message, success: false });
     }
 });
 

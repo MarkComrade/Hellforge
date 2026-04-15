@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
-const { generateFinalLoot } = require('../services/lootAlgorithm.js');
+const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
 const { eventManager } = require('../services/eventGeneration.js');
 
 // Valid dungeon names — reject anything not in this list
@@ -112,16 +112,11 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
         }
 
         let Event = null;
+        const playerId = Number(req.session.userId);
         if (!wasVisited) {
-            const playerId = Number(req.session.userId);
-
             if (result.roomType === 'loot') {
                 if (Number.isInteger(playerId) && playerId > 0) {
-                    Event = await generateFinalLoot(
-                        playerId,
-                        req.dungeon.dungeonName,
-                        req.dungeon.dungeonLevel
-                    );
+                    Event = await resolveDungeonRoomLoot(req.dungeon, targetKey, playerId);
                 } else {
                     Event = {
                         success: false,
@@ -138,6 +133,20 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
                 );
             }
 
+            if (Event && Event.success) {
+                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
+                if (Event.item) {
+                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
+                }
+            }
+        } else if (
+            result.roomType === 'loot' &&
+            Number.isInteger(playerId) &&
+            playerId > 0 &&
+            req.dungeon.roomLoot?.[targetKey] &&
+            req.dungeon.roomLoot[targetKey].itemCollected === false
+        ) {
+            Event = await resolveDungeonRoomLoot(req.dungeon, targetKey, playerId);
             if (Event && Event.success) {
                 Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
                 if (Event.item) {
@@ -230,6 +239,40 @@ router.get('/state', requireLogin, requireDungeon, (req, res) => {
         res.json(req.dungeon.getClientState());
     } catch (error) {
         console.error('State error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Attempt to pick up a stored room item (inventory was full at first visit).
+// Must be standing on a loot room that has an uncollected item.
+router.post('/pickup-room-loot', allowGuest, requireDungeon, async (req, res) => {
+    try {
+        const dungeon = req.dungeon;
+        const currentKey = `${dungeon.playerX},${dungeon.playerY}`;
+        const roomState = dungeon.roomLoot?.[currentKey];
+
+        if (!roomState || roomState.type !== 'item_drop' || roomState.itemCollected) {
+            return res.status(400).json({ success: false, message: 'No item to pick up here.' });
+        }
+
+        const playerId = Number(req.session.userId);
+        if (!Number.isInteger(playerId) || playerId <= 0) {
+            return res.status(401).json({ success: false, message: 'Not logged in.' });
+        }
+
+        const result = await resolveDungeonRoomLoot(dungeon, currentKey, playerId);
+        saveDungeon(req);
+
+        if (!result || !result.success) {
+            return res.json({
+                success: false,
+                message: (result && result.message) || 'Pickup failed.'
+            });
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('Pickup error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });

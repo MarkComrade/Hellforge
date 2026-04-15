@@ -45,7 +45,7 @@ async function Login() {
         row.appendChild(inputCol);
     });
 
-    generateBootStrapGrid(1, 3, 4, 'authButtonRow');
+    generateBootStrapGrid(1, 2, 6, 'authButtonRow');
     const buttonContainers = document.querySelectorAll('.authButtonRow');
 
     let loginButton = document.createElement('input');
@@ -107,21 +107,6 @@ async function Login() {
             }
         } else {
             alert('Kérlek töltsd ki az összes mezőt!');
-        }
-    });
-
-    let guestButton = document.createElement('input');
-    guestButton.setAttribute('type', 'button');
-    guestButton.setAttribute('value', 'Continue as Guest');
-    guestButton.setAttribute('class', 'menuButton');
-    buttonContainers[2].appendChild(guestButton);
-    guestButton.addEventListener('click', async function () {
-        try {
-            await postFetch('/api/loginAuthApi/guest', {});
-            Menu();
-        } catch (error) {
-            console.error(error);
-            Menu();
         }
     });
 

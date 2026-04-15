@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../sql/database.js');
-const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
+const {
+    generateAndInsertLoot,
+    getBaseTier,
+    normalizeDungeonKey
+} = require('../services/lootAlgorithm.js');
+const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');
 
 function getDungeonFromSession(request) {
@@ -65,22 +70,54 @@ router.get('/lootAlgorithm/:playerId', async (request, response) => {
 
 router.get('/shop-items', async (request, response) => {
     try {
-        const count = Number.parseInt(request.query.count, 10) || 5;
-        const { dungeonName, dungeonLevel } = request.query;
+        const dungeon = getDungeonFromSession(request);
+        if (!dungeon) {
+            return response.status(200).json({ success: false, message: 'Not in a dungeon.' });
+        }
+
+        const roomKey = dungeon.playerX + ',' + dungeon.playerY;
+        const currentRoom = dungeon.map[roomKey];
+        if (!currentRoom || currentRoom.roomType !== 'shop') {
+            return response.status(200).json({ success: false, message: 'Not in a shop room.' });
+        }
+
+        // Return cached stock if this shop room was already visited
+        if (dungeon.shopStock[roomKey]) {
+            return response.status(200).json({
+                success: true,
+                items: dungeon.shopStock[roomKey]
+            });
+        }
+
+        let rawCount = Number.parseInt(request.query.count, 10);
+        let count = 5;
+        if (Number.isInteger(rawCount) && rawCount > 0) {
+            count = rawCount;
+        }
+
         const items = await database.getRandomShopItems(count);
 
-        const dungeonTier =
-            dungeonName && dungeonLevel ? getBaseTier(dungeonName, Number(dungeonLevel)) : null;
+        const dungeonKey = normalizeDungeonKey(dungeon.dungeonName);
+        let dungeonTier = getBaseTier(dungeonKey, dungeon.dungeonLevel);
 
         for (let i = 0; i < items.length; i++) {
-            if (dungeonTier !== null) {
-                const tierDiff = items[i].tier - dungeonTier;
-                const multiplier = 1 + Math.max(-3, Math.min(3, tierDiff)) * 0.2;
-                items[i].adjustedPrice = Math.round(items[i].price * multiplier);
-            } else {
-                items[i].adjustedPrice = items[i].price;
+            let tierDiff = items[i].tier - dungeonTier;
+            if (tierDiff < -3) tierDiff = -3;
+            if (tierDiff > 3) tierDiff = 3;
+
+            let randomMarkup = 0.8 + Math.random() * 0.4;
+            let tierMultiplier = 1 + tierDiff * 0.25;
+            let finalMultiplier = tierMultiplier * randomMarkup;
+
+            items[i].adjustedPrice = Math.round(items[i].price * finalMultiplier);
+            if (items[i].adjustedPrice < 1) {
+                items[i].adjustedPrice = 1;
             }
         }
+
+        // Cache the generated stock in the dungeon session
+        dungeon.shopStock[roomKey] = items;
+        request.session.dungeonData = dungeon.toJSON();
 
         response.status(200).json({
             success: true,
@@ -95,53 +132,101 @@ router.get('/shop-items', async (request, response) => {
 });
 
 router.post('/buy-item', async (request, response) => {
-    const { itemId, category, price, dungeonName, dungeonLevel } = request.body;
+    const { itemId, category, adjustedPrice } = request.body;
     const playerId = request.session?.userId;
 
     if (!playerId) {
         return response.status(401).json({ success: false, message: 'Not authenticated.' });
     }
 
-    if (!itemId || !category || price == null) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Missing required fields: itemId, category, price.' });
+    if (!itemId || !category || adjustedPrice == null) {
+        return response.status(400).json({
+            success: false,
+            message: 'Missing required fields: itemId, category, adjustedPrice.'
+        });
     }
 
-    if (!['weapon', 'armor'].includes(category)) {
+    if (category !== 'weapon' && category !== 'armor') {
         return response.status(400).json({ success: false, message: 'Invalid item category.' });
     }
 
-    const parsedPrice = Number(price);
-    if (!Number.isInteger(parsedPrice) || parsedPrice < 0) {
+    let parsedPrice = Number(adjustedPrice);
+    if (!Number.isInteger(parsedPrice) || parsedPrice < 1) {
         return response.status(400).json({ success: false, message: 'Invalid price value.' });
     }
 
     try {
-        let authorizedPrice = parsedPrice;
+        const itemInfo = await database.getItemBaseInfo(itemId, category);
+        if (!itemInfo) {
+            return response.status(200).json({ success: false, message: 'Item not found.' });
+        }
 
-        if (dungeonName && dungeonLevel) {
-            const dungeonTier = getBaseTier(dungeonName, Number(dungeonLevel));
-            const itemInfo = await database.getItemBaseInfo(itemId, category);
+        const dungeon = getDungeonFromSession(request);
 
-            if (!itemInfo) {
-                return response.status(400).json({ success: false, message: 'Item not found.' });
+        // Check if item was already bought from this shop
+        if (dungeon) {
+            const roomKey = dungeon.playerX + ',' + dungeon.playerY;
+            let stock = dungeon.shopStock[roomKey];
+            if (stock) {
+                for (let i = 0; i < stock.length; i++) {
+                    if (
+                        String(stock[i].itemId) === String(itemId) &&
+                        stock[i].category === category &&
+                        stock[i].sold
+                    ) {
+                        return response
+                            .status(200)
+                            .json({ success: false, message: 'Item already purchased.' });
+                    }
+                }
             }
+        }
 
-            const tierDiff = itemInfo.tier - dungeonTier;
-            const multiplier = 1 + Math.max(-3, Math.min(3, tierDiff)) * 0.2;
-            authorizedPrice = Math.round(itemInfo.price * multiplier);
+        let serverPrice = itemInfo.price;
+
+        if (dungeon) {
+            const dungeonKey = normalizeDungeonKey(dungeon.dungeonName);
+            const dungeonTier = getBaseTier(dungeonKey, dungeon.dungeonLevel);
+            let tierDiff = itemInfo.tier - dungeonTier;
+            if (tierDiff < -3) tierDiff = -3;
+            if (tierDiff > 3) tierDiff = 3;
+
+            let maxMultiplier = (1 + tierDiff * 0.25) * 1.2;
+            let maxAllowedPrice = Math.round(itemInfo.price * maxMultiplier);
+
+            if (parsedPrice > maxAllowedPrice) {
+                parsedPrice = maxAllowedPrice;
+            }
+            serverPrice = parsedPrice;
         }
 
         const result = await database.purchaseItemToLoadout(
             playerId,
             itemId,
             category,
-            authorizedPrice
+            serverPrice
         );
 
         if (!result.success) {
-            return response.status(400).json({ success: false, message: result.message });
+            return response.status(200).json({ success: false, message: result.message });
+        }
+
+        // Mark item as sold in cached shop stock
+        if (dungeon) {
+            const roomKey = dungeon.playerX + ',' + dungeon.playerY;
+            if (dungeon.shopStock[roomKey]) {
+                let stock = dungeon.shopStock[roomKey];
+                for (let i = 0; i < stock.length; i++) {
+                    if (
+                        String(stock[i].itemId) === String(itemId) &&
+                        stock[i].category === category
+                    ) {
+                        stock[i].sold = true;
+                        break;
+                    }
+                }
+                request.session.dungeonData = dungeon.toJSON();
+            }
         }
 
         return response.status(200).json({
@@ -156,4 +241,60 @@ router.post('/buy-item', async (request, response) => {
             .json({ success: false, message: 'Server error during purchase.' });
     }
 });
+
+router.post('/sell-item', async (request, response) => {
+    const playerId = request.session?.userId;
+
+    if (!playerId) {
+        return response.status(200).json({ success: false, message: 'Not authenticated.' });
+    }
+
+    const { loadoutId } = request.body;
+    if (!loadoutId) {
+        return response.status(200).json({
+            success: false,
+            message: 'Missing required field: loadoutId.'
+        });
+    }
+
+    const dungeon = getDungeonFromSession(request);
+    if (!dungeon) {
+        return response.status(200).json({
+            success: false,
+            message: 'You must be in a dungeon to sell items.'
+        });
+    }
+
+    const currentKey = dungeon.playerX + ',' + dungeon.playerY;
+    const currentRoom = dungeon.map[currentKey];
+    if (!currentRoom || currentRoom.roomType !== 'shop') {
+        return response.status(200).json({
+            success: false,
+            message: 'You must be in a shop room to sell items.'
+        });
+    }
+
+    try {
+        const result = await database.sellItemFromLoadout(playerId, loadoutId);
+
+        if (!result.success) {
+            return response.status(200).json({ success: false, message: result.message });
+        }
+
+        return response.status(200).json({
+            success: true,
+            message: result.message,
+            soldFor: result.soldFor,
+            itemName: result.itemName,
+            remainingGold: result.remainingGold
+        });
+    } catch (error) {
+        console.error('Sell-item error:', error);
+        return response.status(500).json({
+            success: false,
+            message: 'Server error during sale.'
+        });
+    }
+});
+
 module.exports = router;

@@ -247,6 +247,23 @@
     color: #ffc847;
 }
 
+.shopSlotPrice {
+    font-size: 1.1vh;
+    color: #5abf85;
+    text-align: center;
+}
+
+.shopSellSection {
+    border-top: 0.2vh solid rgba(220, 40, 40, 0.35);
+    padding-top: 1.2vh;
+    margin-top: 0.8vh;
+}
+
+.shopSellButton {
+    font-size: 1.1vh;
+    padding: 0.4vh 0.8vw;
+}
+
 .shopStats {
     border: 0.15vh solid rgba(220, 40, 40, 0.35);
     background: rgba(0, 0, 0, 0.3);
