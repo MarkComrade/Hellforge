@@ -1188,6 +1188,37 @@ async function getItemBaseInfo(itemId, category) {
     }
 }
 
+//!Combat Deck Query
+async function getPlayerCombatDeckCardIds(playerId) {
+    const query = `
+        SELECT iic.card_id
+         FROM player_inventory pi
+         JOIN item_instance_cards iic
+           ON iic.instance_id IN (
+               pi.helmet_instance,
+               pi.armor_instance,
+               pi.melee_instance,
+               pi.ranged_instance
+           )
+         WHERE pi.playerId = ?
+         `;
+    const [rows] = await pool.execute(query, [playerId]);
+    return rows;
+}
+
+async function getPlayerCombatDeck(playerId) {
+    try {
+        const rows = await getPlayerCombatDeckCardIds(playerId);
+        if (rows.length === 0) {
+            return { success: false, message: 'Játékos nem található' };
+        }
+        const deck = rows.map((row) => getCardById(row.card_id)).filter(Boolean);
+        return { success: true, deck };
+    } catch (error) {
+        return { success: false, message: 'Hiba történt a kártyapakli lekérése során' };
+    }
+}
+
 //!Export
 module.exports = {
     pool,
@@ -1227,6 +1258,9 @@ module.exports = {
     getRandomShopItems,
     insertIntoLoadout,
     purchaseItemToLoadout,
+    getItemBaseInfo,
+    getPlayerCombatDeckCardIds,
+    getPlayerCombatDeck,
     sellItemFromLoadout,
     getItemBaseInfo
 };
