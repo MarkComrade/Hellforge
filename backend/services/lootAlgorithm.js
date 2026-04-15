@@ -9,6 +9,7 @@ const {
     getLoadoutCount,
     addGoldToInventory
 } = require('../sql/database.js');
+const { pickCardsForItem } = require('../services/cardPool.js');
 const types = {
     crypt: 1,
     labyrinth: 2,
@@ -117,12 +118,15 @@ function normalizeLootItem(item) {
     return { ...item, img_path: item.img_path || item.img || null };
 }
 
-async function tryInsertLootItem(playerId, itemType, itemId) {
+async function tryInsertLootItem(playerId, itemType, itemId, itemSubType, itemTier) {
     const count = await getLoadoutCount(playerId);
     if (Number(count) >= 10) {
         return { success: false, inventoryFull: true };
     }
-    const result = await insertIntoLoadout(playerId, itemType, itemId);
+
+    const cards = itemSubType && itemTier ? pickCardsForItem(itemSubType, Number(itemTier)) : [];
+
+    const result = await insertIntoLoadout(playerId, itemType, itemId, cards);
     return result.success
         ? { success: true }
         : { ...result, inventoryFull: /full/i.test(String(result.message || '')) };
@@ -151,7 +155,16 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
             return { success: false, message: 'Loot generation failed.' };
         }
 
-        const dbResult = await tryInsertLootItem(playerId, loot.item.type, loot.item.item.id);
+        const itemSubType = loot.item.item?.type || null;
+        const itemTier = loot.tier;
+
+        const dbResult = await tryInsertLootItem(
+            playerId,
+            loot.item.type,
+            loot.item.item.id,
+            itemSubType,
+            itemTier
+        );
 
         if (!dbResult.success) {
             return {
@@ -295,11 +308,16 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
     try {
         const existing = dungeonSession.roomLoot?.[roomKey];
 
-        // ── Revisit: item was stored and not yet picked up ──
         if (existing) {
             if (existing.type !== 'item_drop' || existing.itemCollected) return null;
 
-            const insert = await tryInsertLootItem(playerId, existing.itemType, existing.itemId);
+            const insert = await tryInsertLootItem(
+                playerId,
+                existing.itemType,
+                existing.itemId,
+                existing.itemSubType,
+                existing.tier
+            );
             if (!insert.success) {
                 existing.inventoryFull = Boolean(insert.inventoryFull);
                 existing.storedInRoom = true;
@@ -314,7 +332,6 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
             return buildLootPayload(existing, { gold: 0 });
         }
 
-        // ── First visit: gold-only drop ──
         if (!shouldDropItem(dungeonSession.dungeonName, dungeonSession.dungeonLevel)) {
             const gold = generateGoldReward(
                 dungeonSession.dungeonName,
@@ -334,7 +351,6 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
             return buildLootPayload(dungeonSession.roomLoot[roomKey]);
         }
 
-        // ── First visit: item drop ──
         const loot = await generateLoot(dungeonSession.dungeonName, dungeonSession.dungeonLevel);
         if (!loot.item.success) return { success: false, message: 'Item generation failed.' };
 
@@ -350,6 +366,7 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
             gold,
             item: normalizeLootItem(loot.item.item),
             itemType: loot.item.type,
+            itemSubType: loot.item.item?.type || null,
             itemId: loot.item.item.id,
             tier: loot.tier,
             itemCollected: false,
@@ -358,7 +375,13 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
             storedInRoom: false
         };
 
-        const insert = await tryInsertLootItem(playerId, roomState.itemType, roomState.itemId);
+        const insert = await tryInsertLootItem(
+            playerId,
+            roomState.itemType,
+            roomState.itemId,
+            roomState.itemSubType,
+            roomState.tier
+        );
         if (!insert.success) {
             roomState.inventoryFull = Boolean(insert.inventoryFull);
             roomState.storedInRoom = true;
