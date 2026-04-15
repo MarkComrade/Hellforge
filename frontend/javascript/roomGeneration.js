@@ -169,9 +169,20 @@ function roomEventHandler(room, dungeonLevel, result) {
     switch (roomType) {
         case 'start':
             break;
-        case 'combat':
-            //combatStart();
+        case 'combat': {
+            const sessionToken = sessionStorage.getItem('dungeonSessionToken');
+            postFetch('/api/combat/start', { sessionToken })
+                .then((data) => {
+                    if (!data.combatToken) {
+                        console.error('Combat start failed:', data.message);
+                        return;
+                    }
+                    sessionStorage.setItem('combatToken', data.combatToken);
+                    startCombat(data.combatToken, data.state);
+                })
+                .catch((err) => console.error('Combat start error:', err.message));
             break;
+        }
         case 'loot':
             if (result.Event && result.Event.success) {
                 createFrontendEvent({ success: true, type: 'loot', loot: result.Event });

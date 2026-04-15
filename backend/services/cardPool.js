@@ -2050,9 +2050,26 @@ function pickCardsForItem(itemType, tier) {
 
 const CARDS_PER_TURN = 5;
 
+// Build a shuffled draw-pile from the four equipped item card arrays.
+// equipmentSnapshot must have melee_cards, ranged_cards, helmet_cards, armor_cards arrays.
+function buildDeckFromEquipment(equipmentSnapshot) {
+    const cards = [
+        ...(equipmentSnapshot.melee_cards || []),
+        ...(equipmentSnapshot.ranged_cards || []),
+        ...(equipmentSnapshot.helmet_cards || []),
+        ...(equipmentSnapshot.armor_cards || [])
+    ];
+    for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    return cards;
+}
+
 module.exports = {
     CARD_POOL,
     CARDS_PER_TURN,
     getCardById,
-    pickCardsForItem
+    pickCardsForItem,
+    buildDeckFromEquipment
 };

@@ -351,6 +351,35 @@ class CombatSession {
         return c;
     }
 
+    getClientState() {
+        return {
+            encounterId: this.encounterId,
+            isResolved: this.isResolved,
+            isGameOver: this.isGameOver,
+            turnOwner: this.turnOwner,
+            turnNumber: this.turnNumber,
+            cardsPlayedThisTurn: this.turnRules.cardsPlayedThisTurn,
+            maxCardsThisTurn: this.getMaxCardsThisTurn(),
+            player: {
+                hp: this.player.hp,
+                maxHp: this.player.maxHp,
+                block: this.player.block,
+                statuses: this.player.statuses
+            },
+            enemy: {
+                archetype: this.enemy.archetype,
+                hp: this.enemy.hp,
+                maxHp: this.enemy.maxHp,
+                block: this.enemy.block,
+                statuses: this.enemy.statuses
+            },
+            hand: this.deck.hand,
+            drawPileCount: this.deck.drawPile.length,
+            discardPileCount: this.deck.discardPile.length,
+            combatLog: this.combatLog.slice(-20)
+        };
+    }
+
     getPublicState() {
         return {
             encounterId: this.encounterId,
