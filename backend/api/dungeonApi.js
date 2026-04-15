@@ -245,7 +245,7 @@ router.get('/state', requireLogin, requireDungeon, (req, res) => {
 
 // Attempt to pick up a stored room item (inventory was full at first visit).
 // Must be standing on a loot room that has an uncollected item.
-router.post('/pickup-room-loot', allowGuest, requireDungeon, async (req, res) => {
+router.post('/pickup-room-loot', requireDungeon, async (req, res) => {
     try {
         const dungeon = req.dungeon;
         const currentKey = `${dungeon.playerX},${dungeon.playerY}`;
