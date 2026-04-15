@@ -9,7 +9,7 @@
         "db:up": "cd ..&& docker-compose up -d",
         "myadmin:up": "cd ..&& docker-compose up -d phpmyadmin",
         "db:reset": "cd .. && docker-compose down && docker volume rm hellforge_db_data || echo Volume already removed && docker-compose up -d",
-        "dev": "npm run db:up && nodemon"
+        "dev": "nodemon"
     },
     "author": "Kardos Krisztián",
     "license": "ISC",
