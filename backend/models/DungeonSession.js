@@ -13,6 +13,7 @@ class DungeonSession {
         this.map = {}; // key: "x,y" → { exists, roomType, visited }
         this.visitedRooms = new Set(); // tracks which rooms the player has entered
         this.shopStock = {}; // key: "x,y" → array of shop items (cached per shop room)
+        this.roomLoot = {}; // key: "x,y" → generated loot state for that room
         this.bounds = { minX: 1, maxX: 9, minY: 1, maxY: 9, adaptiveSize: 9 };
 
         this.generateMap(); // auto-generate on construction
@@ -197,6 +198,7 @@ class DungeonSession {
             map: this.map,
             visitedRooms: Array.from(this.visitedRooms), // Set → Array for JSON
             shopStock: this.shopStock,
+            roomLoot: this.roomLoot,
             bounds: this.bounds
         };
     }
@@ -215,6 +217,7 @@ class DungeonSession {
         d.map = data.map;
         d.visitedRooms = new Set(data.visitedRooms); // Array → Set
         d.shopStock = data.shopStock || {};
+        d.roomLoot = data.roomLoot || {};
         d.bounds = data.bounds;
         return d;
     }

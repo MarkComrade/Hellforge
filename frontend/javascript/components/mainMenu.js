@@ -51,33 +51,24 @@ async function Menu() {
     const columns = document.querySelectorAll('.container-fluid:last-child .col-md-12');
 
     buttons.forEach(({ text, onClick }, index) => {
-        if (text == 'Login' && isLoggedIn) return;
-        if (text == 'Logout' && !isLoggedIn) return;
-        if (text == 'Admin' && isLoggedIn && !isAdmin) return;
+        const isLoginRelated = text === 'Login' || text === 'Admin';
 
-        if (text != 'Login' && text != 'Logout') {
-            let button = document.createElement('input');
-            button.setAttribute('type', 'button');
-            button.setAttribute('value', text);
-            button.setAttribute('class', 'menuButton');
-            button.setAttribute('style', 'margin-top:5vh;');
-            button.addEventListener('click', onClick);
-            columns[index].appendChild(button);
-        } else if (text == 'Login') {
-            let button = document.createElement('input');
-            button.setAttribute('type', 'button');
-            button.setAttribute('value', text);
-            button.setAttribute('class', 'menuButton');
-            button.setAttribute('style', 'margin-top:5vh;');
-            button.addEventListener('click', onClick);
-            columns[index].appendChild(button);
-        } else if (text == 'Logout') {
-            let button = document.createElement('input');
-            button.setAttribute('type', 'button');
-            button.setAttribute('value', text);
+        if (isAdmin && text !== 'Admin' && text !== 'Logout') return;
+        if (!isAdmin && !isLoggedIn && !isLoginRelated) return;
+        if (!isAdmin && isLoggedIn && isLoginRelated) return;
+
+        const button = document.createElement('input');
+        button.setAttribute('type', 'button');
+        button.setAttribute('value', text);
+        button.addEventListener('click', onClick);
+
+        if (text === 'Logout') {
             button.setAttribute('class', 'logOutButton');
-            button.addEventListener('click', onClick);
             topRow[1].appendChild(button);
+        } else {
+            button.setAttribute('class', 'menuButton');
+            button.setAttribute('style', 'margin-top:5vh;');
+            columns[index].appendChild(button);
         }
     });
 }

@@ -1,7 +1,3 @@
-function createFrontendLootPopup(lootEvent) {
-    const defaultGoldImg = '../textures/items/coing.png';
-    const defaultLootImg = '../textures/misc/placeholderloot.png';
-    const lootPopupId = 'loot-popup';
 const DEFAULT_GOLD_IMG = '../textures/items/coing.png';
 const DEFAULT_LOOT_IMG = '../textures/misc/placeholderloot.png';
 const LOOT_POPUP_ID = 'loot-popup';
@@ -34,15 +30,23 @@ function setEventChoicePending(isPending) {
 function closeEventPopup(popup) {
     setEventChoicePending(false);
     popup.remove();
+
+    if (typeof window.syncLootPickupButton === 'function') {
+        const currentRoom = document.querySelector('#map .cell[data-current="true"]');
+        window.syncLootPickupButton(currentRoom);
+    }
 }
 
 function eventLootPopup(lootEvent) {
-    if (!lootEvent || lootEvent.success === false) {
-        return;
-    }
+    if (!lootEvent || lootEvent.success === false) return;
 
     removeEventPopupById(LOOT_POPUP_ID);
     setEventChoicePending(true);
+
+    if (typeof window.syncLootPickupButton === 'function') {
+        const currentRoom = document.querySelector('#map .cell[data-current="true"]');
+        window.syncLootPickupButton(currentRoom);
+    }
 
     const popup = document.createElement('div');
     popup.id = LOOT_POPUP_ID;
@@ -50,7 +54,7 @@ function eventLootPopup(lootEvent) {
 
     const title = document.createElement('h3');
     title.className = 'lootPopupTitle';
-    title.textContent = 'Loot Gained';
+    title.textContent = lootEvent.inventoryFull ? 'Inventory Full' : 'Loot Gained';
     popup.appendChild(title);
 
     const content = document.createElement('div');
@@ -112,14 +116,57 @@ function eventLootPopup(lootEvent) {
     const footer = document.createElement('div');
     footer.className = 'eventDialogueFooter';
 
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'eventDialogueButton primary';
-    button.textContent = 'Continue';
-    button.addEventListener('click', () => {
-        closeEventPopup(popup);
-    });
-    footer.appendChild(button);
+    if (lootEvent.storedInRoom) {
+        const pickupBtn = document.createElement('button');
+        pickupBtn.type = 'button';
+        pickupBtn.className = 'eventDialogueButton primary';
+        pickupBtn.textContent = 'Pick Up Item';
+        pickupBtn.addEventListener('click', async () => {
+            pickupBtn.disabled = true;
+            try {
+                const sessionToken = sessionStorage.getItem('dungeonSessionToken');
+                const result = await postFetch('/api/dungeon/pickup-room-loot', { sessionToken });
+                if (result && result.success && !result.inventoryFull) {
+                    const currentRoom = document.querySelector('#map .cell[data-current="true"]');
+                    if (currentRoom) {
+                        currentRoom.dataset.hasStoredLoot = result.storedInRoom ? 'true' : 'false';
+                    }
+                    closeEventPopup(popup);
+                } else {
+                    pickupBtn.disabled = false;
+                    const currentRoom = document.querySelector('#map .cell[data-current="true"]');
+                    if (currentRoom) {
+                        currentRoom.dataset.hasStoredLoot = result?.storedInRoom ? 'true' : 'false';
+                    }
+                    const msg = popup.querySelector('.lootPickupStatus');
+                    if (msg) msg.textContent = 'Still full — free a slot first.';
+                }
+            } catch {
+                pickupBtn.disabled = false;
+            }
+        });
+
+        const statusMsg = document.createElement('p');
+        statusMsg.className = 'lootPickupStatus lootPopupFlavor';
+        statusMsg.textContent = 'Free a slot in your loadout to pick this up.';
+        content.appendChild(statusMsg);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'eventDialogueButton';
+        closeBtn.textContent = 'Leave For Now';
+        closeBtn.addEventListener('click', () => closeEventPopup(popup));
+
+        footer.appendChild(pickupBtn);
+        footer.appendChild(closeBtn);
+    } else {
+        const continueBtn = document.createElement('button');
+        continueBtn.type = 'button';
+        continueBtn.className = 'eventDialogueButton primary';
+        continueBtn.textContent = 'Continue';
+        continueBtn.addEventListener('click', () => closeEventPopup(popup));
+        footer.appendChild(continueBtn);
+    }
 
     popup.appendChild(content);
     popup.appendChild(footer);

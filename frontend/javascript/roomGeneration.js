@@ -80,6 +80,68 @@ function appendDoor(cell, src, className) {
     cell.appendChild(img);
 }
 
+function removeLootPickupButton() {
+    const existing = document.getElementById('lootRoomPickupButton');
+    if (existing) {
+        existing.remove();
+    }
+}
+
+function syncLootPickupButton(room) {
+    removeLootPickupButton();
+
+    if (!room || room.dataset.current !== 'true') {
+        return;
+    }
+
+    if (room.dataset.roomType !== 'loot' || room.dataset.hasStoredLoot !== 'true') {
+        return;
+    }
+
+    if (document.getElementById('loot-popup')) {
+        return;
+    }
+
+    const itemImg = room.dataset.lootItemImg || '../textures/misc/placeholderloot.png';
+    const itemName = room.dataset.lootItemName || 'Pick up item';
+
+    const button = document.createElement('img');
+    button.id = 'lootRoomPickupButton';
+    button.className = 'lootRoomPickupButton';
+    button.src = itemImg;
+    button.alt = itemName;
+    button.title = itemName;
+    button.addEventListener('click', async () => {
+        button.style.pointerEvents = 'none';
+        try {
+            const sessionToken = sessionStorage.getItem('dungeonSessionToken');
+            const result = await postFetch('/api/dungeon/pickup-room-loot', { sessionToken });
+
+            if (!result || !result.success) {
+                button.style.pointerEvents = 'auto';
+                return;
+            }
+
+            room.dataset.hasStoredLoot = result.storedInRoom ? 'true' : 'false';
+            room.dataset.lootItemImg = result.item?.img_path || result.item?.img || itemImg;
+            room.dataset.lootItemName = result.item?.name || itemName;
+
+            if (result.inventoryFull) {
+                createFrontendEvent({ success: true, type: 'loot', loot: result });
+                return;
+            }
+
+            removeLootPickupButton();
+            createFrontendEvent({ success: true, type: 'loot', loot: result });
+        } catch (error) {
+            console.log('Pickup failed:', error.message);
+            button.style.pointerEvents = 'auto';
+        }
+    });
+
+    room.appendChild(button);
+}
+
 // Set up navigation — sends move requests to server
 function navigateToRoom(startX, startY, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
@@ -171,6 +233,15 @@ function placeTraderInRoom(room) {
 function roomEventHandler(room, dungeonLevel, result) {
     const roomType = result.roomType || room.dataset.roomType;
 
+    room.dataset.roomType = roomType || '';
+
+    if (roomType !== 'loot') {
+        room.dataset.hasStoredLoot = 'false';
+        room.dataset.lootItemImg = '';
+        room.dataset.lootItemName = '';
+        removeLootPickupButton();
+    }
+
     if (roomType !== 'out') {
         let trapdoor = document.getElementById('trapDoor');
         let exitButton = document.getElementById('exitButton');
@@ -196,9 +267,14 @@ function roomEventHandler(room, dungeonLevel, result) {
             //combatStart();
             break;
         case 'loot':
+            room.dataset.hasStoredLoot = result.Event?.storedInRoom ? 'true' : 'false';
+            room.dataset.lootItemImg =
+                result.Event?.item?.img_path || result.Event?.item?.img || '';
+            room.dataset.lootItemName = result.Event?.item?.name || 'Pick up item';
             if (result.Event && result.Event.success) {
                 createFrontendEvent({ success: true, type: 'loot', loot: result.Event });
             }
+            syncLootPickupButton(room);
             break;
         case 'shop':
             placeTraderInRoom(room);
@@ -212,3 +288,5 @@ function roomEventHandler(room, dungeonLevel, result) {
             break;
     }
 }
+
+window.syncLootPickupButton = syncLootPickupButton;
