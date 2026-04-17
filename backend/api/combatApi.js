@@ -83,6 +83,10 @@ router.post('/start', requireLogin, async (req, res) => {
         if (invResult.success && invResult.inventory) {
             const inv = invResult.inventory;
             equipmentSnapshot = {
+                melee_name: inv.melee_name || null,
+                ranged_name: inv.ranged_name || null,
+                helmet_name: inv.helmet_name || null,
+                armor_name: inv.armor_name || null,
                 melee_cards: inv.melee_cards || [],
                 ranged_cards: inv.ranged_cards || [],
                 helmet_cards: inv.helmet_cards || [],

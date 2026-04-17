@@ -206,6 +206,94 @@
     font-family: 'MedievalSharp', cursive;
 }
 
+/* Card list — used in item tooltips and combat equipment panel */
+.cardListSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4vh;
+    margin-top: 0.6vh;
+    border-top: 0.15vh solid rgba(220, 40, 40, 0.5);
+    padding-top: 0.5vh;
+}
+
+.cardListHeader {
+    color: rgb(220, 40, 40);
+    font-size: 1.4vh;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+.cardTile {
+    background: rgba(40, 10, 10, 0.8);
+    border: 0.15vh solid rgba(180, 40, 40, 0.4);
+    border-radius: 0.3vh;
+    padding: 0.4vh 0.8vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2vh;
+}
+
+.cardTileName {
+    color: rgb(255, 200, 80);
+    font-size: 1.4vh;
+    font-weight: bold;
+}
+
+.cardTileDetail {
+    color: rgb(180, 180, 180);
+    font-size: 1.2vh;
+}
+
+/* Combat equipment panel */
+.combatEquipPanel {
+    width: 60vw;
+    background: rgba(0, 0, 0, 0.6);
+    border: 0.1vh solid #555;
+    border-radius: 0.4vh;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+}
+
+.combatEquipSlot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3vh;
+}
+
+.combatEquipSlotLabel {
+    color: rgb(220, 40, 40);
+    font-size: 1.4vh;
+    font-weight: bold;
+}
+
+.combatEquipSlotName {
+    color: rgb(255, 200, 80);
+    font-size: 1.3vh;
+    font-style: italic;
+}
+
+.combatEquipCardRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5vh;
+}
+
+.combatEquipCard {
+    background: rgba(40, 10, 10, 0.8);
+    border: 0.15vh solid rgba(180, 40, 40, 0.4);
+    border-radius: 0.3vh;
+    padding: 0.3vh 0.7vh;
+    font-size: 1.2vh;
+    color: rgb(200, 200, 200);
+    white-space: nowrap;
+}
+
+.combatEquipCard strong {
+    color: rgb(255, 200, 80);
+}
+
 /* Loot popup */
 .lootPopup {
     position: fixed;

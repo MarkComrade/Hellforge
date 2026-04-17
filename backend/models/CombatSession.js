@@ -373,6 +373,24 @@ class CombatSession {
                 block: this.enemy.block,
                 statuses: this.enemy.statuses
             },
+            equipment: {
+                melee: {
+                    name: this.player.equipmentSnapshot?.melee_name || null,
+                    cards: this.player.equipmentSnapshot?.melee_cards || []
+                },
+                ranged: {
+                    name: this.player.equipmentSnapshot?.ranged_name || null,
+                    cards: this.player.equipmentSnapshot?.ranged_cards || []
+                },
+                helmet: {
+                    name: this.player.equipmentSnapshot?.helmet_name || null,
+                    cards: this.player.equipmentSnapshot?.helmet_cards || []
+                },
+                armor: {
+                    name: this.player.equipmentSnapshot?.armor_name || null,
+                    cards: this.player.equipmentSnapshot?.armor_cards || []
+                }
+            },
             hand: this.deck.hand,
             drawPileCount: this.deck.drawPile.length,
             discardPileCount: this.deck.discardPile.length,

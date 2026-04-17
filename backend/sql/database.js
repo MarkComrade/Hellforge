@@ -246,7 +246,7 @@ const STASH_LIMIT = 50;
 async function getStash(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id,
+            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id, s.instance_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
                     m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
@@ -258,7 +258,28 @@ async function getStash(playerId) {
                AND (s.armor_id IS NOT NULL OR s.weapon_id IS NOT NULL OR s.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        return { success: true, stash: rows };
+
+        const instanceIds = rows.map((r) => r.instance_id).filter((id) => id != null);
+        const cardsByInstance = {};
+        if (instanceIds.length > 0) {
+            const [cardRows] = await pool.query(
+                'SELECT instance_id, card_id FROM item_instance_cards WHERE instance_id IN (?)',
+                [instanceIds]
+            );
+            for (const c of cardRows) {
+                if (!cardsByInstance[c.instance_id]) cardsByInstance[c.instance_id] = [];
+                cardsByInstance[c.instance_id].push(c.card_id);
+            }
+        }
+
+        const stash = rows.map((row) => ({
+            ...row,
+            cards: (cardsByInstance[row.instance_id] || [])
+                .map((id) => getCardById(id))
+                .filter(Boolean)
+        }));
+
+        return { success: true, stash };
     } catch (error) {
         return { success: false, message: 'Hiba történt a stash lekérése során' };
     }
@@ -275,38 +296,110 @@ async function getStashCount(playerId) {
     return rows[0].count;
 }
 
-async function addArmorToStash(playerId, armorId) {
+/**
+ * Re-sequences item_instances.instanceId (and all FK references) to be gap-free
+ * starting from 1. Must be called inside an active transaction on `connection`.
+ * Uses a two-pass offset strategy to avoid PK collisions during renaming.
+ */
+async function compactItemInstances(connection) {
+    const [instances] = await connection.query(
+        'SELECT instanceId FROM item_instances ORDER BY instanceId ASC FOR UPDATE'
+    );
+    if (instances.length === 0) return;
+
+    const remapping = [];
+    for (let i = 0; i < instances.length; i++) {
+        const oldId = instances[i].instanceId;
+        const newId = i + 1;
+        if (oldId !== newId) remapping.push({ oldId, newId });
+    }
+    if (remapping.length === 0) return;
+
+    const OFFSET = 1_000_000;
+    await connection.query('SET foreign_key_checks = 0');
+    try {
+        // Pass 1 — move to temp offset to avoid PK collisions
+        for (const { oldId, newId } of remapping) {
+            const tempId = newId + OFFSET;
+            await connection.query(
+                'UPDATE item_instances SET instanceId = ? WHERE instanceId = ?',
+                [tempId, oldId]
+            );
+            await connection.query(
+                'UPDATE item_instance_cards SET instance_id = ? WHERE instance_id = ?',
+                [tempId, oldId]
+            );
+            await connection.query(
+                'UPDATE player_loadout SET instance_id = ? WHERE instance_id = ?',
+                [tempId, oldId]
+            );
+            await connection.query(
+                'UPDATE player_stash SET instance_id = ? WHERE instance_id = ?',
+                [tempId, oldId]
+            );
+        }
+        // Pass 2 — move from temp offset to final sequential IDs
+        for (const { oldId, newId } of remapping) {
+            const tempId = newId + OFFSET;
+            await connection.query(
+                'UPDATE item_instances SET instanceId = ? WHERE instanceId = ?',
+                [newId, tempId]
+            );
+            await connection.query(
+                'UPDATE item_instance_cards SET instance_id = ? WHERE instance_id = ?',
+                [newId, tempId]
+            );
+            await connection.query(
+                'UPDATE player_loadout SET instance_id = ? WHERE instance_id = ?',
+                [newId, tempId]
+            );
+            await connection.query(
+                'UPDATE player_stash SET instance_id = ? WHERE instance_id = ?',
+                [newId, tempId]
+            );
+        }
+    } finally {
+        await connection.query('SET foreign_key_checks = 1');
+    }
+}
+
+async function removeFromStash(stashId, playerId) {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
-        const [countRows] = await connection.query(
-            `SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?
-               AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
-            [playerId]
+        const [rows] = await connection.query(
+            'SELECT instance_id FROM player_stash WHERE stashId = ? AND playerId = ?',
+            [stashId, playerId]
         );
-        if (Number(countRows[0].count) >= STASH_LIMIT) {
+        if (rows.length === 0) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
+            return { success: false, message: 'A tárgy nem található a stash-ben' };
+        }
+        const instanceId = rows[0].instance_id;
+
+        await connection.query('DELETE FROM player_stash WHERE stashId = ? AND playerId = ?', [
+            stashId,
+            playerId
+        ]);
+
+        if (instanceId != null) {
+            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [instanceId]);
         }
 
-        const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
-        await connection.query(
-            'INSERT INTO player_stash (stashId, playerId, armor_id) VALUES (?, ?, ?)',
-            [stashId, playerId, armorId]
-        );
+        await compactItemInstances(connection);
 
         await connection.commit();
-        return { success: true, message: 'Páncél hozzáadva a stash-hez' };
+        return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a páncél hozzáadása során' };
+        return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
     } finally {
         connection.release();
     }
 }
 
-async function addWeaponToStash(playerId, weaponId) {
+async function addArmorToStash(playerId, armorId, instanceId = null) {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -318,20 +411,51 @@ async function addWeaponToStash(playerId, weaponId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+            return { success: false, message: 'Stash is full. Maximum 50 items allowed.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
         await connection.query(
-            'INSERT INTO player_stash (stashId, playerId, weapon_id) VALUES (?, ?, ?)',
-            [stashId, playerId, weaponId]
+            'INSERT INTO player_stash (stashId, playerId, armor_id, instance_id) VALUES (?, ?, ?, ?)',
+            [stashId, playerId, armorId, instanceId]
         );
 
         await connection.commit();
-        return { success: true, message: 'Fegyver hozzáadva a stash-hez' };
+        return { success: true, message: 'Armor added to stash.' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a fegyver hozzáadása során' };
+        return { success: false, message: 'Error adding armor to stash.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function addWeaponToStash(playerId, weaponId, instanceId = null) {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [countRows] = await connection.query(
+            `SELECT COUNT(*) AS count FROM player_stash WHERE playerId = ?
+               AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
+            [playerId]
+        );
+        if (Number(countRows[0].count) >= STASH_LIMIT) {
+            await connection.rollback();
+            return { success: false, message: 'Stash is full. Maximum 50 items allowed.' };
+        }
+
+        const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
+        await connection.query(
+            'INSERT INTO player_stash (stashId, playerId, weapon_id, instance_id) VALUES (?, ?, ?, ?)',
+            [stashId, playerId, weaponId, instanceId]
+        );
+
+        await connection.commit();
+        return { success: true, message: 'Weapon added to stash.' };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error adding weapon to stash.' };
     } finally {
         connection.release();
     }
@@ -365,21 +489,6 @@ async function addMiscToStash(playerId, miscItemId) {
         return { success: false, message: 'Hiba történt a tárgy hozzáadása során' };
     } finally {
         connection.release();
-    }
-}
-
-async function removeFromStash(stashId, playerId) {
-    try {
-        const [result] = await pool.query(
-            'DELETE FROM player_stash WHERE stashId = ? AND playerId = ?',
-            [stashId, playerId]
-        );
-        if (result.affectedRows === 0) {
-            return { success: false, message: 'A tárgy nem található a stash-ben' };
-        }
-        return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
-    } catch (error) {
-        return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
     }
 }
 
@@ -539,7 +648,7 @@ const LOADOUT_LIMIT = 10;
 async function getLoadout(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id,
+            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id, l.instance_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
                     m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
@@ -551,7 +660,28 @@ async function getLoadout(playerId) {
                AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        return { success: true, loadout: rows };
+
+        const instanceIds = rows.map((r) => r.instance_id).filter((id) => id != null);
+        const cardsByInstance = {};
+        if (instanceIds.length > 0) {
+            const [cardRows] = await pool.query(
+                'SELECT instance_id, card_id FROM item_instance_cards WHERE instance_id IN (?)',
+                [instanceIds]
+            );
+            for (const c of cardRows) {
+                if (!cardsByInstance[c.instance_id]) cardsByInstance[c.instance_id] = [];
+                cardsByInstance[c.instance_id].push(c.card_id);
+            }
+        }
+
+        const loadout = rows.map((row) => ({
+            ...row,
+            cards: (cardsByInstance[row.instance_id] || [])
+                .map((id) => getCardById(id))
+                .filter(Boolean)
+        }));
+
+        return { success: true, loadout };
     } catch (error) {
         return { success: false, message: 'Hiba történt a loadout lekérése során' };
     }
@@ -701,17 +831,38 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
 }
 
 async function deleteFromLoadout(playerId, loadoutId) {
+    const connection = await pool.getConnection();
     try {
-        const [result] = await pool.query(
+        await connection.beginTransaction();
+
+        const [rows] = await connection.query(
+            'SELECT instance_id FROM player_loadout WHERE loadoutId = ? AND playerId = ? AND equipped = 0',
+            [loadoutId, playerId]
+        );
+        if (rows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in inventory.' };
+        }
+        const instanceId = rows[0].instance_id;
+
+        await connection.query(
             'DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ? AND equipped = 0',
             [loadoutId, playerId]
         );
-        if (result.affectedRows === 0) {
-            return { success: false, message: 'Item not found in inventory.' };
+
+        if (instanceId != null) {
+            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [instanceId]);
         }
+
+        await compactItemInstances(connection);
+
+        await connection.commit();
         return { success: true, message: 'Item deleted from inventory.' };
     } catch (error) {
+        await connection.rollback();
         return { success: false, message: 'Error deleting item from inventory.' };
+    } finally {
+        connection.release();
     }
 }
 
@@ -1111,24 +1262,11 @@ async function updateUserInventory(userId, inventoryData) {
     }
 }
 
-//dungeonloot algorithm
-async function upgradeWeakestGearDB(weakestSlot, playerId) {
-    const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
-    if (!validSlots.includes(weakestSlot)) {
-        throw new Error(`Invalid slot: ${weakestSlot}`);
-    }
-    const isArmorSlot = weakestSlot === 'helmet' || weakestSlot === 'armor';
-    const column = isArmorSlot ? 'armor_id' : 'weapon_id';
-    const query = `UPDATE player_loadout SET \`${column}\` = \`${column}\` + 1 WHERE playerId = ? AND equipped = 1 AND slot = ?`;
-    const [result] = await pool.execute(query, [playerId, weakestSlot]);
-    return result;
-}
-
 //loot fetches
 async function fetchWeaponByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT weaponId AS id, name, tier, img_path
+            `SELECT weaponId AS id, type, name, tier, img_path
              FROM weapons
              WHERE tier = ?
              ORDER BY RAND()
@@ -1146,7 +1284,7 @@ async function fetchWeaponByTier(tier) {
 async function fetchArmorByTier(tier) {
     try {
         const [rows] = await pool.query(
-            `SELECT armorId AS id, name, tier, img_path
+            `SELECT armorId AS id, type, name, tier, img_path
              FROM armors
              WHERE tier = ?
              ORDER BY RAND()
@@ -1491,32 +1629,6 @@ async function getItemBaseInfo(itemId, category) {
     }
 }
 
-//!Combat Deck Query
-async function getPlayerCombatDeckCardIds(playerId) {
-    const query = `
-        SELECT iic.card_id
-         FROM player_loadout pl
-         JOIN item_instance_cards iic
-           ON iic.instance_id = pl.instance_id
-         WHERE pl.playerId = ? AND pl.equipped = 1 AND pl.instance_id IS NOT NULL
-         `;
-    const [rows] = await pool.execute(query, [playerId]);
-    return rows;
-}
-
-async function getPlayerCombatDeck(playerId) {
-    try {
-        const rows = await getPlayerCombatDeckCardIds(playerId);
-        if (rows.length === 0) {
-            return { success: false, message: 'Játékos nem található' };
-        }
-        const deck = rows.map((row) => getCardById(row.card_id)).filter(Boolean);
-        return { success: true, deck };
-    } catch (error) {
-        return { success: false, message: 'Hiba történt a kártyapakli lekérése során' };
-    }
-}
-
 //!Export
 module.exports = {
     pool,
@@ -1550,7 +1662,6 @@ module.exports = {
     updateUserInventory,
     deleteUser,
     adminSetStashGold,
-    upgradeWeakestGearDB,
     fetchWeaponByTier,
     fetchArmorByTier,
     fetchRandomMisc,
@@ -1558,8 +1669,5 @@ module.exports = {
     insertIntoLoadout,
     purchaseItemToLoadout,
     getItemBaseInfo,
-    getPlayerCombatDeckCardIds,
-    getPlayerCombatDeck,
-    sellItemFromLoadout,
-    getItemBaseInfo
+    sellItemFromLoadout
 };

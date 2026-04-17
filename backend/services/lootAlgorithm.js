@@ -4,7 +4,6 @@ const {
     fetchArmorByTier,
     fetchRandomMisc,
     insertIntoLoadout,
-    upgradeWeakestGearDB,
     getLoadout,
     getLoadoutCount,
     addGoldToInventory

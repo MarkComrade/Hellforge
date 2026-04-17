@@ -45,6 +45,8 @@ function renderCombat(token, state) {
 
     overlay.appendChild(buildHand(token, state));
 
+    overlay.appendChild(buildEquipmentPanel(state.equipment));
+
     const endTurnBtn = document.createElement('button');
     endTurnBtn.className = 'menuButton';
     endTurnBtn.textContent = 'End Turn';
@@ -99,6 +101,71 @@ function buildHpPanel(label, hp, maxHp, block, statuses) {
     barWrap.appendChild(barLabel);
     panel.appendChild(barWrap);
     return panel;
+}
+
+// ── Equipment panel ───────────────────────────────────────────────────────────
+
+function buildEquipmentPanel(equipment) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'width:60vw;';
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'menuButton';
+    toggleBtn.style.cssText = 'font-size:1.2vh; padding:0.6vh 1.5vh; margin-bottom:0.5vh;';
+    toggleBtn.textContent = 'Equipment Cards ▼';
+
+    const panel = document.createElement('div');
+    panel.className = 'combatEquipPanel';
+    panel.style.display = 'none';
+
+    const slots = [
+        { label: 'Melee', data: equipment && equipment.melee },
+        { label: 'Ranged', data: equipment && equipment.ranged },
+        { label: 'Helmet', data: equipment && equipment.helmet },
+        { label: 'Armor', data: equipment && equipment.armor }
+    ];
+
+    slots.forEach(({ label, data }) => {
+        if (!data || (!data.name && (!data.cards || data.cards.length === 0))) return;
+
+        const slot = document.createElement('div');
+        slot.className = 'combatEquipSlot';
+
+        const slotLabel = document.createElement('span');
+        slotLabel.className = 'combatEquipSlotLabel';
+        slotLabel.textContent = label;
+        slot.appendChild(slotLabel);
+
+        if (data.name) {
+            const slotName = document.createElement('span');
+            slotName.className = 'combatEquipSlotName';
+            slotName.textContent = data.name;
+            slot.appendChild(slotName);
+        }
+
+        const cardRow = document.createElement('div');
+        cardRow.className = 'combatEquipCardRow';
+        (data.cards || []).forEach((card) => {
+            const cardEl = document.createElement('span');
+            cardEl.className = 'combatEquipCard';
+            const effects = formatEffects(card.effects);
+            cardEl.innerHTML = `<strong>${card.name}</strong> T${card.tier}${effects ? ' · ' + effects : ''}`;
+            cardRow.appendChild(cardEl);
+        });
+        slot.appendChild(cardRow);
+
+        panel.appendChild(slot);
+    });
+
+    toggleBtn.addEventListener('click', () => {
+        const open = panel.style.display !== 'none';
+        panel.style.display = open ? 'none' : 'flex';
+        toggleBtn.textContent = open ? 'Equipment Cards ▼' : 'Equipment Cards ▲';
+    });
+
+    wrapper.appendChild(toggleBtn);
+    wrapper.appendChild(panel);
+    return wrapper;
 }
 
 // ── Hand ──────────────────────────────────────────────────────────────────────

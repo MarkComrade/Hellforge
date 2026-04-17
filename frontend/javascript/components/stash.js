@@ -264,6 +264,10 @@ async function renderStashContent(playerId, grid, countText) {
                 tooltip.appendChild(tooltipStat);
             }
 
+            if ((item.armor_id || item.weapon_id) && item.cards && item.cards.length > 0) {
+                tooltip.appendChild(buildCardsSection(item.cards));
+            }
+
             const buttonRow = document.createElement('div');
             buttonRow.setAttribute('class', 'stashTooltipBtnRow');
 

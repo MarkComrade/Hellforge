@@ -35,12 +35,12 @@ router.get('/stash/count/:playerId', async (request, response) => {
 });
 
 router.post('/stash/addArmor', async (request, response) => {
-    const { playerId, armorId } = request.body;
+    const { playerId, armorId, instanceId = null } = request.body;
     if (!playerId || !armorId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
-        const result = await database.addArmorToStash(playerId, armorId);
+        const result = await database.addArmorToStash(playerId, armorId, instanceId);
         response.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });
@@ -48,25 +48,12 @@ router.post('/stash/addArmor', async (request, response) => {
 });
 
 router.post('/stash/addWeapon', async (request, response) => {
-    const { playerId, weaponId } = request.body;
+    const { playerId, weaponId, instanceId = null } = request.body;
     if (!playerId || !weaponId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
-        const result = await database.addWeaponToStash(playerId, weaponId);
-        response.status(result.success ? 200 : 400).json(result);
-    } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
-    }
-});
-
-router.post('/stash/addMisc', async (request, response) => {
-    const { playerId, miscItemId } = request.body;
-    if (!playerId || !miscItemId) {
-        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
-    }
-    try {
-        const result = await database.addMiscToStash(playerId, miscItemId);
+        const result = await database.addWeaponToStash(playerId, weaponId, instanceId);
         response.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         response.status(500).json({ success: false, message: 'Szerver hiba' });
