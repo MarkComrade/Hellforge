@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const { CombatSession } = require('../models/CombatSession.js');
 const DungeonSession = require('../models/DungeonSession.js');
-const { generateEnemy } = require('../services/enemyPool.js');
+const { generateEnemy, generateEnemyGroup, rollEnemyCount } = require('../services/enemyPool.js');
 const { buildDeckFromEquipment, getCardById } = require('../services/cardPool.js');
 const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
 const { generateFinalLoot } = require('../services/lootAlgorithm.js');
@@ -102,7 +102,8 @@ router.post('/start', requireLogin, async (req, res) => {
                 .filter(Boolean);
         }
 
-        const enemy = generateEnemy(dungeonType, dungeonLevel);
+        const enemyCount = rollEnemyCount(dungeonType);
+        const enemies = generateEnemyGroup(dungeonType, dungeonLevel, enemyCount);
         const deck = buildDeckFromEquipment(equipmentSnapshot);
 
         const combat = new CombatSession({
@@ -113,7 +114,7 @@ router.post('/start', requireLogin, async (req, res) => {
             playerId,
             equipmentSnapshot
         });
-        combat.setEnemy(enemy);
+        combat.setEnemies(enemies);
         combat.setDeckState({ drawPile: deck });
         combat.refillHand();
 
@@ -147,7 +148,23 @@ router.post('/play-card', requireLogin, requireCombat, (req, res) => {
         if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 4) {
             return res.status(400).json({ success: false, message: 'cardIndex must be 0–4' });
         }
-        const result = resolveCard(req.combat, cardIndex);
+
+        let targetIndex = 0;
+        if (req.body.targetIndex !== undefined) {
+            targetIndex = Number(req.body.targetIndex);
+            if (
+                !Number.isInteger(targetIndex) ||
+                targetIndex < 0 ||
+                targetIndex >= req.combat.enemies.length
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: `targetIndex must be 0–${req.combat.enemies.length - 1}`
+                });
+            }
+        }
+
+        const result = resolveCard(req.combat, cardIndex, targetIndex);
         saveCombat(req);
         res.json({ ...result, state: req.combat.getClientState() });
     } catch (error) {

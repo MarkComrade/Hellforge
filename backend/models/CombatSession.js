@@ -53,6 +53,8 @@ class CombatSession {
             currentIntent: null
         };
 
+        this.enemies = [];
+
         this.deck = {
             drawPile: [],
             hand: [],
@@ -95,6 +97,7 @@ class CombatSession {
         this.enemy = {
             enemyId: enemyData.enemyId || null,
             archetype: enemyData.archetype || 'unknown',
+            img_path: enemyData.img_path || null,
             hp: this._clamp(hp, 0, maxHp),
             maxHp,
             block: Number(enemyData.block || 0),
@@ -104,6 +107,55 @@ class CombatSession {
             cards: Array.isArray(enemyData.cards) ? enemyData.cards : [],
             cardsPerTurn: enemyData.cardsPerTurn || { min: 1, max: 2 }
         };
+
+        // Wrap single enemy into the enemies array for multi-enemy compat
+        this.enemies = [{ ...this.enemy, index: 0 }];
+    }
+
+    // Initialise the encounter with multiple enemies at once.
+    // Each entry follows the same shape as generateEnemy() output.
+    setEnemies(enemiesArray = []) {
+        this.enemies = enemiesArray.map((e, i) => {
+            const maxHp = Number(e.maxHp || e.hp || 0);
+            const hp = Number(e.hp || maxHp);
+            return {
+                index: Number.isInteger(e.index) ? e.index : i,
+                enemyId: e.enemyId || null,
+                archetype: e.archetype || 'unknown',
+                img_path: e.img_path || null,
+                hp: this._clamp(hp, 0, maxHp),
+                maxHp,
+                block: Number(e.block || 0),
+                strength: Number(e.strength || 0),
+                statuses: Array.isArray(e.statuses) ? e.statuses : [],
+                currentIntent: e.currentIntent || null,
+                cards: Array.isArray(e.cards) ? e.cards : [],
+                cardsPerTurn: e.cardsPerTurn || { min: 1, max: 2 }
+            };
+        });
+
+        // Keep legacy this.enemy pointing at the first enemy for backward compat
+        this.enemy =
+            this.enemies.length > 0
+                ? this.enemies[0]
+                : {
+                      enemyId: null,
+                      archetype: null,
+                      img_path: null,
+                      hp: 0,
+                      maxHp: 0,
+                      block: 0,
+                      strength: 0,
+                      statuses: [],
+                      currentIntent: null,
+                      cards: [],
+                      cardsPerTurn: { min: 1, max: 2 }
+                  };
+    }
+
+    // Returns only enemies that are still alive (hp > 0).
+    getAliveEnemies() {
+        return this.enemies.filter((e) => e.hp > 0);
     }
 
     setDeckState(deckState = {}) {
@@ -192,9 +244,13 @@ class CombatSession {
 
     startEnemyTurn() {
         this.setTurnOwner(TURN_OWNERS.ENEMY);
-        // Block and strength accumulated by the enemy last turn expire now
-        this.enemy.block = 0;
-        this.enemy.strength = 0;
+        // Block and strength accumulated by every enemy last turn expire now
+        for (const enemy of this.enemies) {
+            if (enemy.hp > 0) {
+                enemy.block = 0;
+                enemy.strength = 0;
+            }
+        }
     }
 
     getMaxCardsThisTurn() {
@@ -244,10 +300,19 @@ class CombatSession {
         }
     }
 
-    setEnemyHp(nextHp) {
-        this.enemy.hp = this._clamp(Number(nextHp), 0, this.enemy.maxHp);
+    setEnemyHp(nextHp, enemyIndex = 0) {
+        const target = this.enemies[enemyIndex] || this.enemies[0];
+        if (!target) return;
 
-        if (this.enemy.hp <= 0 && this.enemy.maxHp > 0) {
+        target.hp = this._clamp(Number(nextHp), 0, target.maxHp);
+
+        // Keep legacy this.enemy in sync when targeting the first enemy
+        if (target === this.enemies[0]) {
+            this.enemy.hp = target.hp;
+        }
+
+        // Combat is won when every enemy is dead
+        if (this.enemies.length > 0 && this.enemies.every((e) => e.hp <= 0)) {
             this.resolveCombat({ gameOver: false });
         }
     }
@@ -291,6 +356,7 @@ class CombatSession {
             turnRules: this.turnRules,
             player: this.player,
             enemy: this.enemy,
+            enemies: this.enemies,
             deck: this.deck,
             combatLog: this.combatLog,
             reward: this.reward,
@@ -328,6 +394,7 @@ class CombatSession {
         c.enemy = data.enemy || {
             enemyId: null,
             archetype: null,
+            img_path: null,
             hp: 0,
             maxHp: 0,
             block: 0,
@@ -337,6 +404,13 @@ class CombatSession {
             cards: [],
             cardsPerTurn: { min: 1, max: 2 }
         };
+        // Restore the enemies array — fall back to wrapping legacy single enemy
+        c.enemies =
+            Array.isArray(data.enemies) && data.enemies.length > 0
+                ? data.enemies
+                : c.enemy.maxHp > 0
+                  ? [{ ...c.enemy, index: 0 }]
+                  : [];
         c.deck = data.deck || {
             drawPile: [],
             hand: [],
@@ -366,13 +440,15 @@ class CombatSession {
                 block: this.player.block,
                 statuses: this.player.statuses
             },
-            enemy: {
-                archetype: this.enemy.archetype,
-                hp: this.enemy.hp,
-                maxHp: this.enemy.maxHp,
-                block: this.enemy.block,
-                statuses: this.enemy.statuses
-            },
+            enemies: this.enemies.map((e) => ({
+                index: e.index,
+                archetype: e.archetype,
+                img_path: e.img_path || null,
+                hp: e.hp,
+                maxHp: e.maxHp,
+                block: e.block,
+                statuses: e.statuses
+            })),
             hand: this.deck.hand,
             drawPileCount: this.deck.drawPile.length,
             discardPileCount: this.deck.discardPile.length,
@@ -394,6 +470,7 @@ class CombatSession {
             turnRules: this.turnRules,
             player: this.player,
             enemy: this.enemy,
+            enemies: this.enemies,
             deck: this.deck,
             combatLog: this.combatLog,
             reward: this.reward,
