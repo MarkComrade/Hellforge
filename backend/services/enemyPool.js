@@ -219,6 +219,113 @@ const ENEMY_POOL = {
             ]
         }
     ],
+    // ═══════════════════════════════════════════════════════════════════════
+    // laboratory  ─ hard difficulty, levels 1-15, base damage 14-24
+    // ═══════════════════════════════════════════════════════════════════════
+    laboratory: [
+        {
+            id: 'lab_chemist',
+            name: 'Lab Chemist',
+            img_path: '/textures/characters/laboratory_chemist.png',
+            baseHp: 56,
+            hpPerLevel: 9,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                { name: 'Acid Flask', likelihood: 28, effects: { damage: 18, scorch: 4 } },
+                { name: 'Corrosive Burst', likelihood: 24, effects: { damage: 20 } },
+                {
+                    name: 'Toxic Draft',
+                    likelihood: 20,
+                    effects: { damage: 14, vulnerable: { pct: 25, turns: 2 } }
+                },
+                { name: 'Fume Screen', likelihood: 18, effects: { block: 22 }, defensive: true },
+                {
+                    name: 'Emergency Serum',
+                    likelihood: 10,
+                    effects: { healing: 18 },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'lab_guardian',
+            name: 'Lab Guardian',
+            img_path: '/textures/characters/laboratory_guardian.png',
+            baseHp: 66,
+            hpPerLevel: 10,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                { name: 'Guardian Slam', likelihood: 26, effects: { damage: 21 } },
+                {
+                    name: 'Containment Strike',
+                    likelihood: 24,
+                    effects: { damage: 17, vulnerable: { pct: 25, turns: 2 } }
+                },
+                { name: 'Shock Baton', likelihood: 20, effects: { damage: 16, bleed: 4 } },
+                {
+                    name: 'Reinforced Plating',
+                    likelihood: 20,
+                    effects: { block: 24 },
+                    defensive: true
+                },
+                {
+                    name: 'Repair Protocol',
+                    likelihood: 10,
+                    effects: { healing: 16 },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'lab_mutant',
+            name: 'Lab Mutant',
+            img_path: '/textures/characters/laboratory_mutant.png',
+            baseHp: 72,
+            hpPerLevel: 11,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                { name: 'Mutant Claw', likelihood: 28, effects: { damage: 22, bleed: 5 } },
+                { name: 'Rending Maul', likelihood: 24, effects: { damage: 24 } },
+                {
+                    name: 'Toxic Lunge',
+                    likelihood: 20,
+                    effects: { damage: 18, scorch: 5 }
+                },
+                {
+                    name: 'Bone Carapace',
+                    likelihood: 20,
+                    effects: { block: 26 },
+                    defensive: true
+                },
+                {
+                    name: 'Regenerate Tissue',
+                    likelihood: 10,
+                    effects: { healing: 18 },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'lab_specimen',
+            name: 'Escaped Specimen',
+            img_path: '/textures/characters/laboratory_specimen.png',
+            baseHp: 62,
+            hpPerLevel: 10,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                { name: 'Specimen Pounce', likelihood: 28, effects: { damage: 19 } },
+                { name: 'Viral Bite', likelihood: 24, effects: { damage: 16, bleed: 5 } },
+                { name: 'Pyro Spit', likelihood: 20, effects: { damage: 17, scorch: 4 } },
+                { name: 'Adaptive Hide', likelihood: 18, effects: { block: 23 }, defensive: true },
+                {
+                    name: 'Feeding Frenzy',
+                    likelihood: 10,
+                    effects: { lifesteal: { pct: 30, turns: 2 } },
+                    defensive: true
+                }
+            ]
+        }
+    ],
 
     // ═══════════════════════════════════════════════════════════════════════
     // GATES OF HELL  ─ extreme difficulty, levels 1-15, base damage 20-32
