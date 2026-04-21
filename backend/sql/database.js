@@ -1164,7 +1164,7 @@ async function fetchArmorByTier(tier) {
 async function fetchRandomMisc() {
     try {
         const [rows] = await pool.query(
-            `SELECT itemId AS id, name, img_path
+            `SELECT itemId AS id, name, img_path, value
              FROM misc_items
              ORDER BY RAND()
              LIMIT 1`
