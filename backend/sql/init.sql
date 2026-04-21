@@ -118,6 +118,27 @@ INSERT INTO `weapons` (`type`, `name`, `img_path`, `tier`, `price`, `attack_mult
     ('Melee', 'Hellish Sword', '../textures/items/weapons/sword_hellish.png', 6, 2100, 3.6),
     ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 1600, 3.2);
 
+INSERT INTO `misc_items` (`name`, `img_path`, `value`) VALUES
+    ('Amethyst', '../textures/items/misc/misc_amethyst.png', 500),
+    ('Book', '../textures/items/misc/misc_book.png', 185),
+    ('Boots', '../textures/items/misc/misc_boots.png', 67),
+    ('Broom', '../textures/items/misc/misc_broom.png', 69),
+    ('Chalice', '../textures/items/misc/misc_chalice.png', 450),
+    ('Cross', '../textures/items/misc/misc_cross.png', 920),
+    ('Crown', '../textures/items/misc/misc_crown.png', 420),
+    ('Cup', '../textures/items/misc/misc_cup.png', 65),
+    ('Emerald', '../textures/items/misc/misc_emerald.png', 888),
+    ('Golden Egg', '../textures/items/misc/misc_goldenegg.png', 1000),
+    ('Hand', '../textures/items/misc/misc_hand.png', 1337),
+    ('Potatoes', '../textures/items/misc/misc_potatoes.png', 13),
+    ('Potion', '../textures/items/misc/misc_potion.png', 300),
+    ('Ring', '../textures/items/misc/misc_ring.png', 555),
+    ('Ruby', '../textures/items/misc/misc_ruby.png', 777),
+    ('Sapphire', '../textures/items/misc/misc_sapphire.png', 999),
+    ('Scroll', '../textures/items/misc/misc_scroll.png', 550),
+    ('Silk', '../textures/items/misc/misc_silk.png', 100),
+    ('Wine', '../textures/items/misc/misc_wine.png', 150);
+
 INSERT INTO `user` (`userId`, `name`, `password`) VALUES
 (1, 'test_player_1', '$2b$12$VF39VlT.u4aYpVfEkEIjReijHK5Vh.W/1fsv/2K/YWLsvaLk8qr1K'),
     (2, 'test_player_2', '$2b$12$5/kPX.UYOQDnL6n4TsBWV.29QBYX8MlE3507KsO5qtQs/yhjP2CDq'),

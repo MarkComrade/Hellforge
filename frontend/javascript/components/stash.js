@@ -289,7 +289,9 @@ async function renderStashContent(playerId, grid, countText) {
                     }
                 });
                 buttonRow.appendChild(equipButton);
+            }
 
+            if (equipmentSlot || item.misc_item_id) {
                 const moveToInventoryButton = document.createElement('button');
                 moveToInventoryButton.setAttribute('class', 'stashEquipBtn');
                 moveToInventoryButton.textContent = 'Move to loadout';
