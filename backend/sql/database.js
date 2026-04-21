@@ -63,6 +63,33 @@ async function createItemInstance(connection, itemType, itemId, cards = []) {
     return instanceId;
 }
 
+async function getCardsByInstanceIds(instanceIds) {
+    if (!Array.isArray(instanceIds) || instanceIds.length === 0) {
+        return {};
+    }
+
+    const [cardRows] = await pool.query(
+        `SELECT instance_id, card_id
+         FROM item_instance_cards
+         WHERE instance_id IN (?)
+         ORDER BY instance_id ASC, slot ASC`,
+        [instanceIds]
+    );
+
+    const cardsByInstance = {};
+    for (const row of cardRows) {
+        if (!cardsByInstance[row.instance_id]) {
+            cardsByInstance[row.instance_id] = [];
+        }
+        const card = getCardById(row.card_id);
+        if (card) {
+            cardsByInstance[row.instance_id].push(card);
+        }
+    }
+
+    return cardsByInstance;
+}
+
 //!SQL Queries
 
 //!Login Query
@@ -246,7 +273,7 @@ const STASH_LIMIT = 50;
 async function getStash(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id,
+            `SELECT s.stashId, s.armor_id, s.weapon_id, s.misc_item_id, s.instance_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
                     m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
@@ -258,7 +285,18 @@ async function getStash(playerId) {
                AND (s.armor_id IS NOT NULL OR s.weapon_id IS NOT NULL OR s.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        return { success: true, stash: rows };
+
+        const instanceIds = rows
+            .map((row) => row.instance_id)
+            .filter((id) => Number.isInteger(id) && id > 0);
+        const cardsByInstance = await getCardsByInstanceIds(instanceIds);
+
+        const stash = rows.map((row) => ({
+            ...row,
+            cards: row.misc_item_id ? [] : cardsByInstance[row.instance_id] || []
+        }));
+
+        return { success: true, stash };
     } catch (error) {
         return { success: false, message: 'Hiba történt a stash lekérése során' };
     }
@@ -539,7 +577,7 @@ const LOADOUT_LIMIT = 10;
 async function getLoadout(playerId) {
     try {
         const [rows] = await pool.query(
-            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id,
+            `SELECT l.loadoutId, l.armor_id, l.weapon_id, l.misc_item_id, l.instance_id,
                     a.name AS armor_name, a.type AS armor_type, a.img_path AS armor_img, a.price AS armor_price, a.tier AS armor_tier, a.defense_multiplier,
                     w.name AS weapon_name, w.type AS weapon_type, w.img_path AS weapon_img, w.price AS weapon_price, w.tier AS weapon_tier, w.attack_multiplier,
                     m.name AS misc_name, m.img_path AS misc_img, m.value AS misc_value
@@ -551,7 +589,18 @@ async function getLoadout(playerId) {
                AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)`,
             [playerId]
         );
-        return { success: true, loadout: rows };
+
+        const instanceIds = rows
+            .map((row) => row.instance_id)
+            .filter((id) => Number.isInteger(id) && id > 0);
+        const cardsByInstance = await getCardsByInstanceIds(instanceIds);
+
+        const loadout = rows.map((row) => ({
+            ...row,
+            cards: row.misc_item_id ? [] : cardsByInstance[row.instance_id] || []
+        }));
+
+        return { success: true, loadout };
     } catch (error) {
         return { success: false, message: 'Hiba történt a loadout lekérése során' };
     }
