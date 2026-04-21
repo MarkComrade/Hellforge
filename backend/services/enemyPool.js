@@ -34,7 +34,7 @@ const ENEMY_POOL = {
         {
             id: 'skeleton',
             name: 'Skeleton',
-            img_path: '/textures/enemies/skeleton.png',
+            img_path: '/textures/characters/crypt_skeleton.png',
             baseHp: 22,
             hpPerLevel: 4,
             cardsPerTurn: { min: 1, max: 3 },
@@ -54,7 +54,7 @@ const ENEMY_POOL = {
         {
             id: 'zombie',
             name: 'Zombie',
-            img_path: '/textures/enemies/zombie.png',
+            img_path: '/textures/characters/crypt_zombie.png',
             baseHp: 32,
             hpPerLevel: 5,
             cardsPerTurn: { min: 1, max: 2 },
@@ -74,7 +74,7 @@ const ENEMY_POOL = {
         {
             id: 'crypt_guard',
             name: 'Crypt Guard',
-            img_path: '/textures/enemies/crypt_guard.png',
+            img_path: '/textures/characters/crypt_guard.png',
             baseHp: 28,
             hpPerLevel: 5,
             cardsPerTurn: { min: 1, max: 3 },
@@ -103,7 +103,7 @@ const ENEMY_POOL = {
         {
             id: 'wraith',
             name: 'Wraith',
-            img_path: '/textures/enemies/wraith.png',
+            img_path: '/textures/characters/crypt_wraith.png',
             baseHp: 20,
             hpPerLevel: 3,
             cardsPerTurn: { min: 1, max: 3 },
@@ -130,7 +130,7 @@ const ENEMY_POOL = {
         {
             id: 'minotaur',
             name: 'Minotaur',
-            img_path: '/textures/enemies/minotaur.png',
+            img_path: '/textures/characters/labyrinth_minotaur.png',
             baseHp: 45,
             hpPerLevel: 7,
             cardsPerTurn: { min: 2, max: 3 },
@@ -154,7 +154,7 @@ const ENEMY_POOL = {
         {
             id: 'stone_golem',
             name: 'Stone Golem',
-            img_path: '/textures/enemies/stone_golem.png',
+            img_path: '/textures/characters/labyrinth_stone_golem.png',
             baseHp: 60,
             hpPerLevel: 9,
             cardsPerTurn: { min: 1, max: 2 },
@@ -173,7 +173,7 @@ const ENEMY_POOL = {
         {
             id: 'shadow_knight',
             name: 'Shadow Knight',
-            img_path: '/textures/enemies/shadow_knight.png',
+            img_path: '/textures/characters/labyrinth_shadow_knight.png',
             baseHp: 40,
             hpPerLevel: 6,
             cardsPerTurn: { min: 2, max: 3 },
@@ -197,7 +197,7 @@ const ENEMY_POOL = {
         {
             id: 'labyrinth_stalker',
             name: 'Labyrinth Stalker',
-            img_path: '/textures/enemies/labyrinth_stalker.png',
+            img_path: '/textures/characters/labyrinth_stalker.png',
             baseHp: 35,
             hpPerLevel: 5,
             cardsPerTurn: { min: 2, max: 3 },
@@ -227,7 +227,7 @@ const ENEMY_POOL = {
         {
             id: 'demon',
             name: 'Demon',
-            img_path: '/textures/enemies/demon.png',
+            img_path: '/textures/characters/gates_of_hell_demon.png',
             baseHp: 70,
             hpPerLevel: 11,
             cardsPerTurn: { min: 2, max: 3 },
@@ -251,7 +251,7 @@ const ENEMY_POOL = {
         {
             id: 'soul_reaper',
             name: 'Soul Reaper',
-            img_path: '/textures/enemies/soul_reaper.png',
+            img_path: '/textures/characters/gates_of_hell_soul_reaper.png',
             baseHp: 58,
             hpPerLevel: 9,
             cardsPerTurn: { min: 2, max: 3 },
@@ -275,7 +275,7 @@ const ENEMY_POOL = {
         {
             id: 'hell_knight',
             name: 'Hell Knight',
-            img_path: '/textures/enemies/hell_knight.png',
+            img_path: '/textures/characters/gates_of_hell_hell_knight.png',
             baseHp: 85,
             hpPerLevel: 13,
             cardsPerTurn: { min: 1, max: 3 },
@@ -304,7 +304,7 @@ const ENEMY_POOL = {
         {
             id: 'infernal_brute',
             name: 'Infernal Brute',
-            img_path: '/textures/enemies/infernal_brute.png',
+            img_path: '/textures/characters/gates_of_hell_infernal_brute.png',
             baseHp: 75,
             hpPerLevel: 12,
             cardsPerTurn: { min: 2, max: 3 },

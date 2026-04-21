@@ -203,6 +203,7 @@ function createEnemyPanel(enemy) {
     const sprite = document.createElement('img');
     sprite.className = 'combat-character-sprite enemy-sprite';
     sprite.src = enemy.img_path || FALLBACK_SPRITE;
+    console.log('Loading enemy sprite:', enemy.img_path);
     sprite.alt = enemy.archetype || 'Enemy';
     sprite.onerror = function () {
         this.onerror = null;
