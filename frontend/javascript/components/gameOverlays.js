@@ -1,4 +1,5 @@
 function openSettings() {
+    if (document.getElementById('combat-scene')) return;
     let body = document.getElementsByTagName('body')[0];
     const settingsOverlay = document.createElement('div');
     settingsOverlay.setAttribute('class', 'settingsOverlay');
@@ -40,6 +41,7 @@ function openSettings() {
 
 // Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
 async function abandonDungeon() {
+    if (document.getElementById('combat-scene')) return;
     if (
         !confirm('Are you sure you want to abandon the dungeon? Your progress will not be saved.')
     ) {
