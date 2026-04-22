@@ -12,11 +12,11 @@ const TRAP_GOLD_LOSS_MIN = 10;
 const TRAP_GOLD_LOSS_MAX = 40;
 
 const CURSED_TRAP_CARD_POOL = [
-    { id: 901, name: 'Paperwork of Pain', effect: 'self damage' },
+    { id: 901, name: 'Sussy Combo', effect: 'self damage' },
     { id: 902, name: 'Oops, All Regret', effect: 'self damage' },
     { id: 903, name: 'Monday Simulator', effect: 'does nothing' },
     { id: 904, name: 'German Stare', effect: 'does nothing' },
-    { id: 905, name: 'Self-Own Combo', effect: 'self damage' },
+    { id: 905, name: 'Crazy Hamburger', effect: 'self damage' },
     { id: 906, name: 'Absolutely Nothing', effect: 'does nothing' }
 ];
 
