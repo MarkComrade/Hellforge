@@ -260,6 +260,10 @@ function roomEventHandler(room, dungeonLevel, result) {
         if (existingTrader) existingTrader.remove();
     }
 
+    if (roomType !== 'event' && typeof window.closeTradeEventOverlay === 'function') {
+        window.closeTradeEventOverlay();
+    }
+
     switch (roomType) {
         case 'start':
             break;

@@ -229,8 +229,8 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
         }
     } catch (error) {
         console.error('Failed to load inventory:', error);
-        if (!inventory) return;
     }
+    if (!inventory) return;
 
     const slots = [
         {

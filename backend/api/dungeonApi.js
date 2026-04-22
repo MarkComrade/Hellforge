@@ -52,6 +52,15 @@ function saveDungeon(req) {
     req.session.dungeonData = req.dungeon.toJSON();
 }
 
+function enrichEvent(event) {
+    if (!event || !event.success) return event;
+    event.goldImgPath = event.goldImgPath || GOLD_IMG_PATH;
+    if (event.item) {
+        event.item.img_path = event.item.img_path || event.item.img || null;
+    }
+    return event;
+}
+
 // ───── Endpoints ─────
 
 // Creates a fresh dungeon — generates the map server-side and sends it to the client
@@ -126,19 +135,10 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
             }
 
             if (result.roomType === 'event') {
-                Event = await eventManager(
-                    playerId,
-                    req.dungeon.dungeonName,
-                    req.dungeon.dungeonLevel
-                );
+                Event = await eventManager(req.dungeon, playerId);
             }
 
-            if (Event && Event.success) {
-                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
-                if (Event.item) {
-                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
-                }
-            }
+            enrichEvent(Event);
         } else if (
             result.roomType === 'loot' &&
             Number.isInteger(playerId) &&
@@ -147,12 +147,7 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
             req.dungeon.roomLoot[targetKey].itemCollected === false
         ) {
             Event = await resolveDungeonRoomLoot(req.dungeon, targetKey, playerId);
-            if (Event && Event.success) {
-                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
-                if (Event.item) {
-                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
-                }
-            }
+            enrichEvent(Event);
         }
 
         saveDungeon(req);

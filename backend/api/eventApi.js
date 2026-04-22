@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const database = require('../sql/database.js');
 const {
-    generateAndInsertLoot,
-    getBaseTier,
-    normalizeDungeonKey
+    generateAndInsertLoot
 } = require('../services/lootAlgorithm.js');
+const { withAdjustedPrice, getMaxAllowedPrice } = require('../services/pricing.js');
 const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');
 
@@ -97,31 +96,17 @@ router.get('/shop-items', async (request, response) => {
 
         const items = await database.getRandomShopItems(count);
 
-        const dungeonKey = normalizeDungeonKey(dungeon.dungeonName);
-        let dungeonTier = getBaseTier(dungeonKey, dungeon.dungeonLevel);
-
-        for (let i = 0; i < items.length; i++) {
-            let tierDiff = items[i].tier - dungeonTier;
-            if (tierDiff < -3) tierDiff = -3;
-            if (tierDiff > 3) tierDiff = 3;
-
-            let randomMarkup = 0.8 + Math.random() * 0.4;
-            let tierMultiplier = 1 + tierDiff * 0.25;
-            let finalMultiplier = tierMultiplier * randomMarkup;
-
-            items[i].adjustedPrice = Math.round(items[i].price * finalMultiplier);
-            if (items[i].adjustedPrice < 1) {
-                items[i].adjustedPrice = 1;
-            }
-        }
+        const pricedItems = items.map((item) =>
+            withAdjustedPrice(item, dungeon.dungeonName, dungeon.dungeonLevel)
+        );
 
         // Cache the generated stock in the dungeon session
-        dungeon.shopStock[roomKey] = items;
+        dungeon.shopStock[roomKey] = pricedItems;
         request.session.dungeonData = dungeon.toJSON();
 
         response.status(200).json({
             success: true,
-            items
+            items: pricedItems
         });
     } catch (error) {
         response.status(500).json({
@@ -163,21 +148,32 @@ router.post('/buy-item', async (request, response) => {
 
         const dungeon = getDungeonFromSession(request);
 
-        // Check if item was already bought from this shop
+        // Check if item was already bought from this room stock and lock the price to the cached offer.
         if (dungeon) {
             const roomKey = dungeon.playerX + ',' + dungeon.playerY;
             let stock = dungeon.shopStock[roomKey];
             if (stock) {
+                let matchedStockItem = null;
                 for (let i = 0; i < stock.length; i++) {
                     if (
                         String(stock[i].itemId) === String(itemId) &&
-                        stock[i].category === category &&
-                        stock[i].sold
+                        stock[i].category === category
                     ) {
+                        matchedStockItem = stock[i];
+                        break;
+                    }
+                }
+
+                if (matchedStockItem) {
+                    if (matchedStockItem.sold) {
                         return response
                             .status(200)
                             .json({ success: false, message: 'Item already purchased.' });
                     }
+
+                    parsedPrice = Number(
+                        matchedStockItem.adjustedPrice ?? matchedStockItem.price ?? parsedPrice
+                    );
                 }
             }
         }
@@ -185,14 +181,12 @@ router.post('/buy-item', async (request, response) => {
         let serverPrice = itemInfo.price;
 
         if (dungeon) {
-            const dungeonKey = normalizeDungeonKey(dungeon.dungeonName);
-            const dungeonTier = getBaseTier(dungeonKey, dungeon.dungeonLevel);
-            let tierDiff = itemInfo.tier - dungeonTier;
-            if (tierDiff < -3) tierDiff = -3;
-            if (tierDiff > 3) tierDiff = 3;
-
-            let maxMultiplier = (1 + tierDiff * 0.25) * 1.2;
-            let maxAllowedPrice = Math.round(itemInfo.price * maxMultiplier);
+            const maxAllowedPrice = getMaxAllowedPrice(
+                itemInfo.price,
+                itemInfo.tier,
+                dungeon.dungeonName,
+                dungeon.dungeonLevel
+            );
 
             if (parsedPrice > maxAllowedPrice) {
                 parsedPrice = maxAllowedPrice;

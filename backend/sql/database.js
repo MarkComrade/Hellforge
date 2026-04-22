@@ -356,7 +356,7 @@ async function addWeaponToStash(playerId, weaponId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
@@ -387,7 +387,7 @@ async function addMiscToStash(playerId, miscItemId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 60 tárgy tárolható.' };
+            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
@@ -407,17 +407,37 @@ async function addMiscToStash(playerId, miscItemId) {
 }
 
 async function removeFromStash(stashId, playerId) {
+    const connection = await pool.getConnection();
     try {
-        const [result] = await pool.query(
-            'DELETE FROM player_stash WHERE stashId = ? AND playerId = ?',
+        await connection.beginTransaction();
+
+        const [rows] = await connection.query(
+            'SELECT instance_id FROM player_stash WHERE stashId = ? AND playerId = ?',
             [stashId, playerId]
         );
-        if (result.affectedRows === 0) {
+        if (rows.length === 0) {
+            await connection.rollback();
             return { success: false, message: 'A tárgy nem található a stash-ben' };
         }
+
+        const instanceId = rows[0].instance_id;
+
+        await connection.query('DELETE FROM player_stash WHERE stashId = ? AND playerId = ?', [
+            stashId,
+            playerId
+        ]);
+
+        if (instanceId) {
+            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [instanceId]);
+        }
+
+        await connection.commit();
         return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
     } catch (error) {
+        await connection.rollback();
         return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
+    } finally {
+        connection.release();
     }
 }
 
@@ -585,7 +605,7 @@ async function getLoadout(playerId) {
              LEFT JOIN armors a ON l.armor_id = a.armorId
              LEFT JOIN weapons w ON l.weapon_id = w.weaponId
              LEFT JOIN misc_items m ON l.misc_item_id = m.itemId
-             WHERE l.playerId = ? AND l.equipped = 0
+                         WHERE l.playerId = ? AND l.equipped = 0
                AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL OR l.misc_item_id IS NOT NULL)`,
             [playerId]
         );
@@ -610,7 +630,7 @@ async function getLoadoutCount(playerId) {
     const [rows] = await pool.query(
         `SELECT COUNT(*) AS count
          FROM player_loadout
-         WHERE playerId = ? AND equipped = 0
+                 WHERE playerId = ? AND equipped = 0
            AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)`,
         [playerId]
     );
@@ -750,17 +770,235 @@ async function swapLoadoutEquipment(playerId, loadoutId, slot) {
 }
 
 async function deleteFromLoadout(playerId, loadoutId) {
+    const connection = await pool.getConnection();
     try {
-        const [result] = await pool.query(
+        await connection.beginTransaction();
+
+        const [rows] = await connection.query(
+            `SELECT loadoutId, instance_id, armor_id, weapon_id, misc_item_id
+             FROM player_loadout
+             WHERE loadoutId = ? AND playerId = ? AND equipped = 0
+             FOR UPDATE`,
+            [loadoutId, playerId]
+        );
+
+        if (rows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'Item not found in inventory.' };
+        }
+
+        const row = rows[0];
+
+        await connection.query(
             'DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ? AND equipped = 0',
             [loadoutId, playerId]
         );
-        if (result.affectedRows === 0) {
-            return { success: false, message: 'Item not found in inventory.' };
+
+        if (Number.isInteger(row.instance_id) && row.instance_id > 0) {
+            await connection.query('DELETE FROM item_instance_cards WHERE instance_id = ?', [
+                row.instance_id
+            ]);
+            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [
+                row.instance_id
+            ]);
         }
-        return { success: true, message: 'Item deleted from inventory.' };
+
+        await connection.commit();
+        return {
+            success: true,
+            message: 'Item deleted from inventory.',
+            deletedItem: {
+                loadoutId: row.loadoutId,
+                armor_id: row.armor_id,
+                weapon_id: row.weapon_id,
+                misc_item_id: row.misc_item_id,
+                instance_id: row.instance_id || null
+            }
+        };
     } catch (error) {
+        await connection.rollback();
         return { success: false, message: 'Error deleting item from inventory.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function deleteRandomNonEquippedItem(playerId) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT loadoutId, instance_id, armor_id, weapon_id, misc_item_id
+             FROM player_loadout
+             WHERE playerId = ? AND equipped = 0
+               AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)
+             ORDER BY RAND() LIMIT 1`,
+            [playerId]
+        );
+
+        if (rows.length === 0) {
+            return { success: false, message: 'No non-equipped inventory item to delete.' };
+        }
+
+        const row = rows[0];
+
+        await pool.query('DELETE FROM player_loadout WHERE loadoutId = ? AND playerId = ?', [
+            row.loadoutId,
+            playerId
+        ]);
+
+        if (row.instance_id) {
+            await pool.query('DELETE FROM item_instances WHERE instanceId = ?', [row.instance_id]);
+        }
+
+        return {
+            success: true,
+            message: 'A random non-equipped item was destroyed.',
+            deletedItem: {
+                loadoutId: row.loadoutId,
+                armor_id: row.armor_id,
+                weapon_id: row.weapon_id,
+                misc_item_id: row.misc_item_id
+            }
+        };
+    } catch (error) {
+        return { success: false, message: 'Error deleting random inventory item.' };
+    }
+}
+
+async function curseRandomItemCard(playerId, cursedCardPool) {
+    if (!Array.isArray(cursedCardPool) || cursedCardPool.length === 0) {
+        return { success: false, message: 'No cursed card pool configured.' };
+    }
+
+    const validCursedIds = cursedCardPool
+        .map((entry) => Number(entry?.id))
+        .filter((id) => Number.isInteger(id) && id > 0);
+
+    if (validCursedIds.length === 0) {
+        return { success: false, message: 'No valid cursed card ids found.' };
+    }
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [rows] = await connection.query(
+            `SELECT iic.id AS cardRowId, iic.card_id AS oldCardId, iic.instance_id AS instanceId
+             FROM item_instance_cards iic
+             JOIN player_loadout pl ON pl.instance_id = iic.instance_id
+             WHERE pl.playerId = ?
+               AND iic.card_id NOT IN (${validCursedIds.map(() => '?').join(', ')})
+             ORDER BY RAND()
+             LIMIT 1
+             FOR UPDATE`,
+            [playerId, ...validCursedIds]
+        );
+
+        if (rows.length === 0) {
+            await connection.rollback();
+            return { success: false, message: 'No item cards available to curse.' };
+        }
+
+        const target = rows[0];
+        const cursedCardId = validCursedIds[Math.floor(Math.random() * validCursedIds.length)];
+
+        await connection.query('UPDATE item_instance_cards SET card_id = ? WHERE id = ?', [
+            cursedCardId,
+            target.cardRowId
+        ]);
+
+        await connection.commit();
+        return {
+            success: true,
+            message: 'A card was cursed.',
+            cardSwap: {
+                cardRowId: target.cardRowId,
+                instanceId: target.instanceId,
+                oldCardId: target.oldCardId,
+                newCardId: cursedCardId
+            }
+        };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error cursing card.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function applyGoldTrapLoss(playerId, amountToLose) {
+    const normalizedAmount = Math.max(0, Math.floor(Number(amountToLose) || 0));
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [goldRows] = await connection.query(
+            `SELECT loadoutId, gold_amount
+             FROM player_loadout
+             WHERE playerId = ? AND gold_amount IS NOT NULL
+             FOR UPDATE`,
+            [playerId]
+        );
+
+        const totalGold = goldRows.reduce((sum, row) => sum + Number(row.gold_amount || 0), 0);
+        if (totalGold <= 0 || normalizedAmount <= 0) {
+            await connection.rollback();
+            return {
+                success: false,
+                message: 'No gold to remove.',
+                lostGold: 0,
+                remainingGold: totalGold
+            };
+        }
+
+        let safeAmountToLose = normalizedAmount;
+        if (safeAmountToLose < 1) {
+            safeAmountToLose = 1;
+        }
+        if (safeAmountToLose > totalGold) {
+            safeAmountToLose = totalGold;
+        }
+
+        let remainingLoss = safeAmountToLose;
+        for (const row of goldRows) {
+            if (remainingLoss <= 0) break;
+
+            const rowGold = Number(row.gold_amount || 0);
+            const deduct = Math.min(rowGold, remainingLoss);
+            const newAmount = rowGold - deduct;
+            remainingLoss -= deduct;
+
+            if (newAmount === 0) {
+                await connection.query('DELETE FROM player_loadout WHERE loadoutId = ?', [
+                    row.loadoutId
+                ]);
+            } else {
+                await connection.query(
+                    'UPDATE player_loadout SET gold_amount = ? WHERE loadoutId = ?',
+                    [newAmount, row.loadoutId]
+                );
+            }
+        }
+
+        const [remainingRows] = await connection.query(
+            `SELECT COALESCE(SUM(gold_amount), 0) AS gold
+             FROM player_loadout
+             WHERE playerId = ? AND gold_amount IS NOT NULL`,
+            [playerId]
+        );
+
+        await connection.commit();
+        return {
+            success: true,
+            message: 'Gold removed by trap.',
+            lostGold: safeAmountToLose,
+            remainingGold: Number(remainingRows[0].gold || 0)
+        };
+    } catch (error) {
+        await connection.rollback();
+        return { success: false, message: 'Error applying gold trap loss.' };
+    } finally {
+        connection.release();
     }
 }
 
@@ -1291,7 +1529,7 @@ async function insertIntoLoadout(playerId, type, itemId, cards = []) {
 
             const loadoutId = await findNextAvailableId('player_loadout', 'loadoutId', connection);
             await connection.query(
-                `INSERT INTO player_loadout (loadoutId, playerId, \`${column}\`, instance_id) VALUES (?, ?, ?, ?)`,
+                `INSERT INTO player_loadout (loadoutId, playerId, \`${column}\`, instance_id, equipped) VALUES (?, ?, ?, ?, 0)`,
                 [loadoutId, playerId, itemId, instanceId]
             );
             await connection.commit();
@@ -1390,7 +1628,7 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
                 connection
             );
             await connection.query(
-                'INSERT INTO player_loadout (loadoutId, playerId, weapon_id, instance_id) VALUES (?, ?, ?, ?)',
+                'INSERT INTO player_loadout (loadoutId, playerId, weapon_id, instance_id, equipped) VALUES (?, ?, ?, ?, 0)',
                 [newLoadoutId, playerId, itemId, instanceId]
             );
         } else {
@@ -1407,7 +1645,7 @@ async function purchaseItemToLoadout(playerId, itemId, category, price) {
                 connection
             );
             await connection.query(
-                'INSERT INTO player_loadout (loadoutId, playerId, armor_id, instance_id) VALUES (?, ?, ?, ?)',
+                'INSERT INTO player_loadout (loadoutId, playerId, armor_id, instance_id, equipped) VALUES (?, ?, ?, ?, 0)',
                 [newLoadoutId, playerId, itemId, instanceId]
             );
         }
@@ -1491,6 +1729,12 @@ async function sellItemFromLoadout(playerId, loadoutId) {
             loadoutId,
             playerId
         ]);
+
+        if (loadoutItem.instance_id) {
+            await connection.query('DELETE FROM item_instances WHERE instanceId = ?', [
+                loadoutItem.instance_id
+            ]);
+        }
 
         const newLoadoutId = await findNextAvailableId('player_loadout', 'loadoutId', connection);
         await connection.query(
@@ -1589,8 +1833,11 @@ module.exports = {
     moveLoadoutToStash,
     swapLoadoutEquipment,
     deleteFromLoadout,
+    deleteRandomNonEquippedItem,
     getTotalGold,
     addGoldToInventory,
+    applyGoldTrapLoss,
+    curseRandomItemCard,
     transferGoldBetweenStorage,
     getUserInventory,
     getAllUsers,
@@ -1609,6 +1856,5 @@ module.exports = {
     getItemBaseInfo,
     getPlayerCombatDeckCardIds,
     getPlayerCombatDeck,
-    sellItemFromLoadout,
-    getItemBaseInfo
+    sellItemFromLoadout
 };

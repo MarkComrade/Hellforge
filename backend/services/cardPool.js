@@ -2705,6 +2705,76 @@
             affectedTargets: 1,
             effects: { block: 1000 }
         }
+    ],
+
+    // Cursed cards used by trap events.
+    cursed: [
+        {
+            id: 901,
+            name: 'sussy combo',
+            img_path: '/textures/cards/curse_sussy_combo.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 4 }
+        },
+        {
+            id: 902,
+            name: 'Oopsie, All Regret',
+            img_path: '/textures/cards/curse_oopsie_all_regret.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 6 }
+        },
+        {
+            id: 903,
+            name: 'Monday Simulator',
+            img_path: '/textures/cards/curse_monday_simulator.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: {}
+        },
+        {
+            id: 904,
+            name: 'German Stare',
+            img_path: '/textures/cards/curse_german_stare.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: {}
+        },
+        {
+            id: 905,
+            name: 'crazy hamburger',
+            img_path: '/textures/cards/curse_crazy_hamburger.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 8 }
+        },
+        {
+            id: 906,
+            name: 'Absolutely Nothing',
+            img_path: '/textures/cards/curse_absolutely_nothing.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: {}
+        }
     ]
 };
 
