@@ -2,6 +2,7 @@ const DEFAULT_GOLD_IMG = '../textures/items/coing.png';
 const DEFAULT_LOOT_IMG = '../textures/misc/placeholderloot.png';
 const LOOT_POPUP_ID = 'loot-popup';
 const EVENT_DIALOGUE_POPUP_ID = 'event-dialogue-popup';
+const TRADE_EVENT_OVERLAY_ID = 'event-trade-overlay';
 const EVENT_TEXT_MAX_LENGTH = 280;
 
 const eventUiState = {
@@ -16,7 +17,11 @@ function sanitizeEventText(value, fallbackText) {
 function removeEventPopupById(elementId) {
     const existing = document.getElementById(elementId);
     if (existing) {
-        if (elementId === EVENT_DIALOGUE_POPUP_ID || elementId === LOOT_POPUP_ID) {
+        if (
+            elementId === EVENT_DIALOGUE_POPUP_ID ||
+            elementId === LOOT_POPUP_ID ||
+            elementId === TRADE_EVENT_OVERLAY_ID
+        ) {
             setEventChoicePending(false);
         }
         existing.remove();
@@ -35,6 +40,10 @@ function closeEventPopup(popup) {
         const currentRoom = document.querySelector('#map .cell[data-current="true"]');
         window.syncLootPickupButton(currentRoom);
     }
+}
+
+function closeTradeEventOverlay() {
+    removeEventPopupById(TRADE_EVENT_OVERLAY_ID);
 }
 
 function eventLootPopup(lootEvent) {
@@ -248,6 +257,11 @@ function createFrontendEvent(eventPayload) {
         return;
     }
 
+    if (eventPayload.type === 'trade') {
+        createTradeEventOverlay(eventPayload);
+        return;
+    }
+
     createDialoguePopup(eventPayload);
 }
 
@@ -310,7 +324,7 @@ async function fetchShopItems() {
     }
 }
 
-function createTraderPanel() {
+function createTraderPanel(traderLine = 'Fresh stock for brave souls. Pick your poison.') {
     const panel = document.createElement('div');
     panel.className = 'shopTraderPanel';
 
@@ -325,7 +339,7 @@ function createTraderPanel() {
 
     const text = document.createElement('p');
     text.className = 'shopTraderText';
-    text.textContent = 'Fresh stock for brave souls. Pick your poison.';
+    text.textContent = traderLine;
 
     panel.append(img, text);
     return panel;
@@ -450,20 +464,22 @@ function createShopGrid(items, onSelect) {
     return { grid, markSold };
 }
 
-function createPromptPanel() {
+function createPromptPanel(options = {}) {
+    const { idleText = 'Select an item slot to inspect and buy.', buttonText = 'Buy' } = options;
+
     const panel = document.createElement('div');
     panel.className = 'shopPrompt';
 
     const promptText = document.createElement('p');
     promptText.className = 'shopPromptText';
-    promptText.textContent = 'Select an item slot to inspect and buy.';
+    promptText.textContent = idleText;
 
     const actions = document.createElement('div');
     actions.className = 'shopPromptActions';
 
     const buyButton = document.createElement('button');
     buyButton.className = 'shopPromptButton';
-    buyButton.textContent = 'Buy';
+    buyButton.textContent = buttonText;
     buyButton.disabled = true;
 
     const statusText = document.createElement('p');
@@ -478,7 +494,7 @@ function createPromptPanel() {
                 item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0);
             promptText.textContent = `Buy ${item.name} for ${displayPrice} gold?`;
         } else {
-            promptText.textContent = 'Select an item slot to inspect and buy.';
+            promptText.textContent = idleText;
         }
         statusText.textContent = '';
         statusText.className = 'shopStatusText';
@@ -494,7 +510,120 @@ function createPromptPanel() {
         }
     }
 
-    return { panel, promptText, buyButton, statusText, setItem, setStatus };
+    return { panel, promptText, buyButton, statusText, actions, setItem, setStatus };
+}
+
+function createTradeEventOverlay(tradeEvent) {
+    removeEventPopupById(TRADE_EVENT_OVERLAY_ID);
+    setEventChoicePending(true);
+
+    const tradeItems = Array.isArray(tradeEvent?.items) ? tradeEvent.items.slice(0, 1) : [];
+
+    const overlay = document.createElement('section');
+    overlay.id = TRADE_EVENT_OVERLAY_ID;
+    overlay.className = 'shopOverlay';
+
+    const traderPanel = createTraderPanel(
+        sanitizeEventText(
+            tradeEvent?.merchantLine,
+            tradeEvent?.description || 'The merchant offers one item at a favorable price.'
+        )
+    );
+    overlay.appendChild(traderPanel);
+
+    const shopPanel = document.createElement('div');
+    shopPanel.className = 'shopPanel';
+
+    const shopTitle = document.createElement('h2');
+    shopTitle.className = 'shopTitle';
+    shopTitle.textContent = sanitizeEventText(tradeEvent?.title, 'Traveling Merchant');
+    shopPanel.appendChild(shopTitle);
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'shopCloseButton';
+    closeButton.textContent = '✕';
+    closeButton.setAttribute('aria-label', 'Close trade offer');
+    closeButton.addEventListener('click', closeTradeEventOverlay);
+    shopPanel.appendChild(closeButton);
+
+    const intro = document.createElement('p');
+    intro.className = 'shopStatsDescription';
+    intro.textContent = 'One discounted item. Once you leave, the deal is gone.';
+    shopPanel.appendChild(intro);
+
+    overlay.appendChild(shopPanel);
+    document.body.appendChild(overlay);
+
+    if (tradeItems.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.className = 'shopEmpty';
+        emptyMsg.textContent = 'The trader reaches into the satchel, then shrugs. Nothing left.';
+        shopPanel.appendChild(emptyMsg);
+        return;
+    }
+
+    const { panel: statsPanel, update: updateStats } = createStatsDisplay();
+    const {
+        panel: promptPanel,
+        buyButton,
+        actions,
+        setItem,
+        setStatus
+    } = createPromptPanel({
+        idleText: 'Inspect the offer before you decide.'
+    });
+
+    const leaveButton = document.createElement('button');
+    leaveButton.type = 'button';
+    leaveButton.className = 'shopPromptButton';
+    leaveButton.textContent = 'Leave';
+    leaveButton.addEventListener('click', closeTradeEventOverlay);
+    actions.appendChild(leaveButton);
+
+    let selectedItem = null;
+
+    const { grid, markSold } = createShopGrid(tradeItems, (item) => {
+        selectedItem = item;
+        setItem(item);
+        updateStats(item);
+    });
+
+    buyButton.addEventListener('click', async () => {
+        if (!selectedItem) return;
+
+        buyButton.disabled = true;
+        setStatus('Processing...', '');
+
+        try {
+            const result = await postFetch('/api/events/buy-item', {
+                itemId: selectedItem.itemId,
+                category: selectedItem.category,
+                adjustedPrice:
+                    selectedItem.adjustedPrice !== undefined
+                        ? selectedItem.adjustedPrice
+                        : selectedItem.price
+            });
+
+            if (result && result.success) {
+                setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
+                markSold(String(selectedItem.itemId), selectedItem.category);
+                selectedItem = null;
+                setItem(null);
+                updateStats(null);
+                return;
+            }
+
+            const errorMsg = result && result.message ? result.message : 'Purchase failed.';
+            setStatus(errorMsg, 'error');
+            buyButton.disabled = false;
+        } catch (error) {
+            console.error('Trade purchase failed:', error);
+            setStatus('Could not complete purchase. Try again.', 'error');
+            buyButton.disabled = false;
+        }
+    });
+
+    shopPanel.append(grid, statsPanel, promptPanel);
 }
 
 async function renderShop() {
@@ -760,5 +889,6 @@ window.createFrontendLootPopup = eventLootPopup;
 window.eventLootPopup = eventLootPopup;
 window.createFrontendEvent = createFrontendEvent;
 window.isEventChoicePending = () => eventUiState.isChoicePending;
+window.closeTradeEventOverlay = closeTradeEventOverlay;
 window.outRoom = outRoom;
 window.renderShop = renderShop;
