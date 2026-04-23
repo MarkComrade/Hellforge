@@ -134,7 +134,8 @@ function syncLootPickupButton(room) {
             removeLootPickupButton();
             createFrontendEvent({ success: true, type: 'loot', loot: result });
         } catch (error) {
-            console.log('Pickup failed:', error.message);
+            toast('Failed to pick up item', 'error');
+            console.error('Pickup failed:', error.message);
             button.style.pointerEvents = 'auto';
         }
     });
@@ -175,7 +176,7 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 });
 
                 if (!result.success) {
-                    console.log('No room available');
+                    toast('No passage in that direction', 'warning', 1500);
                     return;
                 }
 
@@ -201,7 +202,8 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                     roomEventHandler(cell, dungeonLevel, result);
                 }
             } catch (error) {
-                console.log('Move failed:', error.message);
+                toast('Move failed', 'error');
+                console.error('Move failed:', error.message);
             }
         });
     });
@@ -272,13 +274,17 @@ function roomEventHandler(room, dungeonLevel, result) {
             postFetch('/api/combat/start', { sessionToken })
                 .then((data) => {
                     if (!data.combatToken) {
+                        toast('Failed to start combat', 'error');
                         console.error('Combat start failed:', data.message);
                         return;
                     }
                     sessionStorage.setItem('combatToken', data.combatToken);
                     startCombat(data.combatToken, data.state);
                 })
-                .catch((err) => console.error('Combat start error:', err.message));
+                .catch((err) => {
+                    toast('Combat start failed', 'error');
+                    console.error('Combat start error:', err.message);
+                });
             break;
         }
         case 'loot':

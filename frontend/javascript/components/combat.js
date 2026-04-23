@@ -203,7 +203,6 @@ function createEnemyPanel(enemy) {
     const sprite = document.createElement('img');
     sprite.className = 'combat-character-sprite enemy-sprite';
     sprite.src = enemy.img_path || FALLBACK_SPRITE;
-    console.log('Loading enemy sprite:', enemy.img_path);
     sprite.alt = enemy.archetype || 'Enemy';
     sprite.onerror = function () {
         this.onerror = null;
@@ -502,6 +501,7 @@ async function playSelectedCard() {
         renderCombat();
     } catch (err) {
         console.error('Play card failed:', err.message);
+        toast('Failed to play card', 'error');
         addLogMessage('Failed to play card.', 'system');
     } finally {
         isCombatBusy = false;
@@ -523,6 +523,7 @@ async function endPlayerTurn() {
         renderCombat();
     } catch (err) {
         console.error('End turn failed:', err.message);
+        toast('Failed to end turn', 'error');
     } finally {
         isCombatBusy = false;
     }
@@ -597,6 +598,7 @@ async function claimReward(triggerButton) {
         showRewardPopup(data.reward);
     } catch (err) {
         console.error('Claim reward failed:', err.message);
+        toast('Failed to claim reward. Try again.', 'error');
         triggerButton.disabled = false;
     }
 }

@@ -164,3 +164,26 @@ body.ready {
     z-index: 9999;
     background-color: rgba(0, 0, 0, 1);
 }
+.toast-container {
+    z-index: 99999 !important;
+}
+.toast {
+    font-size: 2vw;
+    color: #fff !important;
+    display: flex;
+    justify-content: center;
+    text-shadow:
+        -0.1vw -0.1vw 0 #000,
+        0.1vw -0.1vw 0 #000,
+        -0.1vw 0.1vw 0 #000,
+        0.1vw 0.1vw 0 #000;
+}
+.toast-info {
+    background-color: rgba(0, 123, 255, 0.9) !important;
+}
+.toast-success {
+    background-color: rgba(40, 167, 69, 0.9) !important;
+}
+.toast-error {
+    background-color: rgb(220, 40, 40) !important;
+}

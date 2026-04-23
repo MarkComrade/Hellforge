@@ -30,14 +30,16 @@ function newGame(dungeon) {
     postFetch('/api/dungeon/start', { dungeonName: dungeon })
         .then((data) => {
             if (!data.success) {
-                console.log('Failed to start dungeon:', data.message);
+                toast('Failed to start dungeon: ' + (data.message || 'Unknown error'), 'error');
                 return;
             }
             sessionStorage.setItem('dungeonSessionToken', data.sessionToken);
+            toast('Entering ' + dungeon + '...', 'info', 2000);
             newLevelFromServer(dungeon, data, data.currentHP);
         })
         .catch((error) => {
-            console.log('Dungeon start failed:', error.message);
+            toast('Dungeon start failed', 'error');
+            console.error('Dungeon start failed:', error.message);
         });
 }
 

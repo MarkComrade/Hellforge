@@ -71,7 +71,7 @@ function renderAdminLogin() {
         const password = document.querySelector('#adminPasswordInput').value;
 
         if (!username || !password) {
-            alert('Kérlek töltsd ki az összes mezőt!');
+            toast('Please enter both username and password', 'error');
             return;
         }
 
@@ -80,10 +80,10 @@ function renderAdminLogin() {
             if (result.success) {
                 adminTools();
             } else {
-                alert(result.message);
+                toast(result.message, 'error');
             }
         } catch (error) {
-            alert('Hiba történt az admin bejelentkezés során');
+            toast('Hiba történt az admin bejelentkezés során', 'error');
             console.error(error);
         }
     });
@@ -198,7 +198,7 @@ async function renderUserManagement() {
         deleteButton.addEventListener('click', async function () {
             const form = document.getElementById('inventoryForm');
             if (!form) {
-                alert('Please select a user first!');
+                toast('Please select a user first!', 'warning');
                 return;
             }
 
@@ -215,17 +215,17 @@ async function renderUserManagement() {
             try {
                 const response = await postFetch(`/api/adminActions/deleteUser/${userId}`, {});
                 if (response.success) {
-                    alert('User deleted successfully!');
+                    toast('User deleted successfully!', 'success');
                     document.querySelector('.inventoryContainer').innerHTML =
                         '<p class="menuText">User deleted. Select another user.</p>';
                     selectedOption?.remove();
                     select.value = '';
                 } else {
-                    alert('Error deleting user: ' + response.message);
+                    toast('Error deleting user: ' + response.message, 'error');
                 }
             } catch (error) {
                 console.error('Error deleting user:', error);
-                alert('Error deleting user: ' + error.message);
+                toast('Error deleting user: ' + error.message, 'error');
             }
         });
         deleteCol.appendChild(deleteButton);
@@ -240,7 +240,7 @@ async function renderUserManagement() {
         saveButton.addEventListener('click', async function () {
             const form = document.getElementById('inventoryForm');
             if (!form) {
-                alert('Please select a user first!');
+                toast('Please select a user first!', 'warning');
                 return;
             }
 
@@ -252,13 +252,13 @@ async function renderUserManagement() {
             const goldRaw = document.getElementById('stashGoldInput').value;
 
             if (!helmet || !armor || !melee || !ranged) {
-                alert('All equipment fields are required!');
+                toast('All equipment fields are required!', 'error');
                 return;
             }
 
             const goldParsed = parseInt(goldRaw, 10);
             if (isNaN(goldParsed) || goldParsed < 0) {
-                alert('Gold must be a non-negative whole number.');
+                toast('Gold must be a non-negative whole number.', 'error');
                 return;
             }
 
@@ -275,18 +275,18 @@ async function renderUserManagement() {
                 ]);
 
                 if (equipResponse.success && goldResponse.success) {
-                    alert('User updated successfully!');
+                    toast('User updated successfully!', 'success');
                     await displayUserInventory(userId);
                 } else {
                     const msg = [equipResponse, goldResponse]
                         .filter((r) => !r.success)
                         .map((r) => r.message)
-                        .join('\n');
-                    alert('Error saving changes:\n' + msg);
+                        .join(' | ');
+                    toast('Error saving changes: ' + msg, 'error');
                 }
             } catch (error) {
                 console.error('Error updating user:', error);
-                alert('Error updating user: ' + error.message);
+                toast('Error updating user: ' + error.message, 'error');
             }
         });
         saveCol.appendChild(saveButton);
