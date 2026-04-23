@@ -18,7 +18,7 @@ app.set('trust proxy', 1); //?Middleware Proxy
 //!Session beállítása:
 app.use(
     session({
-        secret: process.env.SESSION_SECRET,
+        secret: process.env.SESSION_SECRET || 'falafel',
         resave: false,
         saveUninitialized: true
     })

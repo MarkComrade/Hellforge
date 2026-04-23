@@ -14,7 +14,7 @@ const SCATTER_POSITIONS = [
     [{ top: '28vh', right: '24vw' }],
     [
         { top: '16vh', right: '18vw' },
-        { top: '46vh', right: '28vw' }
+        { top: '38vh', right: '28vw' }
     ],
     [
         { top: '12vh', right: '20vw' },
