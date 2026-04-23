@@ -134,9 +134,15 @@ async function createLoadoutGoldPanel(playerId) {
 }
 
 async function openInventory() {
+    if (document.getElementById('combat-scene')) return;
     const shopOverlay = document.getElementById('shop-overlay');
     if (shopOverlay) {
         alert('Close the shop before opening your inventory.');
+        return;
+    }
+
+    if (typeof isEventChoicePending === 'function' && isEventChoicePending()) {
+        alert('Dismiss the current event before opening your inventory.');
         return;
     }
 
@@ -223,8 +229,8 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
         }
     } catch (error) {
         console.error('Failed to load inventory:', error);
-        if (!inventory) return;
     }
+    if (!inventory) return;
 
     const slots = [
         {
@@ -232,28 +238,32 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
             name: inventory.helmet_name,
             img: inventory.helmet_img,
             stat: `Defense: x${inventory.helmet_defense}`,
-            tier: inventory.helmet_tier
+            tier: inventory.helmet_tier,
+            cards: inventory.helmet_cards || []
         },
         {
             label: 'Armor',
             name: inventory.armor_name,
             img: inventory.armor_img,
             stat: `Defense: x${inventory.armor_defense}`,
-            tier: inventory.armor_tier
+            tier: inventory.armor_tier,
+            cards: inventory.armor_cards || []
         },
         {
             label: 'Melee',
             name: inventory.melee_name,
             img: inventory.melee_img,
             stat: `Attack: x${inventory.melee_attack}`,
-            tier: inventory.melee_tier
+            tier: inventory.melee_tier,
+            cards: inventory.melee_cards || []
         },
         {
             label: 'Ranged',
             name: inventory.ranged_name,
             img: inventory.ranged_img,
             stat: `Attack: x${inventory.ranged_attack}`,
-            tier: inventory.ranged_tier
+            tier: inventory.ranged_tier,
+            cards: inventory.ranged_cards || []
         }
     ];
 
@@ -298,6 +308,20 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
             tooltipTier.setAttribute('class', 'tooltipDetail');
             tooltipTier.textContent = `Tier: ${item.tier}`;
             tooltip.appendChild(tooltipTier);
+
+            const buttonRow = document.createElement('div');
+            buttonRow.setAttribute('class', 'stashTooltipBtnRow');
+
+            const cardsButton = document.createElement('button');
+            cardsButton.setAttribute('class', 'stashEquipBtn');
+            cardsButton.textContent = 'Cards';
+            cardsButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                showItemCardsPopup(item.name, item.cards || []);
+            });
+            buttonRow.appendChild(cardsButton);
+
+            tooltip.appendChild(buttonRow);
 
             const closeTooltipHandler = (event) => {
                 if (!tooltip.contains(event.target) && !slotElement.contains(event.target)) {
@@ -426,6 +450,17 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                     }
                 });
                 buttonRow.appendChild(equipButton);
+            }
+
+            if (!item.misc_item_id) {
+                const cardsButton = document.createElement('button');
+                cardsButton.setAttribute('class', 'stashEquipBtn');
+                cardsButton.textContent = 'Cards';
+                cardsButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    showItemCardsPopup(itemName, item.cards || []);
+                });
+                buttonRow.appendChild(cardsButton);
             }
 
             if (!isInGame) {

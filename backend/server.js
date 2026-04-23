@@ -42,6 +42,8 @@ const inventory = require('./api/inventoryHandlerApi.js');
 app.use('/api/inventory', inventory);
 const dungeon = require('./api/dungeonApi.js'); // server-authoritative dungeon routes (start, move, exit, etc.)
 app.use('/api/dungeon', dungeon);
+const combat = require('./api/combatApi.js'); // server-authoritative combat routes
+app.use('/api/combat', combat);
 const events = require('./api/eventApi.js');
 app.use('/api/events', events);
 

@@ -75,14 +75,16 @@ function calcDotDamage(session, target) {
 
 // Detonate all bleed stacks on a target immediately at 50% of their tick value.
 // Used when scorch is applied to a bleeding target, and vice-versa.
-function detonateBleed(session, target, isPlayer) {
+function detonateBleed(session, target, isPlayer, enemyIndex) {
     const bleed = findStatus(target.statuses, 'bleed');
     if (!bleed || bleed.stacks <= 0) return;
 
     const tickDmg = calcDotDamage(session, target);
     const totalDmg = Math.floor(tickDmg * bleed.stacks * 0.5);
-    const setHp = isPlayer ? (hp) => session.setPlayerHp(hp) : (hp) => session.setEnemyHp(hp);
-    const targetLabel = isPlayer ? 'You' : session.enemy.archetype || 'Enemy';
+    const setHp = isPlayer
+        ? (hp) => session.setPlayerHp(hp)
+        : (hp) => session.setEnemyHp(hp, enemyIndex);
+    const targetLabel = isPlayer ? 'You' : target.archetype || 'Enemy';
 
     // Remove bleed first
     const idx = target.statuses.indexOf(bleed);
@@ -97,14 +99,16 @@ function detonateBleed(session, target, isPlayer) {
     }
 }
 
-function detonateScorch(session, target, isPlayer) {
+function detonateScorch(session, target, isPlayer, enemyIndex) {
     const scorch = findStatus(target.statuses, 'scorch');
     if (!scorch || scorch.stacks <= 0) return;
 
     const tickDmg = calcDotDamage(session, target);
     const totalDmg = Math.floor(tickDmg * scorch.stacks * 0.5);
-    const setHp = isPlayer ? (hp) => session.setPlayerHp(hp) : (hp) => session.setEnemyHp(hp);
-    const targetLabel = isPlayer ? 'You' : session.enemy.archetype || 'Enemy';
+    const setHp = isPlayer
+        ? (hp) => session.setPlayerHp(hp)
+        : (hp) => session.setEnemyHp(hp, enemyIndex);
+    const targetLabel = isPlayer ? 'You' : target.archetype || 'Enemy';
 
     const idx = target.statuses.indexOf(scorch);
     target.statuses.splice(idx, 1);
@@ -149,15 +153,19 @@ function getVulnMultiplier(target) {
 //   attacker / defender — the combat session's player or enemy objects
 //   isPlayerCard        — true when the player is acting, false for enemy
 //   session             — needed for setPlayerHp / setEnemyHp so resolution fires
-function applyEffects(effects, attacker, defender, isPlayerCard, session) {
+//   enemyIndex          — which enemies[] slot the defender/attacker occupies
+function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyIndex) {
+    // Fallback: if no enemyIndex given, use 0
+    if (enemyIndex === undefined) enemyIndex = 0;
+
     const setAttackerHp = isPlayerCard
         ? (hp) => session.setPlayerHp(hp)
-        : (hp) => session.setEnemyHp(hp);
+        : (hp) => session.setEnemyHp(hp, enemyIndex);
     const setDefenderHp = isPlayerCard
-        ? (hp) => session.setEnemyHp(hp)
+        ? (hp) => session.setEnemyHp(hp, enemyIndex)
         : (hp) => session.setPlayerHp(hp);
     const attackerLabel = isPlayerCard ? 'You' : attacker.archetype || 'Enemy';
-    const defenderLabel = isPlayerCard ? session.enemy.archetype || 'Enemy' : 'You';
+    const defenderLabel = isPlayerCard ? defender.archetype || 'Enemy' : 'You';
 
     // ── damage ───────────────────────────────────────────────────────────────
     if (effects.damage) {
@@ -201,7 +209,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session) {
     // ── bleed on defender — detonates scorch if present ────────────────────
     if (effects.bleed) {
         if (findStatus(defender.statuses, 'scorch')) {
-            detonateScorch(session, defender, !isPlayerCard);
+            detonateScorch(session, defender, !isPlayerCard, isPlayerCard ? enemyIndex : -1);
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'bleed', effects.bleed);
@@ -214,7 +222,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session) {
     // ── scorch on defender — detonates bleed if present ──────────────────────
     if (effects.scorch) {
         if (findStatus(defender.statuses, 'bleed')) {
-            detonateBleed(session, defender, !isPlayerCard);
+            detonateBleed(session, defender, !isPlayerCard, isPlayerCard ? enemyIndex : -1);
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'scorch', effects.scorch);
@@ -289,9 +297,11 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session) {
 
 // Tick bleed and scorch on a target — unblockable, stacks -1 per tick.
 // Damage per tick = player's attackMultiplier + 5% of target's maxHp.
-function tickDots(session, target, isPlayer) {
-    const setHp = isPlayer ? (hp) => session.setPlayerHp(hp) : (hp) => session.setEnemyHp(hp);
-    const label = isPlayer ? 'You' : session.enemy.archetype || 'Enemy';
+function tickDots(session, target, isPlayer, enemyIndex) {
+    const setHp = isPlayer
+        ? (hp) => session.setPlayerHp(hp)
+        : (hp) => session.setEnemyHp(hp, enemyIndex);
+    const label = isPlayer ? 'You' : target.archetype || 'Enemy';
     const tickDmg = calcDotDamage(session, target);
 
     for (const s of target.statuses) {
@@ -321,8 +331,9 @@ function tickTurnStatuses(target) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Play the card at hand[cardIndex].
+// targetIndex is the enemies[] slot the player chose (required for 'single' cards).
 // Returns { ok: true } or { ok: false, reason: string }.
-function resolveCard(session, cardIndex) {
+function resolveCard(session, cardIndex, targetIndex) {
     if (!session.isActive()) return { ok: false, reason: 'Combat is already resolved.' };
     if (session.turnOwner !== TURN_OWNERS.PLAYER)
         return { ok: false, reason: "It is not the player's turn." };
@@ -334,13 +345,62 @@ function resolveCard(session, cardIndex) {
     const card = getCardById(cardRef.id);
     if (!card) return { ok: false, reason: `Unknown card id ${cardRef.id}.` };
 
-    // Remove from hand first (draws replacement), then register the play
+    // ── Resolve targets based on the card's targetType ───────────────────────
+    const alive = session.getAliveEnemies();
+    const tType = card.targetType || 'single';
+
+    // Self-only cards never need an enemy target
+    if (tType === 'self') {
+        session.removeCardFromHand(cardIndex, card.exhaust === true);
+        session.registerCardPlayed();
+        session.appendLog({ type: 'player', message: `You play ${card.name}.` });
+        applyEffects(card.effects || {}, session.player, session.player, true, session, 0);
+        return { ok: true };
+    }
+
+    // For enemy-targeting cards, we need at least one alive enemy
+    if (alive.length === 0) {
+        return { ok: false, reason: 'No enemies alive to target.' };
+    }
+
+    // Remove card from hand and register play before applying effects
     session.removeCardFromHand(cardIndex, card.exhaust === true);
     session.registerCardPlayed();
-
     session.appendLog({ type: 'player', message: `You play ${card.name}.` });
 
-    applyEffects(card.effects || {}, session.player, session.enemy, true, session);
+    if (tType === 'single') {
+        const tIdx = Number.isInteger(targetIndex) ? targetIndex : 0;
+        const target = session.enemies[tIdx];
+        if (!target || target.hp <= 0) {
+            const fallback = alive[0];
+            applyEffects(
+                card.effects || {},
+                session.player,
+                fallback,
+                true,
+                session,
+                fallback.index
+            );
+        } else {
+            applyEffects(card.effects || {}, session.player, target, true, session, tIdx);
+        }
+    } else if (tType === 'all') {
+        // Hit every living enemy
+        for (const enemy of alive) {
+            if (!session.isActive()) break;
+            applyEffects(card.effects || {}, session.player, enemy, true, session, enemy.index);
+        }
+    } else if (tType === 'random') {
+        // Hit N random living enemies (may hit the same one twice if fewer alive)
+        const count = Number(card.affectedTargets) || 1;
+        for (let i = 0; i < count; i++) {
+            if (!session.isActive()) break;
+            const pool = session.getAliveEnemies();
+            if (pool.length === 0) break;
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            applyEffects(card.effects || {}, session.player, pick, true, session, pick.index);
+        }
+    }
 
     return { ok: true };
 }
@@ -355,23 +415,32 @@ function endPlayerTurn(session) {
     if (!session.isActive()) return;
 
     // 1. Player DoTs tick
-    tickDots(session, session.player, true);
+    tickDots(session, session.player, true, -1);
     if (!session.isActive()) return;
 
     // 2. Player turn-based statuses decrement
     tickTurnStatuses(session.player);
 
-    // 3. Enemy turn — select cards and execute them one by one
-    session.startEnemyTurn(); // resets enemy block + strength
+    // 3. Enemy turn — each living enemy selects and executes cards
+    session.startEnemyTurn(); // resets block + strength for all enemies
     resolveEnemyCards(session);
     if (!session.isActive()) return;
 
-    // 4. Enemy DoTs tick
-    tickDots(session, session.enemy, false);
+    // 4. Enemy DoTs tick (each living enemy)
+    for (const enemy of session.enemies) {
+        if (!session.isActive()) break;
+        if (enemy.hp > 0) {
+            tickDots(session, enemy, false, enemy.index);
+        }
+    }
     if (!session.isActive()) return;
 
-    // 5. Enemy turn-based statuses decrement
-    tickTurnStatuses(session.enemy);
+    // 5. Enemy turn-based statuses decrement (each enemy)
+    for (const enemy of session.enemies) {
+        if (enemy.hp > 0) {
+            tickTurnStatuses(enemy);
+        }
+    }
 
     // 6. Advance turn, start new player turn (resets player block + strength)
     session.incrementTurn();
@@ -383,11 +452,15 @@ function endPlayerTurn(session) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function resolveEnemyCards(session) {
-    const cards = selectTurnCards(session.enemy);
-
-    for (const card of cards) {
+    for (const enemy of session.enemies) {
         if (!session.isActive()) return;
-        applyEffects(card.effects || {}, session.enemy, session.player, false, session);
+        if (enemy.hp <= 0) continue;
+
+        const cards = selectTurnCards(enemy);
+        for (const card of cards) {
+            if (!session.isActive()) return;
+            applyEffects(card.effects || {}, enemy, session.player, false, session, enemy.index);
+        }
     }
 }
 

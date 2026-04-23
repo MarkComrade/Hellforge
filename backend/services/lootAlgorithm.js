@@ -6,8 +6,10 @@ const {
     insertIntoLoadout,
     upgradeWeakestGearDB,
     getLoadout,
+    getLoadoutCount,
     addGoldToInventory
 } = require('../sql/database.js');
+const { pickCardsForItem } = require('../services/cardPool.js');
 const types = {
     crypt: 1,
     labyrinth: 2,
@@ -15,6 +17,7 @@ const types = {
     gates_of_hell: 4
 };
 const GOLD_IMG_PATH = '../textures/items/coing.png';
+
 function normalizeDungeonKey(dungeonName) {
     return String(dungeonName || '')
         .trim()
@@ -110,6 +113,40 @@ async function generateLoot(dungeon, level) {
     };
 }
 
+function normalizeLootItem(item) {
+    if (!item) return null;
+    return { ...item, img_path: item.img_path || item.img || null };
+}
+
+async function tryInsertLootItem(playerId, itemType, itemId, itemSubType, itemTier) {
+    const count = await getLoadoutCount(playerId);
+    if (Number(count) >= 10) {
+        return { success: false, inventoryFull: true };
+    }
+
+    const cards = itemSubType && itemTier ? pickCardsForItem(itemSubType, Number(itemTier)) : [];
+
+    const result = await insertIntoLoadout(playerId, itemType, itemId, cards);
+    return result.success
+        ? { success: true }
+        : { ...result, inventoryFull: /full/i.test(String(result.message || '')) };
+}
+
+function buildLootPayload(roomState, overrides = {}) {
+    return {
+        success: true,
+        type: roomState.type,
+        message: roomState.message,
+        gold: roomState.gold || 0,
+        item: roomState.item || null,
+        tier: roomState.tier ?? null,
+        goldImgPath: GOLD_IMG_PATH,
+        inventoryFull: Boolean(roomState.inventoryFull),
+        storedInRoom: Boolean(roomState.storedInRoom),
+        ...overrides
+    };
+}
+
 async function generateAndInsertLoot(playerId, dungeon, level) {
     try {
         const loot = await generateLoot(dungeon, level);
@@ -118,19 +155,29 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
             return { success: false, message: 'Loot generation failed.' };
         }
 
-        const dbResult = await insertIntoLoadout(playerId, loot.item.type, loot.item.item.id);
+        const itemSubType = loot.item.item?.type || null;
+        const itemTier = loot.tier;
+
+        const dbResult = await tryInsertLootItem(
+            playerId,
+            loot.item.type,
+            loot.item.item.id,
+            itemSubType,
+            itemTier
+        );
 
         if (!dbResult.success) {
-            return dbResult;
+            return {
+                success: false,
+                message: dbResult.message,
+                inventoryFull: Boolean(dbResult.inventoryFull),
+                item: normalizeLootItem(loot.item.item),
+                tier: loot.tier,
+                goldImgPath: GOLD_IMG_PATH
+            };
         }
 
-        const item = loot.item.item || null;
-        const normalizedItem = item
-            ? {
-                  ...item,
-                  img_path: item.img_path || item.img || null
-              }
-            : null;
+        const normalizedItem = normalizeLootItem(loot.item.item || null);
 
         const payload = {
             success: true,
@@ -257,10 +304,106 @@ async function generateFinalLoot(playerId, dungeon, level) {
     }
 }
 
+async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
+    try {
+        const existing = dungeonSession.roomLoot?.[roomKey];
+
+        if (existing) {
+            if (existing.type !== 'item_drop' || existing.itemCollected) return null;
+
+            const insert = await tryInsertLootItem(
+                playerId,
+                existing.itemType,
+                existing.itemId,
+                existing.itemSubType,
+                existing.tier
+            );
+            if (!insert.success) {
+                existing.inventoryFull = Boolean(insert.inventoryFull);
+                existing.storedInRoom = true;
+                existing.message = 'Your inventory is still full. The item is waiting.';
+                return buildLootPayload(existing, { gold: 0 });
+            }
+
+            existing.itemCollected = true;
+            existing.inventoryFull = false;
+            existing.storedInRoom = false;
+            existing.message = 'You picked up the item left behind in this room.';
+            return buildLootPayload(existing, { gold: 0 });
+        }
+
+        if (!shouldDropItem(dungeonSession.dungeonName, dungeonSession.dungeonLevel)) {
+            const gold = generateGoldReward(
+                dungeonSession.dungeonName,
+                dungeonSession.dungeonLevel
+            );
+            await addGoldToInventory(playerId, gold);
+
+            dungeonSession.roomLoot[roomKey] = {
+                type: 'gold_only',
+                gold,
+                item: null,
+                itemCollected: true,
+                message: 'Gold acquired.',
+                inventoryFull: false,
+                storedInRoom: false
+            };
+            return buildLootPayload(dungeonSession.roomLoot[roomKey]);
+        }
+
+        const loot = await generateLoot(dungeonSession.dungeonName, dungeonSession.dungeonLevel);
+        if (!loot.item.success) return { success: false, message: 'Item generation failed.' };
+
+        const baseGold = generateGoldReward(
+            dungeonSession.dungeonName,
+            dungeonSession.dungeonLevel
+        );
+        const gold = Math.floor(baseGold * (0.1 + Math.random() * 0.2));
+        await addGoldToInventory(playerId, gold);
+
+        const roomState = {
+            type: 'item_drop',
+            gold,
+            item: normalizeLootItem(loot.item.item),
+            itemType: loot.item.type,
+            itemSubType: loot.item.item?.type || null,
+            itemId: loot.item.item.id,
+            tier: loot.tier,
+            itemCollected: false,
+            message: 'Item found and some gold.',
+            inventoryFull: false,
+            storedInRoom: false
+        };
+
+        const insert = await tryInsertLootItem(
+            playerId,
+            roomState.itemType,
+            roomState.itemId,
+            roomState.itemSubType,
+            roomState.tier
+        );
+        if (!insert.success) {
+            roomState.inventoryFull = Boolean(insert.inventoryFull);
+            roomState.storedInRoom = true;
+            roomState.message = 'You found an item, but your inventory is full.';
+            dungeonSession.roomLoot[roomKey] = roomState;
+            return buildLootPayload(roomState);
+        }
+
+        roomState.itemCollected = true;
+        dungeonSession.roomLoot[roomKey] = roomState;
+        return buildLootPayload(roomState);
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Loot pipeline error.' };
+    }
+}
+
 module.exports = {
     getBaseTier,
     normalizeDungeonKey,
     generateAndInsertLoot,
     generateGoldReward,
-    generateFinalLoot
+    generateFinalLoot,
+    resolveDungeonRoomLoot
 };

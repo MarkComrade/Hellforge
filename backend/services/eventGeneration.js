@@ -1,7 +1,24 @@
+const database = require('../sql/database.js');
 const { generateFinalLoot } = require('./lootAlgorithm.js');
+const { withAdjustedPrice } = require('./pricing.js');
 
 const DUNGEON_FALLBACK = 'crypt';
 const MAX_LEVEL = 20;
+const SHOP_MARKUP_MIN = 0.8;
+const SHOP_MARKUP_MAX = 1.2;
+const TRADE_DISCOUNT_MIN = 0.1;
+const TRADE_DISCOUNT_MAX = 0.5;
+const TRAP_GOLD_LOSS_MIN = 10;
+const TRAP_GOLD_LOSS_MAX = 40;
+
+const CURSED_TRAP_CARD_POOL = [
+    { id: 901, name: 'Sussy Combo', effect: 'self damage' },
+    { id: 902, name: 'Oops, All Regret', effect: 'self damage' },
+    { id: 903, name: 'Monday Simulator', effect: 'does nothing' },
+    { id: 904, name: 'German Stare', effect: 'does nothing' },
+    { id: 905, name: 'Crazy Hamburger', effect: 'self damage' },
+    { id: 906, name: 'Absolutely Nothing', effect: 'does nothing' }
+];
 
 function generateEventType() {
     const roll = Math.random();
@@ -11,10 +28,6 @@ function generateEventType() {
 
     if (roll < 0.3) {
         return 'loot';
-    }
-
-    if (roll < 0.6) {
-        return 'yesOrNo';
     }
 
     if (roll < 0.8) {
@@ -62,6 +75,129 @@ function createSimpleEventPayload(type, title, description, choices = []) {
         choices,
         eventId: `${Date.now()}-${Math.floor(Math.random() * 1e6)}`
     };
+}
+
+function applyTradeDiscount(item, minDiscount, maxDiscount) {
+    const discountPercent = minDiscount + Math.random() * (maxDiscount - minDiscount);
+    const sourcePrice = Number(item?.adjustedPrice || item?.price || 0);
+    const discountedPrice = Math.max(1, Math.round(sourcePrice * (1 - discountPercent)));
+
+    return {
+        ...item,
+        adjustedPrice: discountedPrice
+    };
+}
+
+async function generateTradeOffer(dungeon, dungeonName, dungeonLevel) {
+    if (!dungeon) {
+        return [];
+    }
+
+    const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
+    const cachedOffer = dungeon.shopStock?.[roomKey];
+    if (Array.isArray(cachedOffer) && cachedOffer.length > 0) {
+        return cachedOffer;
+    }
+
+    const items = await database.getRandomShopItems(1);
+    if (!Array.isArray(items) || items.length === 0) {
+        return [];
+    }
+
+    const pricedOffer = items
+        .map((item) =>
+            withAdjustedPrice(item, dungeonName, dungeonLevel, {
+                markupMin: SHOP_MARKUP_MIN,
+                markupMax: SHOP_MARKUP_MAX
+            })
+        )
+        .map((item) => applyTradeDiscount(item, TRADE_DISCOUNT_MIN, TRADE_DISCOUNT_MAX));
+
+    dungeon.shopStock[roomKey] = pricedOffer;
+    return pricedOffer;
+}
+
+function generateTradeDialogue(dungeonName, dungeonLevel) {
+    const level = Math.max(1, Number(dungeonLevel) || 1);
+    const levelBand = level <= 3 ? 'low' : level <= 7 ? 'mid' : level <= 12 ? 'high' : 'endgame';
+
+    const tradeDialogueByDungeon = {
+        crypt: {
+            low: [
+                'A grave-robber smiles through cracked teeth and offers one relic below market value.',
+                'From behind a broken tomb, a peddler reveals a single bargain wrapped in funeral cloth.'
+            ],
+            mid: [
+                'A lantern-lit broker slides you one reliquary and names a price too low to trust.',
+                'The merchant whispers that this piece was taken before the dead could reclaim it.'
+            ],
+            high: [
+                'An undertaker-trader opens a velvet case and insists the deal ends with this room.',
+                "A hooded scavenger offers one cursed-looking prize at a hunter's discount."
+            ],
+            endgame: [
+                'A tomb broker bows once and offers a kingly relic for less than it should ever cost.',
+                "The crypt's last merchant names a blood-cheap price for a single forbidden prize."
+            ]
+        },
+        labyrinth: {
+            low: [
+                'A maze runner emerges from a false wall with one item and a surprisingly soft price.',
+                'The trader swears this bargain disappears when the corridor shifts again.'
+            ],
+            mid: [
+                'A horn-marked merchant offers one shortcut in the form of steel and leather.',
+                'From a rotating passage, a dealer presents a single discount before the walls close.'
+            ],
+            high: [
+                'A battered survivor unloads one elite piece cheap, eager to travel lighter.',
+                "The labyrinth's broker says the minotaur is near, so the price drops now."
+            ],
+            endgame: [
+                "At the maze core, a final merchant offers one champion's bargain and nothing more.",
+                'The walls grind shut while a trader presses one last discounted offer into view.'
+            ]
+        },
+        laboratory: {
+            low: [
+                'A salvage tech opens a case of recovered gear and marks one prototype down for speed.',
+                'A soot-stained researcher offers a single underpriced tool before alarms return.'
+            ],
+            mid: [
+                'A black-market scientist slides one field-tested item across the bench at a favor price.',
+                'The trader claims the lab is about to lock down, so one item goes cheap.'
+            ],
+            high: [
+                'A smuggler in a hazard cloak offers one unstable upgrade at a deep cut.',
+                'Between reactor pulses, a broker promises this prototype is worth more than the asking price.'
+            ],
+            endgame: [
+                "At the edge of meltdown, a director's fixer unloads one masterpiece for a desperate discount.",
+                "The lab's last broker offers a single forbidden device at a price that ignores reason."
+            ]
+        },
+        gates_of_hell: {
+            low: [
+                'A scorched dealer kicks ash from a satchel and offers one infernal bargain.',
+                'A chain-bound merchant names a gentle price before the fires notice you both.'
+            ],
+            mid: [
+                'A devilish quartermaster offers one war spoil below cost, eager to keep moving.',
+                'The trader grins and says one item is cheap today because hell is hungry.'
+            ],
+            high: [
+                'A horned broker reveals one battlefield trophy at a price meant to tempt fools and victors alike.',
+                'The merchant swears the next patrol is close, so this single offer comes discounted.'
+            ],
+            endgame: [
+                'At the gate itself, a damned trader offers one hell-forged prize for a shockingly kind sum.',
+                'A final infernal merchant lowers the price on one relic before vanishing into the ashstorm.'
+            ]
+        }
+    };
+
+    const lines = (tradeDialogueByDungeon[dungeonName] || tradeDialogueByDungeon.crypt)[levelBand];
+    return randomFromArray(lines) || 'A merchant offers one item at an unusually favorable price.';
 }
 
 function generateLootDialogue(dungeonName, dungeonLevel) {
@@ -147,19 +283,126 @@ function generateLootDialogue(dungeonName, dungeonLevel) {
     return randomFromArray(lines) || 'You uncover a small cache of loot.';
 }
 
-async function eventManager(playerID, dungeonName, dungeonLevel) {
+async function resolveTrapEvent(playerID) {
+    const safePlayerId = Number(playerID);
+    if (!Number.isInteger(safePlayerId) || safePlayerId <= 0) {
+        return createSimpleEventPayload(
+            'dialogue',
+            'Silent Trap',
+            'A trap springs, but without a registered adventurer profile its effects cannot be applied.'
+        );
+    }
+
+    const trapRoll = Math.random();
+
+    if (trapRoll < 1 / 3) {
+        const curseResult = await database.curseRandomItemCard(safePlayerId, CURSED_TRAP_CARD_POOL);
+        if (!curseResult.success || !curseResult.cardSwap) {
+            return createSimpleEventPayload(
+                'trap',
+                'Misfired Rune',
+                'A curse rune flares and fizzles before it can bind to your gear.'
+            );
+        }
+
+        const cursedMeta =
+            CURSED_TRAP_CARD_POOL.find((card) => card.id === curseResult.cardSwap.newCardId) ||
+            null;
+
+        return createSimpleEventPayload(
+            'trap',
+            'Hexed Card Sigil',
+            `A trap sigil rewrites one of your item cards into "${cursedMeta?.name || 'Cursed Card'}" (${cursedMeta?.effect || 'harmful'}).`
+        );
+    }
+
+    if (trapRoll < 2 / 3) {
+        const totalGoldResult = await database.getTotalGold(safePlayerId);
+        const totalGold =
+            (Number(totalGoldResult?.gold?.stash) || 0) +
+            (Number(totalGoldResult?.gold?.loadout) || 0);
+
+        const lossPercent =
+            TRAP_GOLD_LOSS_MIN +
+            Math.floor(Math.random() * (TRAP_GOLD_LOSS_MAX - TRAP_GOLD_LOSS_MIN + 1));
+
+        let amountToLose = Math.floor((totalGold * lossPercent) / 100);
+        if (amountToLose < 1 && totalGold > 0) {
+            amountToLose = 1;
+        }
+        if (amountToLose > totalGold) {
+            amountToLose = totalGold;
+        }
+
+        const goldResult = await database.applyGoldTrapLoss(safePlayerId, amountToLose);
+
+        if (!goldResult.success || Number(goldResult.lostGold || 0) <= 0) {
+            return createSimpleEventPayload(
+                'trap',
+                'Empty Purse Snare',
+                'A coin-draining mechanism triggers, but you have no gold for it to steal.'
+            );
+        }
+
+        return createSimpleEventPayload(
+            'trap',
+            'Coin Siphon',
+            `Hidden claws skim ${lossPercent}% of your gold (${goldResult.lostGold} lost).`
+        );
+    }
+
+    const itemResult = await database.deleteRandomNonEquippedItem(safePlayerId);
+    if (!itemResult.success || !itemResult.deletedItem) {
+        return createSimpleEventPayload(
+            'trap',
+            'Item Crusher',
+            'An item-crushing trap slams shut, but all your remaining gear is currently equipped.'
+        );
+    }
+
+    const deleted = itemResult.deletedItem;
+    const deletedType = deleted.weapon_id
+        ? 'weapon'
+        : deleted.armor_id
+          ? 'armor'
+          : deleted.misc_item_id
+            ? 'item'
+            : 'gear';
+
+    return createSimpleEventPayload(
+        'trap',
+        'Item Crusher',
+        `A crushing plate destroys one non-equipped ${deletedType} from your inventory.`
+    );
+}
+
+async function eventManager(dungeon, playerID) {
+    const dungeonName = dungeon?.dungeonName;
+    const dungeonLevel = dungeon?.dungeonLevel;
     const eventType = generateEventType();
     const safeDungeon = normalizeDungeonName(dungeonName);
     const safeLevel = sanitizeLevel(dungeonLevel);
 
     switch (eventType) {
-        case 'trade':
-            return createSimpleEventPayload(
-                'trade',
-                'Traveling Merchant',
-                'A robed merchant offers wares from a hidden satchel.',
-                ['Inspect goods', 'Decline and move on']
-            );
+        case 'trade': {
+            const offer = await generateTradeOffer(dungeon, safeDungeon, safeLevel);
+            if (offer.length === 0) {
+                return createSimpleEventPayload(
+                    'dialogue',
+                    'Empty Satchel',
+                    'A merchant pats empty pockets, offers an apology, and disappears into the dark.'
+                );
+            }
+
+            return {
+                success: true,
+                type: 'trade',
+                title: 'Traveling Merchant',
+                description: generateTradeDialogue(safeDungeon, safeLevel),
+                items: offer,
+                eventId: `${Date.now()}-${Math.floor(Math.random() * 1e6)}`
+            };
+        }
         case 'loot': {
             const safePlayerId = Number(playerID);
             if (!Number.isInteger(safePlayerId) || safePlayerId <= 0) {
@@ -186,19 +429,9 @@ async function eventManager(playerID, dungeonName, dungeonLevel) {
                 description: generateLootDialogue(safeDungeon, safeLevel)
             };
         }
-        case 'yesOrNo':
-            return createSimpleEventPayload(
-                'yesOrNo',
-                'Ancient Lever',
-                'A rusted lever juts from the wall. Pulling it could open a hidden path... or trigger a trap.',
-                ['Pull lever', 'Leave it']
-            );
+
         case 'trap':
-            return createSimpleEventPayload(
-                'trap',
-                'Pressure Plate',
-                'You hear a click underfoot. The mechanism resets before it can fire, but your pulse spikes.'
-            );
+            return resolveTrapEvent(playerID);
         case 'dialogue': {
             const dungeonDialogues = generateDialogue(safeDungeon, safeLevel);
             const pickedDialogue =

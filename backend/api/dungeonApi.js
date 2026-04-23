@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
-const { generateFinalLoot } = require('../services/lootAlgorithm.js');
+const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
 const { eventManager } = require('../services/eventGeneration.js');
 
 // Valid dungeon names — reject anything not in this list
@@ -18,12 +18,10 @@ const MAX_DUNGEON_LEVEL = 20;
 // Express calls them in order: requireSession → requireDungeon → route handler.
 // If any middleware calls res.status().json() it stops the chain (the route never runs).
 
-// Like requireSession but allows guests — if no session identity exists,
-// automatically assign a guest identity so unauthenticated users can play.
-function allowGuest(req, res, next) {
-    if (!req.session.userName) {
-        req.session.userName = 'Guest';
-        req.session.isLoggedIn = false;
+// Rejects unauthenticated requests — players must be logged in to use dungeon features.
+function requireLogin(req, res, next) {
+    if (!req.session.isLoggedIn) {
+        return res.status(401).json({ success: false, message: 'Login required' });
     }
     next();
 }
@@ -54,10 +52,19 @@ function saveDungeon(req) {
     req.session.dungeonData = req.dungeon.toJSON();
 }
 
+function enrichEvent(event) {
+    if (!event || !event.success) return event;
+    event.goldImgPath = event.goldImgPath || GOLD_IMG_PATH;
+    if (event.item) {
+        event.item.img_path = event.item.img_path || event.item.img || null;
+    }
+    return event;
+}
+
 // ───── Endpoints ─────
 
 // Creates a fresh dungeon — generates the map server-side and sends it to the client
-router.post('/start', allowGuest, (req, res) => {
+router.post('/start', requireLogin, (req, res) => {
     try {
         const { dungeonName } = req.body;
         // SECURITY: only allow known dungeon names — prevents injection of arbitrary strings
@@ -79,7 +86,7 @@ router.post('/start', allowGuest, (req, res) => {
 
 // Move the player one cell — dx/dy must be a cardinal direction (e.g. dx=1,dy=0 = right)
 // movePlayer() returns null if the target cell doesn't exist (wall), preventing cheating
-router.post('/move', allowGuest, requireDungeon, async (req, res) => {
+router.post('/move', requireLogin, requireDungeon, async (req, res) => {
     try {
         const { dx, dy } = req.body;
         if (dx === undefined || dy === undefined) {
@@ -114,16 +121,11 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
         }
 
         let Event = null;
+        const playerId = Number(req.session.userId);
         if (!wasVisited) {
-            const playerId = Number(req.session.userId);
-
             if (result.roomType === 'loot') {
                 if (Number.isInteger(playerId) && playerId > 0) {
-                    Event = await generateFinalLoot(
-                        playerId,
-                        req.dungeon.dungeonName,
-                        req.dungeon.dungeonLevel
-                    );
+                    Event = await resolveDungeonRoomLoot(req.dungeon, targetKey, playerId);
                 } else {
                     Event = {
                         success: false,
@@ -133,19 +135,19 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
             }
 
             if (result.roomType === 'event') {
-                Event = await eventManager(
-                    playerId,
-                    req.dungeon.dungeonName,
-                    req.dungeon.dungeonLevel
-                );
+                Event = await eventManager(req.dungeon, playerId);
             }
 
-            if (Event && Event.success) {
-                Event.goldImgPath = Event.goldImgPath || GOLD_IMG_PATH;
-                if (Event.item) {
-                    Event.item.img_path = Event.item.img_path || Event.item.img || null;
-                }
-            }
+            enrichEvent(Event);
+        } else if (
+            result.roomType === 'loot' &&
+            Number.isInteger(playerId) &&
+            playerId > 0 &&
+            req.dungeon.roomLoot?.[targetKey] &&
+            req.dungeon.roomLoot[targetKey].itemCollected === false
+        ) {
+            Event = await resolveDungeonRoomLoot(req.dungeon, targetKey, playerId);
+            enrichEvent(Event);
         }
 
         saveDungeon(req);
@@ -159,7 +161,7 @@ router.post('/move', allowGuest, requireDungeon, async (req, res) => {
 
 // Advance to the next dungeon level — only allowed when standing on the exit ('out') room.
 // This is the anti-cheat gate: clients can't skip levels because the server checks position.
-router.post('/next-level', allowGuest, requireDungeon, (req, res) => {
+router.post('/next-level', requireLogin, requireDungeon, (req, res) => {
     try {
         const dungeon = req.dungeon;
         // Build the map key from current coords to look up what room the player is in
@@ -196,7 +198,7 @@ router.post('/next-level', allowGuest, requireDungeon, (req, res) => {
 });
 
 // Leave the dungeon — only allowed from the exit room
-router.post('/exit', allowGuest, requireDungeon, (req, res) => {
+router.post('/exit', requireLogin, requireDungeon, (req, res) => {
     try {
         const dungeon = req.dungeon;
         const currentKey = `${dungeon.playerX},${dungeon.playerY}`;
@@ -216,7 +218,7 @@ router.post('/exit', allowGuest, requireDungeon, (req, res) => {
 });
 
 // Abandon — quit the dungeon from any room (no exit-room check)
-router.post('/abandon', allowGuest, requireDungeon, (req, res) => {
+router.post('/abandon', requireLogin, requireDungeon, (req, res) => {
     try {
         delete req.session.dungeonData;
         res.json({ success: true, message: 'Dungeon abandoned' });
@@ -227,11 +229,45 @@ router.post('/abandon', allowGuest, requireDungeon, (req, res) => {
 });
 
 // Returns the full dungeon state — useful for reconnecting or debugging
-router.get('/state', allowGuest, requireDungeon, (req, res) => {
+router.get('/state', requireLogin, requireDungeon, (req, res) => {
     try {
         res.json(req.dungeon.getClientState());
     } catch (error) {
         console.error('State error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Attempt to pick up a stored room item (inventory was full at first visit).
+// Must be standing on a loot room that has an uncollected item.
+router.post('/pickup-room-loot', requireDungeon, async (req, res) => {
+    try {
+        const dungeon = req.dungeon;
+        const currentKey = `${dungeon.playerX},${dungeon.playerY}`;
+        const roomState = dungeon.roomLoot?.[currentKey];
+
+        if (!roomState || roomState.type !== 'item_drop' || roomState.itemCollected) {
+            return res.status(400).json({ success: false, message: 'No item to pick up here.' });
+        }
+
+        const playerId = Number(req.session.userId);
+        if (!Number.isInteger(playerId) || playerId <= 0) {
+            return res.status(401).json({ success: false, message: 'Not logged in.' });
+        }
+
+        const result = await resolveDungeonRoomLoot(dungeon, currentKey, playerId);
+        saveDungeon(req);
+
+        if (!result || !result.success) {
+            return res.json({
+                success: false,
+                message: (result && result.message) || 'Pickup failed.'
+            });
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('Pickup error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });

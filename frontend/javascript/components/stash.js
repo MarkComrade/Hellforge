@@ -289,7 +289,20 @@ async function renderStashContent(playerId, grid, countText) {
                     }
                 });
                 buttonRow.appendChild(equipButton);
+            }
 
+            if (!item.misc_item_id) {
+                const cardsButton = document.createElement('button');
+                cardsButton.setAttribute('class', 'stashEquipBtn');
+                cardsButton.textContent = 'Cards';
+                cardsButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    showItemCardsPopup(itemName, item.cards || []);
+                });
+                buttonRow.appendChild(cardsButton);
+            }
+
+            if (equipmentSlot || item.misc_item_id) {
                 const moveToInventoryButton = document.createElement('button');
                 moveToInventoryButton.setAttribute('class', 'stashEquipBtn');
                 moveToInventoryButton.textContent = 'Move to loadout';
