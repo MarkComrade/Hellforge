@@ -265,9 +265,16 @@ function createFrontendEvent(eventPayload) {
     createDialoguePopup(eventPayload);
 }
 
-async function outRoom(room, dungeonLevel) {
+async function outRoom(room, dungeon, dungeonLevel) {
+    const trapdoorTextures = {
+        Laboratory: '../textures/rooms/trapdoor_laboratory.png',
+        Crypt: '../textures/rooms/trapdoor_crypt.png',
+        Labyrinth: '../textures/rooms/trapdoor_labyrinth.png',
+        'Gates of Hell': '../textures/rooms/trapdoor_hell.png'
+    };
+
     let trapdoor = document.createElement('img');
-    trapdoor.src = '../textures/rooms/trapdoor.png';
+    trapdoor.src = trapdoorTextures[dungeon];
     trapdoor.id = 'trapDoor';
     room.appendChild(trapdoor);
 

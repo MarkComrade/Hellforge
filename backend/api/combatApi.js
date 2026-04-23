@@ -9,7 +9,7 @@ const { generateEnemy, generateEnemyGroup, rollEnemyCount } = require('../servic
 const { buildDeckFromEquipment, getCardById } = require('../services/cardPool.js');
 const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
 const { generateFinalLoot } = require('../services/lootAlgorithm.js');
-const database = require('../sql/database.js');
+const database = require('../sql/queries/inventoryQueries.js');
 
 function normalizeDungeonType(name) {
     return String(name || '')
@@ -77,11 +77,27 @@ router.post('/start', requireLogin, async (req, res) => {
             ranged_cards: [],
             helmet_cards: [],
             armor_cards: [],
-            attackMultiplier: 5
+            attackMultiplier: 5,
+            meleeMultiplier: 1,
+            rangedMultiplier: 1,
+            defenseMultiplier: 1
         };
         const invResult = await database.getPlayerInventory(playerId);
         if (invResult.success && invResult.inventory) {
             const inv = invResult.inventory;
+            const meleeAtk = Number(inv.melee_attack) || 1;
+            const rangedAtk = Number(inv.ranged_attack) || 1;
+            const helmetDef = Number(inv.helmet_defense) || 1;
+            const armorDef = Number(inv.armor_defense) || 1;
+            equipmentSnapshot = {
+                melee_cards: inv.melee_cards || [],
+                ranged_cards: inv.ranged_cards || [],
+                helmet_cards: inv.helmet_cards || [],
+                armor_cards: inv.armor_cards || [],
+                attackMultiplier: meleeAtk + rangedAtk,
+                meleeMultiplier: meleeAtk,
+                rangedMultiplier: rangedAtk,
+                defenseMultiplier: (helmetDef + armorDef) / 2
             const tagCards = (cards, itemImg) =>
                 (cards || []).map((c) => ({ ...c, source_item_img: itemImg || null }));
             equipmentSnapshot = {
@@ -104,7 +120,7 @@ router.post('/start', requireLogin, async (req, res) => {
                 .filter(Boolean);
         }
 
-        const enemyCount = rollEnemyCount(dungeonType);
+        const enemyCount = rollEnemyCount(dungeonType, dungeonLevel);
         const enemies = generateEnemyGroup(dungeonType, dungeonLevel, enemyCount);
         const deck = buildDeckFromEquipment(equipmentSnapshot);
 

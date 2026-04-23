@@ -154,7 +154,7 @@ function getVulnMultiplier(target) {
 //   isPlayerCard        — true when the player is acting, false for enemy
 //   session             — needed for setPlayerHp / setEnemyHp so resolution fires
 //   enemyIndex          — which enemies[] slot the defender/attacker occupies
-function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyIndex) {
+function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyIndex, cardType) {
     // Fallback: if no enemyIndex given, use 0
     if (enemyIndex === undefined) enemyIndex = 0;
 
@@ -170,10 +170,39 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
     // ── damage ───────────────────────────────────────────────────────────────
     if (effects.damage) {
         const base = effects.damage + (attacker.strength || 0);
-        const scaled = Math.floor(base * getVulnMultiplier(defender));
+        const snap = session.player.equipmentSnapshot;
+        // Scale outgoing player card damage by weapon attack multiplier
+        let weaponMult = 1;
+        if (isPlayerCard) {
+            if (cardType === 'melee') weaponMult = Number(snap?.meleeMultiplier || 1);
+            else if (cardType === 'ranged') weaponMult = Number(snap?.rangedMultiplier || 1);
+        }
+        // Reduce incoming enemy damage by player's combined armor defense
+        const defenseMult = !isPlayerCard ? Math.max(1, Number(snap?.defenseMultiplier || 1)) : 1;
+        const scaled = Math.floor((base * weaponMult * getVulnMultiplier(defender)) / defenseMult);
         const { damageTaken, blocked } = applyDamage(defender, scaled, true);
 
         setDefenderHp(defender.hp - damageTaken);
+        // Capture post-hit player HP for frontend HP bar sync on enemy attacks
+        const postHitPlayerHp = !isPlayerCard ? defender.hp : undefined;
+
+        // deflect — if player is taking damage and has deflect status, reflect % back
+        if (!isPlayerCard && damageTaken > 0) {
+            const deflect = findStatus(session.player.statuses, 'deflect');
+            if (deflect && deflect.pct > 0) {
+                const reflected = Math.max(1, Math.floor(damageTaken * (deflect.pct / 100)));
+                const reflectTarget = attacker; // the enemy that attacked
+                const { damageTaken: reflDmg } = applyDamage(reflectTarget, reflected, false);
+                if (reflDmg > 0) {
+                    session.setEnemyHp(reflectTarget.hp - reflDmg, enemyIndex);
+                    session.appendLog({
+                        type: 'player',
+                        message: `Deflect reflects ${reflDmg} damage back at ${attackerLabel}.`
+                    });
+                }
+                if (!session.isActive()) return;
+            }
+        }
 
         // lifesteal — heals attacker % of damage dealt
         const ls = findStatus(attacker.statuses, 'lifesteal');
@@ -191,7 +220,11 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
             message: `${defenderLabel} ${isPlayerCard ? 'takes' : 'take'} ${damageTaken} damage${blocked > 0 ? ` (${blocked} blocked)` : ''}.`,
-            meta: { damageTaken, blocked }
+            meta: {
+                damageTaken,
+                blocked,
+                ...(postHitPlayerHp !== undefined ? { playerHp: postHitPlayerHp } : {})
+            }
         });
 
         if (!session.isActive()) return;
@@ -289,6 +322,25 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             message: `You gain ${effects.strength} strength this turn.`
         });
     }
+
+    // ── deflect (player cards only — reflects % of incoming damage back) ─────
+    if (effects.deflect && isPlayerCard) {
+        const { pct, turns } = effects.deflect;
+        upsertTurnStatus(attacker.statuses, 'deflect', pct, turns);
+        session.appendLog({
+            type: 'player',
+            message: `You gain deflect (${pct}% reflected) for ${turns} turn(s).`
+        });
+    }
+
+    // ── regen (player cards only — heals at start of next turn) ──────────────
+    if (effects.regen && isPlayerCard) {
+        upsertStackStatus(attacker.statuses, 'regen', effects.regen);
+        session.appendLog({
+            type: 'player',
+            message: `You gain ${effects.regen} regen.`
+        });
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -314,6 +366,14 @@ function tickDots(session, target, isPlayer, enemyIndex) {
                 message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage. (${s.stacks - 1} turn${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
             });
             s.stacks -= 1;
+        }
+
+        if (s.type === 'regen' && s.stacks > 0 && isPlayer) {
+            setHp(target.hp + s.stacks);
+            session.appendLog({
+                type: 'status',
+                message: `Regen restores ${s.stacks} HP. (stack stays until removed)`
+            });
         }
     }
 }
@@ -354,7 +414,15 @@ function resolveCard(session, cardIndex, targetIndex) {
         session.removeCardFromHand(cardIndex, card.exhaust === true);
         session.registerCardPlayed();
         session.appendLog({ type: 'player', message: `You play ${card.name}.` });
-        applyEffects(card.effects || {}, session.player, session.player, true, session, 0);
+        applyEffects(
+            card.effects || {},
+            session.player,
+            session.player,
+            true,
+            session,
+            0,
+            card.type
+        );
         return { ok: true };
     }
 
@@ -379,16 +447,33 @@ function resolveCard(session, cardIndex, targetIndex) {
                 fallback,
                 true,
                 session,
-                fallback.index
+                fallback.index,
+                card.type
             );
         } else {
-            applyEffects(card.effects || {}, session.player, target, true, session, tIdx);
+            applyEffects(
+                card.effects || {},
+                session.player,
+                target,
+                true,
+                session,
+                tIdx,
+                card.type
+            );
         }
     } else if (tType === 'all') {
         // Hit every living enemy
         for (const enemy of alive) {
             if (!session.isActive()) break;
-            applyEffects(card.effects || {}, session.player, enemy, true, session, enemy.index);
+            applyEffects(
+                card.effects || {},
+                session.player,
+                enemy,
+                true,
+                session,
+                enemy.index,
+                card.type
+            );
         }
     } else if (tType === 'random') {
         // Hit N random living enemies (may hit the same one twice if fewer alive)
@@ -398,7 +483,15 @@ function resolveCard(session, cardIndex, targetIndex) {
             const pool = session.getAliveEnemies();
             if (pool.length === 0) break;
             const pick = pool[Math.floor(Math.random() * pool.length)];
-            applyEffects(card.effects || {}, session.player, pick, true, session, pick.index);
+            applyEffects(
+                card.effects || {},
+                session.player,
+                pick,
+                true,
+                session,
+                pick.index,
+                card.type
+            );
         }
     }
 
@@ -459,6 +552,10 @@ function resolveEnemyCards(session) {
         const cards = selectTurnCards(enemy);
         for (const card of cards) {
             if (!session.isActive()) return;
+            session.appendLog({
+                type: 'enemy',
+                message: `${enemy.archetype || 'Enemy'} uses ${card.name}.`
+            });
             applyEffects(card.effects || {}, enemy, session.player, false, session, enemy.index);
         }
     }

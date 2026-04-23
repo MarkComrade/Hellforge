@@ -1,4 +1,7 @@
-const database = require('../sql/database.js');
+const database = {
+    ...require('../sql/queries/inventoryQueries.js'),
+    ...require('../sql/queries/shopQueries.js')
+};
 const { generateFinalLoot } = require('./lootAlgorithm.js');
 const { withAdjustedPrice } = require('./pricing.js');
 

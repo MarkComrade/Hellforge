@@ -606,7 +606,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 22, bleed: 4, backfire: 8 }
+            effects: { damage: 18, bleed: 4, backfire: 8 }
         },
         {
             id: 55,
@@ -639,7 +639,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 20, healing: 8, lifesteal: { pct: 25, turns: 2 } }
+            effects: { damage: 16, healing: 6, lifesteal: { pct: 20, turns: 2 } }
         },
         {
             id: 58,
@@ -650,7 +650,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 25, vulnerable: { pct: 30, turns: 3 }, backfire: 10 }
+            effects: { damage: 20, vulnerable: { pct: 25, turns: 2 }, backfire: 10 }
         },
         {
             id: 59,
@@ -673,6 +673,869 @@
             targetType: 'all',
             affectedTargets: 'all',
             effects: { damage: 30, bleed: 8, extraPlays: 1, backfire: 12 }
+        },
+
+        // ── NEW T1 melee ─────────────────────────────────────────────────
+        {
+            id: 301,
+            name: 'Wild Swing',
+            img_path: '/textures/cards/wild_swing.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 4, backfire: 1 }
+        },
+        {
+            id: 302,
+            name: 'Shield Bash',
+            img_path: '/textures/cards/shield_bash.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, block: 3 }
+        },
+        {
+            id: 303,
+            name: 'Aggressive Stance',
+            img_path: '/textures/cards/aggressive_stance.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 2, backfire: 2 }
+        },
+        {
+            id: 304,
+            name: 'Lacerate',
+            img_path: '/textures/cards/lacerate.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, bleed: 3 }
+        },
+        {
+            id: 305,
+            name: 'Desperation Strike',
+            img_path: '/textures/cards/desperation_strike.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 12, strength: 2 }
+        },
+        {
+            id: 306,
+            name: 'Stomp',
+            img_path: '/textures/cards/stomp.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 3, vulnerable: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 307,
+            name: 'Chip Away',
+            img_path: '/textures/cards/chip_away.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, bleed: 1, extraPlays: 1 }
+        },
+        {
+            id: 308,
+            name: 'Iron Resolve',
+            img_path: '/textures/cards/iron_resolve.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 4, strength: 1 }
+        },
+        {
+            id: 309,
+            name: 'Blood Offering',
+            img_path: '/textures/cards/blood_offering.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 3, backfire: 4 }
+        },
+        {
+            id: 310,
+            name: 'Fury Burst',
+            img_path: '/textures/cards/fury_burst.png',
+            tier: 1,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 4, bleed: 1 }
+        },
+
+        // ── NEW T2 melee ─────────────────────────────────────────────────
+        {
+            id: 311,
+            name: 'Reckless Charge',
+            img_path: '/textures/cards/reckless_charge.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, backfire: 3 }
+        },
+        {
+            id: 312,
+            name: 'Warlord Step',
+            img_path: '/textures/cards/warlord_step.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 2, extraPlays: 1, backfire: 2 }
+        },
+        {
+            id: 313,
+            name: 'Gore Wound',
+            img_path: '/textures/cards/gore_wound.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, bleed: 4 }
+        },
+        {
+            id: 314,
+            name: 'Lifetap',
+            img_path: '/textures/cards/lifetap.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 6, lifesteal: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 315,
+            name: 'Momentum',
+            img_path: '/textures/cards/momentum.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 4, strength: 1, extraPlays: 1 }
+        },
+        {
+            id: 316,
+            name: 'Hamstring',
+            img_path: '/textures/cards/hamstring.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, vulnerable: { pct: 20, turns: 2 } }
+        },
+        {
+            id: 317,
+            name: 'Burning Strike',
+            img_path: '/textures/cards/burning_strike.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, scorch: 2 }
+        },
+        {
+            id: 318,
+            name: 'Bleed Through',
+            img_path: '/textures/cards/bleed_through.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 7, bleed: 6 }
+        },
+        {
+            id: 319,
+            name: 'Parry and Riposte',
+            img_path: '/textures/cards/parry_and_riposte.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { block: 5, damage: 4 }
+        },
+        {
+            id: 320,
+            name: 'Bloodlust Stance',
+            img_path: '/textures/cards/bloodlust_stance.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 4, lifesteal: { pct: 20, turns: 2 } }
+        },
+
+        // ── NEW T3 melee ─────────────────────────────────────────────────
+        {
+            id: 321,
+            name: 'Blade Storm',
+            img_path: '/textures/cards/blade_storm.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 6, bleed: 2 }
+        },
+        {
+            id: 322,
+            name: 'Wrath',
+            img_path: '/textures/cards/wrath.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 4, backfire: 3 }
+        },
+        {
+            id: 323,
+            name: 'Deep Cut',
+            img_path: '/textures/cards/deep_cut.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, bleed: 5 }
+        },
+        {
+            id: 324,
+            name: 'Siphon Strike',
+            img_path: '/textures/cards/siphon_strike.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 9, lifesteal: { pct: 20, turns: 1 } }
+        },
+        {
+            id: 325,
+            name: 'Expose Weakness',
+            img_path: '/textures/cards/expose_weakness.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 6, vulnerable: { pct: 25, turns: 2 } }
+        },
+        {
+            id: 326,
+            name: 'Inferno Blade',
+            img_path: '/textures/cards/inferno_blade.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, scorch: 3 }
+        },
+        {
+            id: 327,
+            name: 'Relentless',
+            img_path: '/textures/cards/relentless.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 7, extraPlays: 1, backfire: 4 }
+        },
+        {
+            id: 328,
+            name: 'Flurry of Blows',
+            img_path: '/textures/cards/flurry_of_blows.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 5, bleed: 2, extraPlays: 1 }
+        },
+        {
+            id: 329,
+            name: 'Stance Break',
+            img_path: '/textures/cards/stance_break.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 10, vulnerable: { pct: 15, turns: 3 } }
+        },
+        {
+            id: 330,
+            name: 'Vampiric Rush',
+            img_path: '/textures/cards/vampiric_rush.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 10, lifesteal: { pct: 30, turns: 2 }, healing: 5 }
+        },
+
+        // ── NEW T4 melee ─────────────────────────────────────────────────
+        {
+            id: 331,
+            name: 'Blood Frenzy',
+            img_path: '/textures/cards/blood_frenzy.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 10, bleed: 5, lifesteal: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 332,
+            name: 'Titan Strike',
+            img_path: '/textures/cards/titan_strike.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, vulnerable: { pct: 20, turns: 2 }, backfire: 4 }
+        },
+        {
+            id: 333,
+            name: 'Scorched Flesh',
+            img_path: '/textures/cards/scorched_flesh.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 11, scorch: 4, bleed: 2 }
+        },
+        {
+            id: 334,
+            name: 'Power Surge',
+            img_path: '/textures/cards/power_surge.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, extraPlays: 1, backfire: 5 }
+        },
+        {
+            id: 335,
+            name: 'Sanguine Blade',
+            img_path: '/textures/cards/sanguine_blade.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 12, lifesteal: { pct: 25, turns: 2 } }
+        },
+        {
+            id: 336,
+            name: 'Guillotine',
+            img_path: '/textures/cards/guillotine.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 22, vulnerable: { pct: 30, turns: 2 } }
+        },
+        {
+            id: 337,
+            name: 'Whirlwind',
+            img_path: '/textures/cards/whirlwind.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 8, bleed: 3 }
+        },
+        {
+            id: 338,
+            name: 'Soul Carve',
+            img_path: '/textures/cards/soul_carve.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 11, bleed: 4, extraPlays: 1, backfire: 6 }
+        },
+        {
+            id: 339,
+            name: 'Wrath of Steel',
+            img_path: '/textures/cards/wrath_of_steel.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 18, strength: 4, bleed: 5 }
+        },
+        {
+            id: 340,
+            name: 'Predator Lunge',
+            img_path: '/textures/cards/predator_lunge.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 9, scorch: 4, extraPlays: 1 }
+        },
+
+        // ── NEW T5 melee ─────────────────────────────────────────────────
+        {
+            id: 341,
+            name: 'Crimson Cyclone',
+            img_path: '/textures/cards/crimson_cyclone.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 10, bleed: 4 }
+        },
+        {
+            id: 342,
+            name: 'Hemorrhage',
+            img_path: '/textures/cards/hemorrhage.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 13, bleed: 7, lifesteal: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 343,
+            name: 'Cursed Blade',
+            img_path: '/textures/cards/cursed_blade.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, scorch: 5, backfire: 5 }
+        },
+        {
+            id: 344,
+            name: 'War Machine',
+            img_path: '/textures/cards/war_machine.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 6, extraPlays: 1, backfire: 6 }
+        },
+        {
+            id: 345,
+            name: 'Executioner',
+            img_path: '/textures/cards/executioner.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 16, vulnerable: { pct: 30, turns: 2 }, backfire: 6 }
+        },
+        {
+            id: 346,
+            name: 'Dread Cleave',
+            img_path: '/textures/cards/dread_cleave.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 11, bleed: 3, extraPlays: 1, backfire: 7 }
+        },
+        {
+            id: 347,
+            name: 'Eternal Thirst',
+            img_path: '/textures/cards/eternal_thirst.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, lifesteal: { pct: 30, turns: 2 } }
+        },
+        {
+            id: 348,
+            name: 'Magma Blade',
+            img_path: '/textures/cards/magma_blade.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 13, scorch: 6, bleed: 3 }
+        },
+        {
+            id: 349,
+            name: 'Killing Intent',
+            img_path: '/textures/cards/killing_intent.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 20, strength: 5, vulnerable: { pct: 25, turns: 2 } }
+        },
+        {
+            id: 350,
+            name: 'Butcher',
+            img_path: '/textures/cards/butcher.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 24, bleed: 8, backfire: 8 }
+        },
+
+        // ── NEW T6 melee ─────────────────────────────────────────────────
+        {
+            id: 351,
+            name: 'Ragnarok',
+            img_path: '/textures/cards/ragnarok.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 22, bleed: 6, scorch: 4, backfire: 10 }
+        },
+        {
+            id: 352,
+            name: 'Void Cleave',
+            img_path: '/textures/cards/void_cleave.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 17, bleed: 6, extraPlays: 1, backfire: 7 }
+        },
+        {
+            id: 353,
+            name: 'Soul Harvest',
+            img_path: '/textures/cards/soul_harvest_melee.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 16, lifesteal: { pct: 30, turns: 2 }, healing: 6 }
+        },
+        {
+            id: 354,
+            name: 'Eternal Wrath',
+            img_path: '/textures/cards/eternal_wrath.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 7, extraPlays: 1, backfire: 8 }
+        },
+        {
+            id: 355,
+            name: 'Hell Cutter',
+            img_path: '/textures/cards/hell_cutter.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 18, scorch: 6, bleed: 4 }
+        },
+        {
+            id: 356,
+            name: 'Armageddon Blade',
+            img_path: '/textures/cards/armageddon_blade.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 28, strength: 6, bleed: 7, backfire: 10 }
+        },
+        {
+            id: 357,
+            name: 'Doomsday Cleave',
+            img_path: '/textures/cards/doomsday_cleave.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 13, bleed: 5, vulnerable: { pct: 20, turns: 1 } }
+        },
+        {
+            id: 358,
+            name: 'Bloodborn Frenzy',
+            img_path: '/textures/cards/bloodborn_frenzy.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 15, bleed: 5, lifesteal: { pct: 25, turns: 2 }, backfire: 5 }
+        },
+        {
+            id: 359,
+            name: 'Infernal Champion',
+            img_path: '/textures/cards/infernal_champion.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 8, extraPlays: 2, lifesteal: { pct: 30, turns: 3 } }
+        },
+        {
+            id: 360,
+            name: 'Carnage',
+            img_path: '/textures/cards/carnage.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 5,
+            effects: { damage: 16, bleed: 5, backfire: 12 }
+        },
+
+        // ── EXTRA: melee deflect + multi-target ─────────────────────────
+        {
+            id: 361,
+            name: 'Blade Wall',
+            img_path: '/textures/cards/blade_wall.png',
+            tier: 2,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 5, deflect: { pct: 8, turns: 2 } }
+        },
+        {
+            id: 362,
+            name: 'Counter Cleave',
+            img_path: '/textures/cards/counter_cleave.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, deflect: { pct: 8, turns: 1 } }
+        },
+        {
+            id: 363,
+            name: 'Savage Whirl',
+            img_path: '/textures/cards/savage_whirl.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 8, bleed: 2 }
+        },
+        {
+            id: 364,
+            name: 'Stampede',
+            img_path: '/textures/cards/stampede.png',
+            tier: 3,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 7, backfire: 3 }
+        },
+        {
+            id: 365,
+            name: 'Iron Counter',
+            img_path: '/textures/cards/iron_counter.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 12, turns: 2 }, block: 6 }
+        },
+        {
+            id: 366,
+            name: 'Carnage Wave',
+            img_path: '/textures/cards/carnage_wave.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 10, bleed: 3, backfire: 5 }
+        },
+        {
+            id: 367,
+            name: 'Reaping Strike',
+            img_path: '/textures/cards/reaping_strike.png',
+            tier: 4,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 9, lifesteal: { pct: 20, turns: 1 } }
+        },
+        {
+            id: 368,
+            name: 'Ground Slam',
+            img_path: '/textures/cards/ground_slam.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 11, vulnerable: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 369,
+            name: 'Reflective Guard',
+            img_path: '/textures/cards/reflective_guard.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 15, turns: 2 }, strength: 2, block: 4 }
+        },
+        {
+            id: 370,
+            name: 'Bleed Everything',
+            img_path: '/textures/cards/bleed_everything.png',
+            tier: 5,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { bleed: 4, damage: 6 }
+        },
+        {
+            id: 371,
+            name: 'Mirror Stance',
+            img_path: '/textures/cards/mirror_stance_melee.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 25, turns: 3 }, block: 10, strength: 3 }
+        },
+        {
+            id: 372,
+            name: 'Mass Execution',
+            img_path: '/textures/cards/mass_execution.png',
+            tier: 6,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 14, bleed: 4, backfire: 6 }
+        },
+
+        // ── T7 melee — legendary, T6 equipment only (~10% per slot) ─────
+        {
+            id: 701,
+            name: 'God Slayer',
+            img_path: '/textures/cards/god_slayer.png',
+            tier: 7,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 28, strength: 8, backfire: 8 }
+        },
+        {
+            id: 702,
+            name: 'Eternal Carnage',
+            img_path: '/textures/cards/eternal_carnage.png',
+            tier: 7,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 18, bleed: 7, scorch: 4 }
+        },
+        {
+            id: 703,
+            name: 'Apocalyptic Blade',
+            img_path: '/textures/cards/apocalyptic_blade.png',
+            tier: 7,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 25, bleed: 8, lifesteal: { pct: 35, turns: 2 } }
+        },
+        {
+            id: 704,
+            name: 'Void Rend',
+            img_path: '/textures/cards/void_rend.png',
+            tier: 7,
+            type: 'melee',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 22, scorch: 7, vulnerable: { pct: 35, turns: 2 } }
+        },
+        {
+            id: 705,
+            name: 'Omega Cleave',
+            img_path: '/textures/cards/omega_cleave.png',
+            tier: 7,
+            type: 'melee',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 30, bleed: 9, scorch: 6, backfire: 10 }
         }
     ],
 
@@ -745,7 +1608,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2 }
+            effects: { extraPlays: 1 }
         },
         {
             id: 67,
@@ -1261,7 +2124,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 20, scorch: 5, backfire: 6 }
+            effects: { damage: 16, scorch: 4, backfire: 6 }
         },
         {
             id: 113,
@@ -1272,7 +2135,7 @@
             exhaust: false,
             targetType: 'all',
             affectedTargets: 'all',
-            effects: { damage: 17, bleed: 6, extraPlays: 1 }
+            effects: { damage: 14, bleed: 5 }
         },
         {
             id: 114,
@@ -1283,7 +2146,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 22, bleed: 4, backfire: 8 }
+            effects: { damage: 18, bleed: 4, backfire: 8 }
         },
         {
             id: 115,
@@ -1305,7 +2168,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 18, bleed: 7, extraPlays: 1 }
+            effects: { damage: 15, bleed: 6, extraPlays: 1 }
         },
         {
             id: 117,
@@ -1316,7 +2179,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 16, bleed: 5, extraPlays: 1, backfire: 5 }
+            effects: { damage: 14, bleed: 4, extraPlays: 1, backfire: 5 }
         },
         {
             id: 118,
@@ -1327,7 +2190,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 24, backfire: 10 }
+            effects: { damage: 19, backfire: 9 }
         },
         {
             id: 119,
@@ -1350,6 +2213,869 @@
             targetType: 'all',
             affectedTargets: 'all',
             effects: { damage: 30, bleed: 9, extraPlays: 1, backfire: 12 }
+        },
+
+        // ── NEW T1 ranged ────────────────────────────────────────────────
+        {
+            id: 401,
+            name: 'Piercing Arrow',
+            img_path: '/textures/cards/piercing_arrow.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 3, bleed: 1 }
+        },
+        {
+            id: 402,
+            name: 'Steady Aim',
+            img_path: '/textures/cards/steady_aim.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, block: 2 }
+        },
+        {
+            id: 403,
+            name: 'Grazed Shot',
+            img_path: '/textures/cards/grazed_shot.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, vulnerable: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 404,
+            name: 'Smoke Arrow',
+            img_path: '/textures/cards/smoke_arrow.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { scorch: 2, vulnerable: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 405,
+            name: 'Aimed Shot',
+            img_path: '/textures/cards/aimed_shot.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 10, vulnerable: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 406,
+            name: 'Skirmish',
+            img_path: '/textures/cards/skirmish.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 2,
+            effects: { damage: 2, bleed: 1 }
+        },
+        {
+            id: 407,
+            name: 'Flame Arrow',
+            img_path: '/textures/cards/flame_arrow.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, scorch: 2 }
+        },
+        {
+            id: 408,
+            name: 'Hunter Step',
+            img_path: '/textures/cards/hunter_step.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 3, extraPlays: 1 }
+        },
+        {
+            id: 409,
+            name: 'Barbed Shaft',
+            img_path: '/textures/cards/barbed_shaft.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, bleed: 4 }
+        },
+        {
+            id: 410,
+            name: 'Surprise Volley',
+            img_path: '/textures/cards/surprise_volley.png',
+            tier: 1,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 3, bleed: 2 }
+        },
+
+        // ── NEW T2 ranged ────────────────────────────────────────────────
+        {
+            id: 411,
+            name: 'Leg Shot',
+            img_path: '/textures/cards/leg_shot.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, vulnerable: { pct: 20, turns: 2 } }
+        },
+        {
+            id: 412,
+            name: 'Incendiary Bolt',
+            img_path: '/textures/cards/incendiary_bolt.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 4, scorch: 3 }
+        },
+        {
+            id: 413,
+            name: 'Bleeding Flechette',
+            img_path: '/textures/cards/bleeding_flechette.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 3, bleed: 4 }
+        },
+        {
+            id: 414,
+            name: 'Hawk Eye',
+            img_path: '/textures/cards/hawk_eye.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, vulnerable: { pct: 0, turns: 0 } }
+        },
+        {
+            id: 415,
+            name: 'Crippling Arrow',
+            img_path: '/textures/cards/crippling_arrow.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 4, bleed: 3, vulnerable: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 416,
+            name: 'Rapid Fire',
+            img_path: '/textures/cards/rapid_fire.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 7, extraPlays: 1, backfire: 2 }
+        },
+        {
+            id: 417,
+            name: 'Smoke Screen',
+            img_path: '/textures/cards/smoke_screen.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 5, extraPlays: 1 }
+        },
+        {
+            id: 418,
+            name: 'Ember Bolt',
+            img_path: '/textures/cards/ember_bolt.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 4, scorch: 4 }
+        },
+        {
+            id: 419,
+            name: 'Twin Shot',
+            img_path: '/textures/cards/twin_shot.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 2,
+            effects: { damage: 4, bleed: 2 }
+        },
+        {
+            id: 420,
+            name: 'Ambush',
+            img_path: '/textures/cards/ambush.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, bleed: 4, vulnerable: { pct: 20, turns: 2 } }
+        },
+
+        // ── NEW T3 ranged ────────────────────────────────────────────────
+        {
+            id: 421,
+            name: 'Scorched Earth',
+            img_path: '/textures/cards/scorched_earth.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 5, scorch: 3 }
+        },
+        {
+            id: 422,
+            name: 'Blood Arrow',
+            img_path: '/textures/cards/blood_arrow.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 8, bleed: 5 }
+        },
+        {
+            id: 423,
+            name: 'Sniper Focus',
+            img_path: '/textures/cards/sniper_focus.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 11, backfire: 3 }
+        },
+        {
+            id: 424,
+            name: 'Tracking Shot',
+            img_path: '/textures/cards/tracking_shot.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 7, vulnerable: { pct: 25, turns: 2 }, extraPlays: 1 }
+        },
+        {
+            id: 425,
+            name: 'Fire Volley',
+            img_path: '/textures/cards/fire_volley.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { scorch: 4, damage: 4 }
+        },
+        {
+            id: 426,
+            name: 'Ricochet',
+            img_path: '/textures/cards/ricochet.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 5, bleed: 2, extraPlays: 1, backfire: 3 }
+        },
+        {
+            id: 427,
+            name: 'Debilitating Arrow',
+            img_path: '/textures/cards/debilitating_arrow.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 6, vulnerable: { pct: 30, turns: 1 } }
+        },
+        {
+            id: 428,
+            name: 'Hell Shot',
+            img_path: '/textures/cards/hell_shot.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 9, scorch: 4, backfire: 3 }
+        },
+        {
+            id: 429,
+            name: 'Storm of Bolts',
+            img_path: '/textures/cards/storm_of_bolts.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 6, bleed: 3 }
+        },
+        {
+            id: 430,
+            name: 'Viper Round',
+            img_path: '/textures/cards/viper_round.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 7, bleed: 4, scorch: 2 }
+        },
+
+        // ── NEW T4 ranged ────────────────────────────────────────────────
+        {
+            id: 431,
+            name: 'Shatter Shot',
+            img_path: '/textures/cards/shatter_shot.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 11, vulnerable: { pct: 25, turns: 2 } }
+        },
+        {
+            id: 432,
+            name: 'Burning Rain',
+            img_path: '/textures/cards/burning_rain.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 8, scorch: 4 }
+        },
+        {
+            id: 433,
+            name: 'Hemorrhage Arrow',
+            img_path: '/textures/cards/hemorrhage_arrow.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 10, bleed: 6 }
+        },
+        {
+            id: 434,
+            name: 'Death Mark',
+            img_path: '/textures/cards/death_mark.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, vulnerable: { pct: 40, turns: 2 } }
+        },
+        {
+            id: 435,
+            name: 'Explosive Shot',
+            img_path: '/textures/cards/explosive_shot.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 8, scorch: 3, backfire: 4 }
+        },
+        {
+            id: 436,
+            name: 'Predator Arrow',
+            img_path: '/textures/cards/predator_arrow.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 12, bleed: 4, extraPlays: 1, backfire: 5 }
+        },
+        {
+            id: 437,
+            name: 'Toxic Bolt',
+            img_path: '/textures/cards/toxic_bolt.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 9, bleed: 5, scorch: 3 }
+        },
+        {
+            id: 438,
+            name: 'Longshot',
+            img_path: '/textures/cards/longshot.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 15, backfire: 5 }
+        },
+        {
+            id: 439,
+            name: 'Feral Barrage',
+            img_path: '/textures/cards/feral_barrage.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 7, bleed: 4, extraPlays: 1, backfire: 5 }
+        },
+        {
+            id: 440,
+            name: 'Wildfire Quiver',
+            img_path: '/textures/cards/wildfire_quiver.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 7, scorch: 4 }
+        },
+
+        // ── NEW T5 ranged ────────────────────────────────────────────────
+        {
+            id: 441,
+            name: 'Nightmare Bolt',
+            img_path: '/textures/cards/nightmare_bolt.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, bleed: 6, scorch: 4 }
+        },
+        {
+            id: 442,
+            name: 'Inferno Hail',
+            img_path: '/textures/cards/inferno_hail.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 10, scorch: 5 }
+        },
+        {
+            id: 443,
+            name: 'Assassination',
+            img_path: '/textures/cards/assassination.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 22, bleed: 8, vulnerable: { pct: 30, turns: 2 } }
+        },
+        {
+            id: 444,
+            name: 'Bleed Storm',
+            img_path: '/textures/cards/bleed_storm.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 7, bleed: 5, backfire: 5 }
+        },
+        {
+            id: 445,
+            name: 'Hellfire Quiver',
+            img_path: '/textures/cards/hellfire_quiver.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 9, scorch: 5, bleed: 3 }
+        },
+        {
+            id: 446,
+            name: 'Sentinel Strike',
+            img_path: '/textures/cards/sentinel_strike.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 16, vulnerable: { pct: 30, turns: 2 }, backfire: 5 }
+        },
+        {
+            id: 447,
+            name: 'Scorch Barrage',
+            img_path: '/textures/cards/scorch_barrage.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 3,
+            effects: { damage: 8, scorch: 6, backfire: 4 }
+        },
+        {
+            id: 448,
+            name: 'Venom Salvo',
+            img_path: '/textures/cards/venom_salvo.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 8, bleed: 5 }
+        },
+        {
+            id: 449,
+            name: 'Crimson Rain',
+            img_path: '/textures/cards/crimson_rain.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 14, bleed: 7, backfire: 8 }
+        },
+        {
+            id: 450,
+            name: 'Marked for Death',
+            img_path: '/textures/cards/marked_for_death.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 12, bleed: 5, extraPlays: 1, backfire: 6 }
+        },
+
+        // ── NEW T6 ranged ────────────────────────────────────────────────
+        {
+            id: 451,
+            name: 'Omega Shot',
+            img_path: '/textures/cards/omega_shot.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 28, bleed: 8, scorch: 6, backfire: 10 }
+        },
+        {
+            id: 452,
+            name: 'Infernal Barrage',
+            img_path: '/textures/cards/infernal_barrage.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 11, scorch: 5, backfire: 6 }
+        },
+        {
+            id: 453,
+            name: 'Plague Arrow',
+            img_path: '/textures/cards/plague_arrow.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 15, bleed: 8, scorch: 4 }
+        },
+        {
+            id: 454,
+            name: 'Void Bolt',
+            img_path: '/textures/cards/void_bolt.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 18, vulnerable: { pct: 30, turns: 2 }, backfire: 7 }
+        },
+        {
+            id: 455,
+            name: 'Slaughter Hail',
+            img_path: '/textures/cards/slaughter_hail.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 13, bleed: 6 }
+        },
+        {
+            id: 456,
+            name: 'Hellstorm Arrow',
+            img_path: '/textures/cards/hellstorm_arrow.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 18, scorch: 7, bleed: 5, backfire: 10 }
+        },
+        {
+            id: 457,
+            name: 'Death Sentence',
+            img_path: '/textures/cards/death_sentence.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 16, bleed: 7, extraPlays: 1, backfire: 7 }
+        },
+        {
+            id: 458,
+            name: 'Apocalypse Arrow',
+            img_path: '/textures/cards/apocalypse_arrow.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 32, vulnerable: { pct: 40, turns: 3 }, backfire: 12 }
+        },
+        {
+            id: 459,
+            name: 'Eternal Bleed',
+            img_path: '/textures/cards/eternal_bleed.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 14, bleed: 9, scorch: 3 }
+        },
+        {
+            id: 460,
+            name: 'Predator Instinct',
+            img_path: '/textures/cards/predator_instinct.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'random',
+            affectedTargets: 5,
+            effects: { damage: 14, bleed: 6, scorch: 4, backfire: 11 }
+        },
+
+        // ── EXTRA: ranged deflect + multi-target ─────────────────────────
+        {
+            id: 461,
+            name: 'Evasion Round',
+            img_path: '/textures/cards/evasion_round.png',
+            tier: 2,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 8, turns: 2 }, block: 4 }
+        },
+        {
+            id: 462,
+            name: 'Scatter Shot',
+            img_path: '/textures/cards/scatter_shot.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 7, bleed: 2 }
+        },
+        {
+            id: 463,
+            name: 'Rain of Arrows',
+            img_path: '/textures/cards/rain_of_arrows.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 5,
+            effects: { damage: 5, bleed: 2 }
+        },
+        {
+            id: 464,
+            name: 'Counter Draw',
+            img_path: '/textures/cards/counter_draw.png',
+            tier: 3,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, deflect: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 465,
+            name: 'Suppressive Fire',
+            img_path: '/textures/cards/suppressive_fire.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 7, vulnerable: { pct: 15, turns: 1 } }
+        },
+        {
+            id: 466,
+            name: 'Hail of Death',
+            img_path: '/textures/cards/hail_of_death.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 8, scorch: 3 }
+        },
+        {
+            id: 467,
+            name: 'Mirror Stance',
+            img_path: '/textures/cards/mirror_stance_ranged.png',
+            tier: 4,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 12, turns: 2 }, extraPlays: 1 }
+        },
+        {
+            id: 468,
+            name: 'Blaze Field',
+            img_path: '/textures/cards/blaze_field.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { scorch: 5, damage: 5 }
+        },
+        {
+            id: 469,
+            name: 'Saturation Fire',
+            img_path: '/textures/cards/saturation_fire.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 9, backfire: 5 }
+        },
+        {
+            id: 470,
+            name: 'Deflection Screen',
+            img_path: '/textures/cards/deflection_screen.png',
+            tier: 5,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 15, turns: 2 }, block: 6 }
+        },
+        {
+            id: 471,
+            name: 'Piercing Volley',
+            img_path: '/textures/cards/piercing_volley.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 5,
+            effects: { damage: 8, bleed: 4 }
+        },
+        {
+            id: 472,
+            name: 'Hell Mirror',
+            img_path: '/textures/cards/hell_mirror.png',
+            tier: 6,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 25, turns: 3 }, block: 8, extraPlays: 1 }
+        },
+
+        // ── T7 ranged — legendary, T6 equipment only (~10% per slot) ────
+        {
+            id: 711,
+            name: 'Godshot Supremacy',
+            img_path: '/textures/cards/godshot_supremacy.png',
+            tier: 7,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 25, vulnerable: { pct: 40, turns: 3 } }
+        },
+        {
+            id: 712,
+            name: 'Inferno Cascade',
+            img_path: '/textures/cards/inferno_cascade.png',
+            tier: 7,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 15, scorch: 8, bleed: 4 }
+        },
+        {
+            id: 713,
+            name: 'Death Rain',
+            img_path: '/textures/cards/death_rain.png',
+            tier: 7,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 5,
+            effects: { damage: 12, bleed: 7 }
+        },
+        {
+            id: 714,
+            name: 'World Ender Volley',
+            img_path: '/textures/cards/world_ender_volley.png',
+            tier: 7,
+            type: 'ranged',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 22, bleed: 8, scorch: 7, backfire: 12 }
+        },
+        {
+            id: 715,
+            name: 'Null Bolt',
+            img_path: '/textures/cards/null_bolt.png',
+            tier: 7,
+            type: 'ranged',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 28, bleed: 6, scorch: 6, backfire: 9 }
         }
     ],
 
@@ -1433,7 +3159,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2 }
+            effects: { extraPlays: 1 }
         },
         {
             id: 128,
@@ -1703,7 +3429,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 1 }
+            effects: { extraPlays: 1, strength: 1 }
         },
         {
             id: 152,
@@ -1714,7 +3440,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, backfire: 2 }
+            effects: { extraPlays: 1, backfire: 2 }
         },
         {
             id: 153,
@@ -1736,7 +3462,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2 }
+            effects: { extraPlays: 1 }
         },
         {
             id: 155,
@@ -1758,7 +3484,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 3, backfire: 9 }
+            effects: { extraPlays: 2, backfire: 9 }
         },
         {
             id: 157,
@@ -1826,7 +3552,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 4 }
+            effects: { extraPlays: 1, strength: 4 }
         },
         {
             id: 163,
@@ -1859,7 +3585,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 3 }
+            effects: { extraPlays: 1, strength: 3 }
         },
         {
             id: 166,
@@ -1892,7 +3618,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 5 }
+            effects: { extraPlays: 1, strength: 4 }
         },
         {
             id: 169,
@@ -1938,7 +3664,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { extraPlays: 2, vulnerable: { pct: 15, turns: 2 } }
+            effects: { extraPlays: 1, vulnerable: { pct: 15, turns: 2 } }
         },
         {
             id: 173,
@@ -1960,7 +3686,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 6 }
+            effects: { extraPlays: 1, strength: 5 }
         },
         {
             id: 175,
@@ -1982,7 +3708,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 2, strength: 6, backfire: 6 }
+            effects: { extraPlays: 1, strength: 5, backfire: 6 }
         },
         {
             id: 177,
@@ -2027,6 +3753,814 @@
             targetType: 'single',
             affectedTargets: 1,
             effects: { extraPlays: 1, healing: 5, block: 5, bleed: 5 }
+        },
+
+        // ── NEW T1 helmet ────────────────────────────────────────────────
+        {
+            id: 501,
+            name: 'Quick Study',
+            img_path: '/textures/cards/quick_study.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1 }
+        },
+        {
+            id: 502,
+            name: 'Fortify Mind',
+            img_path: '/textures/cards/fortify_mind.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 3, strength: 1 }
+        },
+        {
+            id: 503,
+            name: 'Berserker Eye',
+            img_path: '/textures/cards/berserker_eye.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 2, backfire: 2 }
+        },
+        {
+            id: 504,
+            name: 'Regen Pulse',
+            img_path: '/textures/cards/regen_pulse.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 1 }
+        },
+        {
+            id: 505,
+            name: 'Keen Focus',
+            img_path: '/textures/cards/keen_focus.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, block: 2 }
+        },
+        {
+            id: 506,
+            name: 'Headbutt',
+            img_path: '/textures/cards/headbutt.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 3, vulnerable: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 507,
+            name: 'Battle Cry',
+            img_path: '/textures/cards/battle_cry.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 1, extraPlays: 1, backfire: 1 }
+        },
+        {
+            id: 508,
+            name: 'Meditate',
+            img_path: '/textures/cards/meditate.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { healing: 3, regen: 1 }
+        },
+        {
+            id: 509,
+            name: 'Reckless Vision',
+            img_path: '/textures/cards/reckless_vision.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, backfire: 3 }
+        },
+        {
+            id: 510,
+            name: 'First Blood',
+            img_path: '/textures/cards/first_blood.png',
+            tier: 1,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 3, extraPlays: 1 }
+        },
+
+        // ── NEW T2 helmet ────────────────────────────────────────────────
+        {
+            id: 511,
+            name: 'Tactical Mind',
+            img_path: '/textures/cards/tactical_mind.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, strength: 2 }
+        },
+        {
+            id: 512,
+            name: 'Iron Will',
+            img_path: '/textures/cards/iron_will.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 5, strength: 2 }
+        },
+        {
+            id: 513,
+            name: 'Blood Rage',
+            img_path: '/textures/cards/blood_rage.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 3, backfire: 3 }
+        },
+        {
+            id: 514,
+            name: 'Vital Flow',
+            img_path: '/textures/cards/vital_flow.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 2, healing: 3 }
+        },
+        {
+            id: 515,
+            name: 'Bleed Insight',
+            img_path: '/textures/cards/bleed_insight.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { bleed: 3, extraPlays: 1 }
+        },
+        {
+            id: 516,
+            name: 'Calculated Strike',
+            img_path: '/textures/cards/calculated_strike.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 5, vulnerable: { pct: 20, turns: 2 } }
+        },
+        {
+            id: 517,
+            name: 'Clarity',
+            img_path: '/textures/cards/clarity.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, regen: 2 }
+        },
+        {
+            id: 518,
+            name: 'Phantom Steps',
+            img_path: '/textures/cards/phantom_steps.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 4, extraPlays: 1 }
+        },
+        {
+            id: 519,
+            name: 'Predator Sense',
+            img_path: '/textures/cards/predator_sense.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 2, extraPlays: 1, backfire: 2 }
+        },
+        {
+            id: 520,
+            name: 'Veteran Resolve',
+            img_path: '/textures/cards/veteran_resolve.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 4, healing: 5 }
+        },
+
+        // ── NEW T3 helmet ────────────────────────────────────────────────
+        {
+            id: 521,
+            name: 'War Trance',
+            img_path: '/textures/cards/war_trance.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 4, extraPlays: 1, backfire: 4 }
+        },
+        {
+            id: 522,
+            name: 'Regenerative Focus',
+            img_path: '/textures/cards/regenerative_focus.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 3, block: 4 }
+        },
+        {
+            id: 523,
+            name: 'Bleed Commander',
+            img_path: '/textures/cards/bleed_commander.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { bleed: 4, extraPlays: 1, damage: 4 }
+        },
+        {
+            id: 524,
+            name: 'Battle Trance',
+            img_path: '/textures/cards/battle_trance.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, strength: 3 }
+        },
+        {
+            id: 525,
+            name: 'Expose All',
+            img_path: '/textures/cards/expose_all.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 20, turns: 2 } }
+        },
+        {
+            id: 526,
+            name: 'Lifeflow',
+            img_path: '/textures/cards/lifeflow.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 3, healing: 5 }
+        },
+        {
+            id: 527,
+            name: 'Mad Genius',
+            img_path: '/textures/cards/mad_genius.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 3, extraPlays: 1, backfire: 4 }
+        },
+        {
+            id: 528,
+            name: 'Tactical Advantage',
+            img_path: '/textures/cards/tactical_advantage.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, block: 6, strength: 1 }
+        },
+        {
+            id: 529,
+            name: 'Death Focus',
+            img_path: '/textures/cards/death_focus.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, extraPlays: 2, backfire: 6 }
+        },
+        {
+            id: 530,
+            name: 'Field Commander',
+            img_path: '/textures/cards/field_commander.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 4, regen: 2 }
+        },
+
+        // ── NEW T4 helmet ────────────────────────────────────────────────
+        {
+            id: 531,
+            name: 'Bloodlust Vision',
+            img_path: '/textures/cards/bloodlust_vision.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, extraPlays: 1, backfire: 5 }
+        },
+        {
+            id: 532,
+            name: 'Soul Sight',
+            img_path: '/textures/cards/soul_sight.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { vulnerable: { pct: 30, turns: 2 }, bleed: 3 }
+        },
+        {
+            id: 533,
+            name: 'Regen Mastery',
+            img_path: '/textures/cards/regen_mastery.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 4, healing: 6 }
+        },
+        {
+            id: 534,
+            name: 'Combat Surge',
+            img_path: '/textures/cards/combat_surge.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, strength: 5, backfire: 6 }
+        },
+        {
+            id: 535,
+            name: 'Bleeding Oracle',
+            img_path: '/textures/cards/bleeding_oracle.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { bleed: 5, extraPlays: 1, damage: 5 }
+        },
+        {
+            id: 536,
+            name: 'Hell Trance',
+            img_path: '/textures/cards/hell_trance.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, regen: 2, backfire: 5 }
+        },
+        {
+            id: 537,
+            name: 'Strategic Mind',
+            img_path: '/textures/cards/strategic_mind.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 1, strength: 3, block: 5 }
+        },
+        {
+            id: 538,
+            name: 'Overwhelm',
+            img_path: '/textures/cards/overwhelm.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 25, turns: 2 }, bleed: 2 }
+        },
+        {
+            id: 539,
+            name: 'Phantom Sight',
+            img_path: '/textures/cards/phantom_sight.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, regen: 3, block: 6 }
+        },
+        {
+            id: 540,
+            name: 'Warlord Mind',
+            img_path: '/textures/cards/warlord_mind.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, extraPlays: 1, healing: 4, backfire: 6 }
+        },
+
+        // ── NEW T5 helmet ────────────────────────────────────────────────
+        {
+            id: 541,
+            name: 'Infinite Rage',
+            img_path: '/textures/cards/infinite_rage.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 6, extraPlays: 1, backfire: 7 }
+        },
+        {
+            id: 542,
+            name: 'Lifestream',
+            img_path: '/textures/cards/lifestream.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 5, healing: 8 }
+        },
+        {
+            id: 543,
+            name: 'Bleed Frenzy Mind',
+            img_path: '/textures/cards/bleed_frenzy_mind.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { bleed: 6, extraPlays: 1, damage: 6 }
+        },
+        {
+            id: 544,
+            name: 'Hellbound Focus',
+            img_path: '/textures/cards/hellbound_focus.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 6, regen: 3, backfire: 6 }
+        },
+        {
+            id: 545,
+            name: 'Supreme Overload',
+            img_path: '/textures/cards/supreme_overload.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 3, strength: 5, backfire: 9 }
+        },
+        {
+            id: 546,
+            name: 'Predator Sight',
+            img_path: '/textures/cards/predator_sight.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { vulnerable: { pct: 35, turns: 2 }, bleed: 4 }
+        },
+        {
+            id: 547,
+            name: 'Momentum Mind',
+            img_path: '/textures/cards/momentum_mind.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 5, extraPlays: 1, regen: 2, backfire: 6 }
+        },
+        {
+            id: 548,
+            name: 'Mass Expose',
+            img_path: '/textures/cards/mass_expose.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 30, turns: 2 } }
+        },
+        {
+            id: 549,
+            name: 'Wrath Engine',
+            img_path: '/textures/cards/wrath_engine.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 7, extraPlays: 2, regen: 3 }
+        },
+        {
+            id: 550,
+            name: 'Bloodmind',
+            img_path: '/textures/cards/bloodmind.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 6, extraPlays: 1, healing: 6, backfire: 8 }
+        },
+
+        // ── NEW T6 helmet ────────────────────────────────────────────────
+        {
+            id: 551,
+            name: 'Godmind',
+            img_path: '/textures/cards/godmind.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 3, strength: 7, regen: 4, backfire: 8 }
+        },
+        {
+            id: 552,
+            name: 'Undying Will',
+            img_path: '/textures/cards/undying_will.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 6, healing: 10, block: 5 }
+        },
+        {
+            id: 553,
+            name: 'Void Focus',
+            img_path: '/textures/cards/void_focus.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 7, extraPlays: 1, backfire: 8 }
+        },
+        {
+            id: 554,
+            name: 'Bleed Tyrant',
+            img_path: '/textures/cards/bleed_tyrant.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { bleed: 7, extraPlays: 1, damage: 7 }
+        },
+        {
+            id: 555,
+            name: 'Hellish Intellect',
+            img_path: '/textures/cards/hellish_intellect.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 7, regen: 4, backfire: 7 }
+        },
+        {
+            id: 556,
+            name: 'Final Clarity',
+            img_path: '/textures/cards/final_clarity.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 3, strength: 6, healing: 10 }
+        },
+        {
+            id: 557,
+            name: 'Doom Sight',
+            img_path: '/textures/cards/doom_sight.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 35, turns: 2 }, bleed: 4 }
+        },
+        {
+            id: 558,
+            name: 'Eternal Flow',
+            img_path: '/textures/cards/eternal_flow.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 6, strength: 5, extraPlays: 1, backfire: 7 }
+        },
+        {
+            id: 559,
+            name: 'Hell Emperor Mind',
+            img_path: '/textures/cards/hell_emperor_mind.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 9, extraPlays: 2, regen: 5, backfire: 10 }
+        },
+        {
+            id: 560,
+            name: 'Apocalypse Sight',
+            img_path: '/textures/cards/apocalypse_sight.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 45, turns: 3 }, bleed: 5, extraPlays: 1 }
+        },
+
+        // ── EXTRA: helmet deflect cards ──────────────────────────────────
+        {
+            id: 561,
+            name: 'Reactive Visor',
+            img_path: '/textures/cards/reactive_visor.png',
+            tier: 2,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 8, turns: 2 }, block: 4 }
+        },
+        {
+            id: 562,
+            name: 'Tactical Dodge',
+            img_path: '/textures/cards/tactical_dodge.png',
+            tier: 3,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 10, turns: 1 }, extraPlays: 1 }
+        },
+        {
+            id: 563,
+            name: 'War Helm Aura',
+            img_path: '/textures/cards/war_helm_aura.png',
+            tier: 4,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 12, turns: 2 }, strength: 3 }
+        },
+        {
+            id: 564,
+            name: 'Ghost Sight',
+            img_path: '/textures/cards/ghost_sight.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 15, turns: 2 }, regen: 2 }
+        },
+        {
+            id: 565,
+            name: 'Warden Visor',
+            img_path: '/textures/cards/warden_visor.png',
+            tier: 5,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 22, turns: 3 }, extraPlays: 1, block: 8 }
+        },
+        {
+            id: 566,
+            name: 'Hell Sentinel Mind',
+            img_path: '/textures/cards/hell_sentinel_mind.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 18, turns: 2 }, strength: 4, backfire: 5 }
+        },
+        {
+            id: 567,
+            name: 'Omega Visor',
+            img_path: '/textures/cards/omega_visor.png',
+            tier: 6,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 30, turns: 3 }, strength: 5, extraPlays: 1 }
+        },
+
+        // ── T7 helmet — legendary, T6 equipment only (~10% per slot) ────
+        {
+            id: 721,
+            name: 'Absolute Power',
+            img_path: '/textures/cards/absolute_power.png',
+            tier: 7,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 9, extraPlays: 1, backfire: 8 }
+        },
+        {
+            id: 722,
+            name: 'Eternal Mind',
+            img_path: '/textures/cards/eternal_mind.png',
+            tier: 7,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 7, strength: 6, extraPlays: 1 }
+        },
+        {
+            id: 723,
+            name: 'Mass Doom',
+            img_path: '/textures/cards/mass_doom.png',
+            tier: 7,
+            type: 'helmet',
+            exhaust: false,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { vulnerable: { pct: 45, turns: 3 }, bleed: 6 }
+        },
+        {
+            id: 724,
+            name: 'Apex Clarity',
+            img_path: '/textures/cards/apex_clarity.png',
+            tier: 7,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 3, strength: 8, regen: 4 }
+        },
+        {
+            id: 725,
+            name: 'God Emperor Sight',
+            img_path: '/textures/cards/god_emperor_sight.png',
+            tier: 7,
+            type: 'helmet',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 11, extraPlays: 2, regen: 6, backfire: 10 }
         }
     ],
 
@@ -2615,7 +5149,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { block: 20, healing: 8 }
+            effects: { block: 16, healing: 7 }
         },
         {
             id: 233,
@@ -2626,7 +5160,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { healing: 20, extraPlays: 1 }
+            effects: { healing: 14 }
         },
         {
             id: 234,
@@ -2659,7 +5193,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { block: 22, damage: 8 }
+            effects: { block: 17, damage: 7 }
         },
         {
             id: 237,
@@ -2670,7 +5204,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { block: 18, healing: 12, extraPlays: 1 }
+            effects: { block: 13, healing: 9 }
         },
         {
             id: 238,
@@ -2704,59 +5238,846 @@
             targetType: 'self',
             affectedTargets: 1,
             effects: { block: 1000 }
+        },
+
+        // ── NEW T1 armour ────────────────────────────────────────────────
+        {
+            id: 601,
+            name: 'Crude Plating',
+            img_path: '/textures/cards/crude_plating.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 3 }
+        },
+        {
+            id: 602,
+            name: 'Thorn Shell',
+            img_path: '/textures/cards/thorn_shell.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 5, turns: 1 } }
+        },
+        {
+            id: 603,
+            name: 'First Aid',
+            img_path: '/textures/cards/first_aid.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { healing: 4 }
+        },
+        {
+            id: 604,
+            name: 'Reactive Hide',
+            img_path: '/textures/cards/reactive_hide.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 2, deflect: { pct: 5, turns: 1 } }
+        },
+        {
+            id: 605,
+            name: 'Stone Skin',
+            img_path: '/textures/cards/stone_skin.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 10, deflect: { pct: 8, turns: 2 } }
+        },
+        {
+            id: 606,
+            name: 'Endure',
+            img_path: '/textures/cards/endure.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 4, healing: 2 }
+        },
+        {
+            id: 607,
+            name: 'Deflect Shard',
+            img_path: '/textures/cards/deflect_shard.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 6, turns: 2 } }
+        },
+        {
+            id: 608,
+            name: 'Regen Layer',
+            img_path: '/textures/cards/regen_layer.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 1, block: 2 }
+        },
+        {
+            id: 609,
+            name: 'Tough It Out',
+            img_path: '/textures/cards/tough_it_out.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 3, healing: 3 }
+        },
+        {
+            id: 610,
+            name: 'Iron Shell',
+            img_path: '/textures/cards/iron_shell.png',
+            tier: 1,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 8, regen: 2 }
+        },
+
+        // ── NEW T2 armour ────────────────────────────────────────────────
+        {
+            id: 611,
+            name: 'Bulwark',
+            img_path: '/textures/cards/bulwark.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 6, healing: 3 }
+        },
+        {
+            id: 612,
+            name: 'Mirror Plating',
+            img_path: '/textures/cards/mirror_plating.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 8, turns: 2 } }
+        },
+        {
+            id: 613,
+            name: 'Fortified Stance',
+            img_path: '/textures/cards/fortified_stance.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 7, deflect: { pct: 6, turns: 1 } }
+        },
+        {
+            id: 614,
+            name: 'Mending Plate',
+            img_path: '/textures/cards/mending_plate.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { healing: 7, regen: 1 }
+        },
+        {
+            id: 615,
+            name: 'Spined Armor',
+            img_path: '/textures/cards/spined_armor.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 10, turns: 2 }, block: 3 }
+        },
+        {
+            id: 616,
+            name: 'Renewal',
+            img_path: '/textures/cards/renewal.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 2, healing: 4 }
+        },
+        {
+            id: 617,
+            name: 'Reactive Shell',
+            img_path: '/textures/cards/reactive_shell.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 12, deflect: { pct: 12, turns: 2 } }
+        },
+        {
+            id: 618,
+            name: 'War Plate',
+            img_path: '/textures/cards/war_plate.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 8, strength: 1 }
+        },
+        {
+            id: 619,
+            name: 'Thorn Ward',
+            img_path: '/textures/cards/thorn_ward.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 9, turns: 2 }, healing: 3 }
+        },
+        {
+            id: 620,
+            name: 'Living Armor',
+            img_path: '/textures/cards/living_armor.png',
+            tier: 2,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 3, block: 8, healing: 5 }
+        },
+
+        // ── NEW T3 armour ────────────────────────────────────────────────
+        {
+            id: 621,
+            name: 'Retaliation Plate',
+            img_path: '/textures/cards/retaliation_plate.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 12, turns: 2 }, block: 6 }
+        },
+        {
+            id: 622,
+            name: 'Ironclad',
+            img_path: '/textures/cards/ironclad.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 10, healing: 5 }
+        },
+        {
+            id: 623,
+            name: 'Regenerating Shell',
+            img_path: '/textures/cards/regenerating_shell.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 3, block: 6 }
+        },
+        {
+            id: 624,
+            name: 'Warden Stance',
+            img_path: '/textures/cards/warden_stance.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 9, deflect: { pct: 10, turns: 2 } }
+        },
+        {
+            id: 625,
+            name: 'Soul Mending',
+            img_path: '/textures/cards/soul_mending.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { healing: 10, regen: 3 }
+        },
+        {
+            id: 626,
+            name: 'Thorn Fortress',
+            img_path: '/textures/cards/thorn_fortress.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 18, turns: 2 }, block: 12 }
+        },
+        {
+            id: 627,
+            name: 'Bastion',
+            img_path: '/textures/cards/bastion.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 12, regen: 2 }
+        },
+        {
+            id: 628,
+            name: 'Resilience',
+            img_path: '/textures/cards/resilience.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 8, healing: 6, deflect: { pct: 8, turns: 1 } }
+        },
+        {
+            id: 629,
+            name: 'Reactive Armor',
+            img_path: '/textures/cards/reactive_armor.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 15, regen: 3, deflect: { pct: 12, turns: 2 } }
+        },
+        {
+            id: 630,
+            name: 'Hardened',
+            img_path: '/textures/cards/hardened.png',
+            tier: 3,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 11, strength: 2 }
+        },
+
+        // ── NEW T4 armour ────────────────────────────────────────────────
+        {
+            id: 631,
+            name: 'Mirror Ward',
+            img_path: '/textures/cards/mirror_ward.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 15, turns: 2 }, block: 8 }
+        },
+        {
+            id: 632,
+            name: 'Juggernaut',
+            img_path: '/textures/cards/juggernaut.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 14, healing: 7 }
+        },
+        {
+            id: 633,
+            name: 'Eternal Regen',
+            img_path: '/textures/cards/eternal_regen.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 4, healing: 8 }
+        },
+        {
+            id: 634,
+            name: 'Thornmail',
+            img_path: '/textures/cards/thornmail.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 18, turns: 2 }, healing: 5 }
+        },
+        {
+            id: 635,
+            name: 'Unbreakable',
+            img_path: '/textures/cards/unbreakable.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 20, deflect: { pct: 15, turns: 2 }, regen: 3 }
+        },
+        {
+            id: 636,
+            name: 'Vital Barrier',
+            img_path: '/textures/cards/vital_barrier.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 12, healing: 8, deflect: { pct: 10, turns: 1 } }
+        },
+        {
+            id: 637,
+            name: 'War Fortress',
+            img_path: '/textures/cards/war_fortress.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 13, strength: 3, deflect: { pct: 8, turns: 1 } }
+        },
+        {
+            id: 638,
+            name: 'Regen Fortress',
+            img_path: '/textures/cards/regen_fortress.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 5, block: 9 }
+        },
+        {
+            id: 639,
+            name: 'Spiteful Armor',
+            img_path: '/textures/cards/spiteful_armor.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 22, turns: 3 }, block: 14 }
+        },
+        {
+            id: 640,
+            name: 'Titan Defense',
+            img_path: '/textures/cards/titan_defense.png',
+            tier: 4,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 15, regen: 3, healing: 6 }
+        },
+
+        // ── NEW T5 armour ────────────────────────────────────────────────
+        {
+            id: 641,
+            name: 'Phantom Plate',
+            img_path: '/textures/cards/phantom_plate.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 20, turns: 2 }, block: 10 }
+        },
+        {
+            id: 642,
+            name: 'Colossus Guard',
+            img_path: '/textures/cards/colossus_guard.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 17, healing: 10 }
+        },
+        {
+            id: 643,
+            name: 'Vital Regen',
+            img_path: '/textures/cards/vital_regen.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 5, healing: 10 }
+        },
+        {
+            id: 644,
+            name: 'Retribution Shell',
+            img_path: '/textures/cards/retribution_shell.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 22, turns: 2 }, healing: 8 }
+        },
+        {
+            id: 645,
+            name: 'Dreadnought',
+            img_path: '/textures/cards/dreadnought.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 18, deflect: { pct: 15, turns: 2 } }
+        },
+        {
+            id: 646,
+            name: 'Immortal Plate',
+            img_path: '/textures/cards/immortal_plate.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 25, regen: 5, deflect: { pct: 20, turns: 2 } }
+        },
+        {
+            id: 647,
+            name: 'Blood Barrier',
+            img_path: '/textures/cards/blood_barrier.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 14, healing: 8, regen: 3 }
+        },
+        {
+            id: 648,
+            name: 'Spiked Fortress',
+            img_path: '/textures/cards/spiked_fortress.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 20, turns: 3 }, block: 11 }
+        },
+        {
+            id: 649,
+            name: 'Hell Bulwark',
+            img_path: '/textures/cards/hell_bulwark.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 22, deflect: { pct: 25, turns: 2 }, healing: 10 }
+        },
+        {
+            id: 650,
+            name: 'Eternal Barrier',
+            img_path: '/textures/cards/eternal_barrier.png',
+            tier: 5,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 5, block: 13, deflect: { pct: 12, turns: 2 } }
+        },
+
+        // ── NEW T6 armour ────────────────────────────────────────────────
+        {
+            id: 651,
+            name: 'Mirror Colossus',
+            img_path: '/textures/cards/mirror_colossus.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 25, turns: 2 }, block: 14 }
+        },
+        {
+            id: 652,
+            name: 'Undying Fortress',
+            img_path: '/textures/cards/undying_fortress.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 20, regen: 6, healing: 10 }
+        },
+        {
+            id: 653,
+            name: 'Hellfire Ward',
+            img_path: '/textures/cards/hellfire_ward.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 28, turns: 2 }, healing: 10 }
+        },
+        {
+            id: 654,
+            name: 'Adamantine Shell',
+            img_path: '/textures/cards/adamantine_shell.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 22, deflect: { pct: 18, turns: 3 } }
+        },
+        {
+            id: 655,
+            name: 'Eternal Reckoning',
+            img_path: '/textures/cards/eternal_reckoning.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 40, turns: 3 }, block: 20, regen: 5 }
+        },
+        {
+            id: 656,
+            name: 'Godplate',
+            img_path: '/textures/cards/godplate.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 22, healing: 12, deflect: { pct: 15, turns: 2 } }
+        },
+        {
+            id: 657,
+            name: 'Hell Retribution',
+            img_path: '/textures/cards/hell_retribution.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 30, turns: 2 }, block: 12, regen: 4 }
+        },
+        {
+            id: 658,
+            name: 'Immortal Fortress',
+            img_path: '/textures/cards/immortal_fortress.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 30, regen: 7, healing: 15 }
+        },
+        {
+            id: 659,
+            name: 'Void Plate',
+            img_path: '/textures/cards/void_plate.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 18, deflect: { pct: 25, turns: 3 }, regen: 4 }
+        },
+        {
+            id: 660,
+            name: 'Apocalypse Armor',
+            img_path: '/textures/cards/apocalypse_armor.png',
+            tier: 6,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 35, deflect: { pct: 35, turns: 3 }, regen: 6, healing: 14 }
+        },
+
+        // ── T7 armour — legendary, T6 equipment only (~10% per slot) ────
+        {
+            id: 731,
+            name: 'Titan Shell',
+            img_path: '/textures/cards/titan_shell.png',
+            tier: 7,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 25, deflect: { pct: 30, turns: 3 } }
+        },
+        {
+            id: 732,
+            name: 'Undying God',
+            img_path: '/textures/cards/undying_god.png',
+            tier: 7,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { regen: 8, healing: 15, block: 15 }
+        },
+        {
+            id: 733,
+            name: 'Eternal Deflection',
+            img_path: '/textures/cards/eternal_deflection.png',
+            tier: 7,
+            type: 'armour',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { deflect: { pct: 35, turns: 3 }, regen: 6, block: 12 }
+        },
+        {
+            id: 734,
+            name: 'Absolute Bulwark',
+            img_path: '/textures/cards/absolute_bulwark.png',
+            tier: 7,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 45, deflect: { pct: 45, turns: 3 }, regen: 8 }
+        },
+        {
+            id: 735,
+            name: 'Invincible Core',
+            img_path: '/textures/cards/invincible_core.png',
+            tier: 7,
+            type: 'armour',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { block: 40, regen: 9, healing: 20, deflect: { pct: 28, turns: 2 } }
         }
     ],
 
     // Cursed cards used by trap events.
     cursed: [
+        // ── Powerful but dangerous — high risk/reward ────────────────────
         {
             id: 901,
-            name: 'sussy combo',
-            img_path: '/textures/cards/curse_sussy_combo.png',
-            tier: 1,
+            name: 'Hellpact',
+            img_path: '/textures/cards/curse_hellpact.png',
+            tier: 3,
             type: 'cursed',
             exhaust: false,
-            targetType: 'self',
+            targetType: 'single',
             affectedTargets: 1,
-            effects: { backfire: 4 }
+            effects: { damage: 22, backfire: 15 }
         },
         {
             id: 902,
-            name: 'Oopsie, All Regret',
-            img_path: '/textures/cards/curse_oopsie_all_regret.png',
-            tier: 1,
+            name: 'Soul Sacrifice',
+            img_path: '/textures/cards/curse_soul_sacrifice.png',
+            tier: 4,
             type: 'cursed',
-            exhaust: false,
-            targetType: 'self',
-            affectedTargets: 1,
-            effects: { backfire: 6 }
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 25, backfire: 20 }
         },
         {
             id: 903,
-            name: 'Monday Simulator',
-            img_path: '/textures/cards/curse_monday_simulator.png',
-            tier: 1,
+            name: 'Blood Pact',
+            img_path: '/textures/cards/curse_blood_pact.png',
+            tier: 4,
             type: 'cursed',
-            exhaust: false,
+            exhaust: true,
             targetType: 'self',
             affectedTargets: 1,
-            effects: {}
+            effects: { strength: 9, backfire: 22 }
         },
         {
             id: 904,
-            name: 'German Stare',
-            img_path: '/textures/cards/curse_german_stare.png',
+            name: 'Infernal Contract',
+            img_path: '/textures/cards/curse_infernal_contract.png',
+            tier: 3,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { extraPlays: 2, backfire: 11 }
+        },
+        {
+            id: 905,
+            name: 'Damnation Strike',
+            img_path: '/textures/cards/curse_damnation_strike.png',
+            tier: 4,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 20, bleed: 7, backfire: 14 }
+        },
+        {
+            id: 906,
+            name: 'Void Gamble',
+            img_path: '/textures/cards/curse_void_gamble.png',
+            tier: 5,
+            type: 'cursed',
+            exhaust: true,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 35, backfire: 28 }
+        },
+        {
+            id: 907,
+            name: 'Sacrifice Play',
+            img_path: '/textures/cards/curse_sacrifice_play.png',
+            tier: 5,
+            type: 'cursed',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 18, strength: 4, backfire: 18 }
+        },
+
+        // ── Plain bad — discourages keeping cursed equipment ─────────────
+        {
+            id: 908,
+            name: 'Black Mark',
+            img_path: '/textures/cards/curse_black_mark.png',
             tier: 1,
             type: 'cursed',
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: {}
+            effects: { backfire: 10 }
         },
         {
-            id: 905,
-            name: 'crazy hamburger',
-            img_path: '/textures/cards/curse_crazy_hamburger.png',
+            id: 909,
+            name: 'Tainted Blow',
+            img_path: '/textures/cards/curse_tainted_blow.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, backfire: 14 }
+        },
+        {
+            id: 910,
+            name: 'Cursed Reflex',
+            img_path: '/textures/cards/curse_cursed_reflex.png',
             tier: 1,
             type: 'cursed',
             exhaust: false,
@@ -2765,15 +6086,340 @@
             effects: { backfire: 8 }
         },
         {
-            id: 906,
-            name: 'Absolutely Nothing',
-            img_path: '/textures/cards/curse_absolutely_nothing.png',
+            id: 911,
+            name: 'Hex Wound',
+            img_path: '/textures/cards/curse_hex_wound.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 15 }
+        },
+        {
+            id: 912,
+            name: 'Void Drain',
+            img_path: '/textures/cards/curse_void_drain.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 12 }
+        },
+
+        // ── More risk/reward ─────────────────────────────────────────────
+        {
+            id: 913,
+            name: 'Berserker Pact',
+            img_path: '/textures/cards/curse_berserker_pact.png',
+            tier: 5,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 7, extraPlays: 1, backfire: 18 }
+        },
+        {
+            id: 914,
+            name: 'Cursed Flurry',
+            img_path: '/textures/cards/curse_cursed_flurry.png',
+            tier: 4,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'random',
+            affectedTargets: 4,
+            effects: { damage: 12, bleed: 5, backfire: 18 }
+        },
+        {
+            id: 915,
+            name: 'Doom Volley',
+            img_path: '/textures/cards/curse_doom_volley.png',
+            tier: 4,
+            type: 'cursed',
+            exhaust: true,
+            targetType: 'all',
+            affectedTargets: 'all',
+            effects: { damage: 16, scorch: 5, backfire: 22 }
+        },
+        {
+            id: 916,
+            name: 'Forbidden Strength',
+            img_path: '/textures/cards/curse_forbidden_strength.png',
+            tier: 6,
+            type: 'cursed',
+            exhaust: true,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { strength: 12, extraPlays: 2, backfire: 30 }
+        },
+        {
+            id: 917,
+            name: 'Hell Roulette',
+            img_path: '/textures/cards/curse_hell_roulette.png',
+            tier: 5,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 18, vulnerable: { pct: 35, turns: 2 }, backfire: 20 }
+        },
+
+        // ── More plain bad ───────────────────────────────────────────────
+        {
+            id: 918,
+            name: 'Ruinous Step',
+            img_path: '/textures/cards/curse_ruinous_step.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 14 }
+        },
+        {
+            id: 919,
+            name: 'Cursed Whisper',
+            img_path: '/textures/cards/curse_cursed_whisper.png',
             tier: 1,
             type: 'cursed',
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: {}
+            effects: { backfire: 9 }
+        },
+        {
+            id: 920,
+            name: 'Hollow Strike',
+            img_path: '/textures/cards/curse_hollow_strike.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, backfire: 16 }
+        },
+        {
+            id: 921,
+            name: 'Marked',
+            img_path: '/textures/cards/curse_marked.png',
+            tier: 3,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 17 }
+        },
+
+        // ── Extra plain-bad fillers — dilutes the cursed pool ────────────
+        {
+            id: 922,
+            name: 'Wretched Touch',
+            img_path: '/textures/cards/curse_wretched_touch.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 11 }
+        },
+        {
+            id: 923,
+            name: 'Blight Grasp',
+            img_path: '/textures/cards/curse_blight_grasp.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 13 }
+        },
+        {
+            id: 924,
+            name: 'Doom Brand',
+            img_path: '/textures/cards/curse_doom_brand.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 16 }
+        },
+        {
+            id: 925,
+            name: 'Spectral Leech',
+            img_path: '/textures/cards/curse_spectral_leech.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, backfire: 15 }
+        },
+        {
+            id: 926,
+            name: 'Cursed Burden',
+            img_path: '/textures/cards/curse_cursed_burden.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 12 }
+        },
+        {
+            id: 927,
+            name: 'Hex Pulse',
+            img_path: '/textures/cards/curse_hex_pulse.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 10 }
+        },
+        {
+            id: 928,
+            name: 'Vile Scar',
+            img_path: '/textures/cards/curse_vile_scar.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 14 }
+        },
+        {
+            id: 929,
+            name: 'Rot Touch',
+            img_path: '/textures/cards/curse_rot_touch.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, backfire: 18 }
+        },
+        {
+            id: 930,
+            name: 'Tainted Pulse',
+            img_path: '/textures/cards/curse_tainted_pulse.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 9 }
+        },
+        {
+            id: 931,
+            name: 'Forsaken Strike',
+            img_path: '/textures/cards/curse_forsaken_strike.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 3, backfire: 20 }
+        },
+        {
+            id: 932,
+            name: 'Cursed Ache',
+            img_path: '/textures/cards/curse_cursed_ache.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 8 }
+        },
+        {
+            id: 933,
+            name: 'Withered Blow',
+            img_path: '/textures/cards/curse_withered_blow.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, backfire: 12 }
+        },
+        {
+            id: 934,
+            name: 'Shadow Sting',
+            img_path: '/textures/cards/curse_shadow_sting.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 11 }
+        },
+        {
+            id: 935,
+            name: 'Foul Brand',
+            img_path: '/textures/cards/curse_foul_brand.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 15 }
+        },
+        {
+            id: 936,
+            name: 'Hex Lash',
+            img_path: '/textures/cards/curse_hex_lash.png',
+            tier: 2,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 2, backfire: 17 }
+        },
+        {
+            id: 937,
+            name: 'Plagued Touch',
+            img_path: '/textures/cards/curse_plagued_touch.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 10 }
+        },
+        {
+            id: 938,
+            name: 'Cursed Miasma',
+            img_path: '/textures/cards/curse_cursed_miasma.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 13 }
+        },
+        {
+            id: 939,
+            name: 'Wretched Blow',
+            img_path: '/textures/cards/curse_wretched_blow.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'single',
+            affectedTargets: 1,
+            effects: { damage: 1, backfire: 14 }
+        },
+        {
+            id: 940,
+            name: 'Dark Fumble',
+            img_path: '/textures/cards/curse_dark_fumble.png',
+            tier: 1,
+            type: 'cursed',
+            exhaust: false,
+            targetType: 'self',
+            affectedTargets: 1,
+            effects: { backfire: 12 }
         }
     ]
 };
@@ -2804,11 +6450,17 @@ function pickCardsForItem(itemType, tier) {
         return t1.slice(0, 5);
     }
 
-    const maxTier = 6;
+    const maxTier = tier === 6 ? 7 : 6;
     const minTier = 1;
 
     function rollCardTier() {
         const roll = Math.random();
+        // T6 equipment: 10% chance per slot to draw a legendary T7 card
+        if (tier === 6) {
+            if (roll < 0.1) return 7;
+            if (roll < 0.25) return 5; // 15% T5
+            return 6; // 75% T6
+        }
         if (roll < 0.15) return Math.max(minTier, tier - 1);
         if (roll < 0.85) return tier;
         return Math.min(maxTier, tier + 1);

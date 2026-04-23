@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../sql/database.js');
+const database = require('../sql/queries/authUserQueries.js');
 const fs = require('fs/promises');
 
 //!Multer
