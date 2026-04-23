@@ -56,7 +56,7 @@ async function fetchLeaderboardData() {
             const top10 = data.top10 || [];
 
             if (top10.length === 0) {
-                console.warn('No leaderboard data received');
+                toast('No leaderboard data found yet.', 'warning');
                 return;
             }
 
@@ -78,6 +78,7 @@ async function fetchLeaderboardData() {
         })
         .catch((error) => {
             if (error.name === 'AbortError') return;
+            toast('Failed to load leaderboard', 'error');
             console.error('Error fetching leaderboard:', error);
         });
 }

@@ -98,6 +98,14 @@ router.post('/start', requireLogin, async (req, res) => {
                 meleeMultiplier: meleeAtk,
                 rangedMultiplier: rangedAtk,
                 defenseMultiplier: (helmetDef + armorDef) / 2
+            const tagCards = (cards, itemImg) =>
+                (cards || []).map((c) => ({ ...c, source_item_img: itemImg || null }));
+            equipmentSnapshot = {
+                melee_cards: tagCards(inv.melee_cards, inv.melee_img),
+                ranged_cards: tagCards(inv.ranged_cards, inv.ranged_img),
+                helmet_cards: tagCards(inv.helmet_cards, inv.helmet_img),
+                armor_cards: tagCards(inv.armor_cards, inv.armor_img),
+                attackMultiplier: (Number(inv.melee_attack) || 1) + (Number(inv.ranged_attack) || 1)
             };
         }
 

@@ -65,17 +65,17 @@ async function Login() {
                 });
 
                 if (result.success) {
-                    console.log(result.message);
+                    toast(result.message || 'Sikeresen bejelentkeztél!', 'success');
                     Menu();
                 } else {
-                    alert(result.message);
+                    toast(result.message, 'error');
                 }
             } catch (error) {
-                alert('Hiba történt a bejelentkezés során');
+                toast('Hiba történt a bejelentkezés során', 'error');
                 console.error(error);
             }
         } else {
-            alert('Kérlek töltsd ki az összes mezőt!');
+            toast('Kérlek töltsd ki az összes mezőt!', 'error');
         }
     });
 
@@ -96,17 +96,17 @@ async function Login() {
                 });
 
                 if (result.success) {
-                    console.log(result.message);
+                    toast(result.message || 'Sikeres regisztráció!', 'success');
                     Menu();
                 } else {
-                    alert(result.message);
+                    toast(result.message, 'error');
                 }
             } catch (error) {
-                alert('Hiba történt a regisztráció során');
+                toast('Hiba történt a regisztráció során', 'error');
                 console.error(error);
             }
         } else {
-            alert('Kérlek töltsd ki az összes mezőt!');
+            toast('Kérlek töltsd ki az összes mezőt!', 'error');
         }
     });
 

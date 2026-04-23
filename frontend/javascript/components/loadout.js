@@ -90,7 +90,7 @@ async function createLoadoutGoldPanel(playerId) {
 
     transferButton.addEventListener('click', async () => {
         if (typeof isInGame !== 'undefined' && isInGame) {
-            alert('You cannot move gold to stash while in game.');
+            toast('You cannot move gold to stash while in a dungeon.', 'warning');
             refreshGoldControls();
             return;
         }
@@ -100,7 +100,7 @@ async function createLoadoutGoldPanel(playerId) {
             return;
         }
         if (transferAmount > goldState.loadoutGold) {
-            alert('Not enough gold in loadout.');
+            toast('Not enough gold in loadout.', 'error');
             refreshGoldControls();
             return;
         }
@@ -115,12 +115,13 @@ async function createLoadoutGoldPanel(playerId) {
 
             if (result.success && result.gold) {
                 goldState = mapLoadoutGold(result.gold);
+                toast(`${transferAmount} gold moved to stash`, 'success');
             } else {
-                alert(result.message || 'Failed to transfer gold.');
+                toast(result.message || 'Failed to transfer gold.', 'error');
                 goldState = await fetchLoadoutGold(playerId);
             }
         } catch (error) {
-            alert('Failed to transfer gold.');
+            toast('Failed to transfer gold.', 'error');
             goldState = await fetchLoadoutGold(playerId);
         } finally {
             amountSlider.value = '0';
@@ -137,12 +138,12 @@ async function openInventory() {
     if (document.getElementById('combat-scene')) return;
     const shopOverlay = document.getElementById('shop-overlay');
     if (shopOverlay) {
-        alert('Close the shop before opening your inventory.');
+        toast('Close the shop before opening your inventory.', 'warning');
         return;
     }
 
     if (typeof isEventChoicePending === 'function' && isEventChoicePending()) {
-        alert('Dismiss the current event before opening your inventory.');
+        toast('Dismiss the current event before opening your inventory.', 'warning');
         return;
     }
 
@@ -152,12 +153,12 @@ async function openInventory() {
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         if (!session.isLoggedIn || !session.userId) {
-            alert('You must be logged in to view your inventory.');
+            toast('You must be logged in to view your inventory.', 'error');
             return;
         }
         playerId = session.userId;
     } catch (error) {
-        alert('Could not retrieve session.');
+        toast('Could not retrieve session.', 'error');
         return;
     }
 
@@ -436,6 +437,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                             slot: equipmentSlot
                         });
                         if (result.success) {
+                            toast(`${itemName} equipped!`, 'success');
                             await renderInventoryContent(
                                 playerId,
                                 equippedGrid,
@@ -443,10 +445,10 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                                 loadoutCount
                             );
                         } else {
-                            alert(result.message || 'Failed to equip item.');
+                            toast(result.message || 'Failed to equip item.', 'error');
                         }
                     } catch (error) {
-                        alert('Error equipping item.');
+                        toast('Error equipping item.', 'error');
                     }
                 });
                 buttonRow.appendChild(equipButton);
@@ -475,6 +477,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                             loadoutId: item.loadoutId
                         });
                         if (result.success) {
+                            toast(`${itemName} moved to stash`, 'success');
                             await renderInventoryContent(
                                 playerId,
                                 equippedGrid,
@@ -482,10 +485,10 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                                 loadoutCount
                             );
                         } else {
-                            alert(result.message || 'Failed to move item to stash.');
+                            toast(result.message || 'Failed to move item to stash.', 'error');
                         }
                     } catch (error) {
-                        alert('Error moving item to stash.');
+                        toast('Error moving item to stash.', 'error');
                     }
                 });
                 buttonRow.appendChild(moveToStashButton);
@@ -503,6 +506,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                         loadoutId: item.loadoutId
                     });
                     if (result.success) {
+                        toast(`${itemName} deleted`, 'info');
                         await renderInventoryContent(
                             playerId,
                             equippedGrid,
@@ -510,10 +514,10 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                             loadoutCount
                         );
                     } else {
-                        alert(result.message || 'Failed to delete item.');
+                        toast(result.message || 'Failed to delete item.', 'error');
                     }
                 } catch (error) {
-                    alert('Error deleting item.');
+                    toast('Error deleting item.', 'error');
                 }
             });
             buttonRow.appendChild(deleteButton);

@@ -159,3 +159,31 @@ function showItemCardsPopup(itemName, cards) {
     backdrop.addEventListener('click', closeItemCardsPopup);
     popup.addEventListener('click', closeItemCardsPopup);
 }
+function toast(message, type = 'info', duration = 3000) {
+    let container = document.querySelector('.toast-container');
+
+    if (!container) {
+        container = document.createElement('div');
+        container.className =
+            'toast-container position-fixed bottom-0 end-0 translate-middle-x m-3';
+        document.body.appendChild(container);
+    }
+    if (document.querySelectorAll('.toast').length <= 2) {
+        const toast = document.createElement('div');
+        toast.classList.add('toast', `toast-${type}`);
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+
+        const body = document.createElement('div');
+        body.classList.add('toast-body');
+        body.textContent = message;
+        toast.appendChild(body);
+
+        container.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast, { delay: duration });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+}

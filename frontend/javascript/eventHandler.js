@@ -291,7 +291,8 @@ async function outRoom(room, dungeon, dungeonLevel) {
                 });
                 exitDungeon();
             } catch (error) {
-                console.log('Exit failed:', error.message);
+                toast('Failed to exit dungeon', 'error');
+                console.error('Exit failed:', error.message);
             }
         });
 
@@ -308,10 +309,12 @@ async function outRoom(room, dungeon, dungeonLevel) {
                 if (result.success) {
                     dungeonLevel = result.dungeonLevel;
                     document.getElementById('level-number').textContent = dungeonLevel;
+                    toast(`Descending deeper... Level ${dungeonLevel}`, 'info', 2500);
                     newLevelFromServer(sessionStorage.getItem('currentDungeon'), result, 100);
                 }
             } catch (error) {
-                console.log('Next level failed:', error.message);
+                toast('Failed to advance to next level', 'error');
+                console.error('Next level failed:', error.message);
             }
         });
     });
@@ -326,7 +329,8 @@ async function fetchShopItems() {
         }
         return payload.items;
     } catch (error) {
-        console.log('Shop items fetch failed:', error.message);
+        toast('Failed to load shop items', 'error');
+        console.error('Shop items fetch failed:', error.message);
         return [];
     }
 }
@@ -756,7 +760,8 @@ async function fetchLoadoutForSelling() {
         }
         return [];
     } catch (error) {
-        console.log('Failed to fetch loadout for selling:', error.message);
+        toast('Failed to load your items for selling', 'error');
+        console.error('Failed to fetch loadout for selling:', error.message);
         return [];
     }
 }
