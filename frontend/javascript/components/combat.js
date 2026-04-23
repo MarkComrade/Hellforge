@@ -324,55 +324,7 @@ function createCardSection() {
     row.className = 'combat-cards-row';
 
     hand.forEach((card, cardIndex) => {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'combat-card combat-card-enter';
-        cardElement.style.animationDelay = cardIndex * 0.07 + 's';
-        if (!canPlayCards) cardElement.classList.add('card-disabled');
-        if (selectedCardIndex === cardIndex) cardElement.classList.add('card-selected');
-
-        const info = document.createElement('div');
-        info.className = 'combat-card-info';
-
-        const nameElement = document.createElement('div');
-        nameElement.className = 'combat-card-name';
-        nameElement.textContent = card.name;
-        info.appendChild(nameElement);
-
-        const typeElement = document.createElement('div');
-        typeElement.className = 'combat-card-type';
-        typeElement.textContent = card.type;
-        info.appendChild(typeElement);
-
-        const effectsElement = document.createElement('div');
-        effectsElement.className = 'combat-card-effects';
-        effectsElement.textContent = formatCardEffects(card.effects);
-        info.appendChild(effectsElement);
-
-        const targetElement = document.createElement('div');
-        targetElement.className = 'combat-card-target';
-        targetElement.textContent = getTargetLabel(card);
-        info.appendChild(targetElement);
-
-        cardElement.appendChild(info);
-
-        if (canPlayCards) {
-            cardElement.addEventListener('click', () => {
-                if (isCombatBusy) return;
-                selectedCardIndex = selectedCardIndex === cardIndex ? null : cardIndex;
-                if (selectedCardIndex !== null) {
-                    const selectedCard = (combatState.hand || [])[selectedCardIndex];
-                    const targetType = selectedCard
-                        ? selectedCard.targetType || 'single'
-                        : 'single';
-                    if (targetType !== 'single') {
-                        selectedEnemyIndex = null;
-                        updateEnemyHighlights();
-                    }
-                }
-                updateCardHighlights();
-            });
-        }
-
+        const cardElement = createCardElement(card, cardIndex, canPlayCards);
         row.appendChild(cardElement);
     });
 
@@ -386,6 +338,91 @@ function createCardSection() {
     section.appendChild(confirmButton);
 
     return section;
+}
+
+function createCardElement(card, cardIndex, canPlayCards) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'combat-card combat-card-enter';
+    cardElement.style.animationDelay = cardIndex * 0.07 + 's';
+    if (!canPlayCards) cardElement.classList.add('card-disabled');
+    if (selectedCardIndex === cardIndex) cardElement.classList.add('card-selected');
+
+    // Tier badge — circular, sits on top edge
+    const tierBadge = document.createElement('div');
+    tierBadge.className = 'combat-card-tier-badge tier-' + (card.tier || 1);
+    tierBadge.textContent = card.tier || '?';
+    cardElement.appendChild(tierBadge);
+
+    // Inner wrapper
+    const inner = document.createElement('div');
+    inner.className = 'combat-card-inner';
+
+    // Card name
+    const nameElement = document.createElement('div');
+    nameElement.className = 'combat-card-name';
+    nameElement.textContent = card.name;
+    inner.appendChild(nameElement);
+
+    // Image box
+    const imgBox = document.createElement('div');
+    imgBox.className = 'combat-card-img-box';
+    const img = document.createElement('img');
+    img.src = card.source_item_img || '../textures/misc/placeholderloot.png';
+    img.alt = card.name;
+    img.onerror = function () {
+        this.onerror = null;
+        this.src = '../textures/misc/placeholderloot.png';
+    };
+    imgBox.appendChild(img);
+    inner.appendChild(imgBox);
+
+    // Effects description box
+    const descBox = document.createElement('div');
+    descBox.className = 'combat-card-desc-box';
+    descBox.textContent = formatCardEffects(card.effects);
+    inner.appendChild(descBox);
+
+    // Footer: type | target | exhaust
+    const footer = document.createElement('div');
+    footer.className = 'combat-card-footer';
+
+    const typeEl = document.createElement('span');
+    typeEl.className = 'combat-card-type';
+    typeEl.textContent = card.type;
+    footer.appendChild(typeEl);
+
+    const targetEl = document.createElement('span');
+    targetEl.className = 'combat-card-target';
+    targetEl.textContent = getTargetLabel(card);
+    footer.appendChild(targetEl);
+
+    if (card.exhaust) {
+        const exhaustEl = document.createElement('span');
+        exhaustEl.className = 'combat-card-exhaust';
+        exhaustEl.textContent = 'Exhaust';
+        footer.appendChild(exhaustEl);
+    }
+
+    inner.appendChild(footer);
+    cardElement.appendChild(inner);
+
+    if (canPlayCards) {
+        cardElement.addEventListener('click', () => {
+            if (isCombatBusy) return;
+            selectedCardIndex = selectedCardIndex === cardIndex ? null : cardIndex;
+            if (selectedCardIndex !== null) {
+                const selectedCard = (combatState.hand || [])[selectedCardIndex];
+                const targetType = selectedCard ? selectedCard.targetType || 'single' : 'single';
+                if (targetType !== 'single') {
+                    selectedEnemyIndex = null;
+                    updateEnemyHighlights();
+                }
+            }
+            updateCardHighlights();
+        });
+    }
+
+    return cardElement;
 }
 
 function updateCardHighlights() {
@@ -432,7 +469,7 @@ function getTargetLabel(card) {
     if (card.targetType === 'self') return 'Self';
     if (card.targetType === 'all') return 'All Enemies';
     if (card.targetType === 'random') return 'Random \u00D7' + (card.affectedTargets || 1);
-    return 'Select Target';
+    return 'Select  Target';
 }
 
 function formatCardEffects(effects) {

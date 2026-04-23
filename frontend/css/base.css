@@ -178,11 +178,14 @@ body.ready {
         -0.1vw 0.1vw 0 #000,
         0.1vw 0.1vw 0 #000;
 }
+.toast-warning {
+    background-color: rgb(220, 121, 40) !important;
+}
 .toast-info {
-    background-color: rgba(0, 123, 255, 0.9) !important;
+    background-color: rgb(217, 124, 124) !important;
 }
 .toast-success {
-    background-color: rgba(40, 167, 69, 0.9) !important;
+    background-color: rgb(177, 171, 63) !important;
 }
 .toast-error {
     background-color: rgb(220, 40, 40) !important;

@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { CARDS_PER_TURN } = require('../services/cardPool.js');
 
-const HAND_SIZE = 5; // hand is always maintained at this size during combat
+const HAND_SIZE = 4; // hand is always maintained at this size during combat
 
 const TURN_OWNERS = {
     PLAYER: 'player',
