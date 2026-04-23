@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../sql/database.js');
+const database = require('../sql/queries/inventoryQueries.js');
 
 //!Endpoints:
 

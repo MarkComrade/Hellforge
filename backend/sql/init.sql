@@ -91,32 +91,32 @@ ALTER TABLE `player_loadout` ADD COLUMN `instance_id` INT UNSIGNED DEFAULT NULL;
 ALTER TABLE `player_loadout` ADD CONSTRAINT `loadout_instance_foreign` FOREIGN KEY(`instance_id`) REFERENCES `item_instances`(`instanceId`);
 
 INSERT INTO `armors` (`type`, `name`, `img_path`, `tier`, `price`, `defense_multiplier`) VALUES
-    ('Helmet', 'Rusty Helmet', '../textures/items/armour/helmet_rusty.png', 1, 5, 1),
-    ('Armor', 'Rusty Chestplate', '../textures/items/armour/armour_rusty.png', 1, 10, 1),
-    ('Helmet', 'Worn Helmet', '../textures/items/armour/helmet_worn.png', 2, 20, 1.1),
-    ('Armor', 'Worn Chestplate', '../textures/items/armour/armour_worn.png', 2, 50, 1.2),
-    ('Helmet', 'Regular Helmet', '../textures/items/armour/helmet_regular.png', 3, 60, 1.35),
-    ('Armor', 'Regular Chestplate', '../textures/items/armour/armour_regular.png', 3, 120, 1.55),
-    ('Helmet', 'Mythical Helmet', '../textures/items/armour/helmet_mythical.png', 4, 150, 1.65),
-    ('Armor', 'Mythical Chestplate', '../textures/items/armour/armour_mythical.png', 4, 300, 1.95),
-    ('Helmet', 'Legendary Helmet', '../textures/items/armour/helmet_legendary.png', 5, 350, 2.1),
-    ('Armor', 'Legendary Chestplate', '../textures/items/armour/armour_legendary.png', 5, 700, 2.5),
-    ('Helmet', 'Hellish Helmet', '../textures/items/armour/helmet_hellish.png', 6, 800, 2.8),
-    ('Armor', 'Hellish Chestplate', '../textures/items/armour/armour_hellish.png', 6, 1600, 3.4);
+    ('Helmet', 'Rusty Helmet', '../textures/items/armour/helmet_rusty.png', 1, 10, 1),
+    ('Armor', 'Rusty Chestplate', '../textures/items/armour/armour_rusty.png', 1, 20, 1),
+    ('Helmet', 'Worn Helmet', '../textures/items/armour/helmet_worn.png', 2, 50, 1.1),
+    ('Armor', 'Worn Chestplate', '../textures/items/armour/armour_worn.png', 2, 120, 1.2),
+    ('Helmet', 'Regular Helmet', '../textures/items/armour/helmet_regular.png', 3, 160, 1.35),
+    ('Armor', 'Regular Chestplate', '../textures/items/armour/armour_regular.png', 3, 320, 1.55),
+    ('Helmet', 'Mythical Helmet', '../textures/items/armour/helmet_mythical.png', 4, 420, 1.65),
+    ('Armor', 'Mythical Chestplate', '../textures/items/armour/armour_mythical.png', 4, 850, 1.95),
+    ('Helmet', 'Legendary Helmet', '../textures/items/armour/helmet_legendary.png', 5, 950, 2.1),
+    ('Armor', 'Legendary Chestplate', '../textures/items/armour/armour_legendary.png', 5, 1900, 2.5),
+    ('Helmet', 'Hellish Helmet', '../textures/items/armour/helmet_hellish.png', 6, 2200, 2.8),
+    ('Armor', 'Hellish Chestplate', '../textures/items/armour/armour_hellish.png', 6, 4500, 3.4);
 
 INSERT INTO `weapons` (`type`, `name`, `img_path`, `tier`, `price`, `attack_multiplier`) VALUES
-    ('Melee', 'Rusty Sword', '../textures/items/weapons/sword_rusty.png', 1, 15, 1),
-    ('Ranged', 'Rusty Bow', '../textures/items/weapons/bow_rusty.png', 1, 10, 1),
-    ('Melee', 'Worn Sword', '../textures/items/weapons/sword_worn.png', 2, 60, 1.25),
-    ('Ranged', 'Worn Bow', '../textures/items/weapons/bow_worn.png', 2, 50, 1.15),
-    ('Melee', 'Regular Sword', '../textures/items/weapons/sword_regular.png', 3, 150, 1.65),
-    ('Ranged', 'Regular Bow', '../textures/items/weapons/bow_regular.png', 3, 120, 1.55),
-    ('Melee', 'Mythical Sword', '../textures/items/weapons/sword_mythical.png', 4, 380, 2.2),
-    ('Ranged', 'Mythical Bow', '../textures/items/weapons/bow_mythical.png', 4, 300, 2.0),
-    ('Melee', 'Legendary Sword', '../textures/items/weapons/sword_legendary.png', 5, 900, 2.8),
-    ('Ranged', 'Legendary Bow', '../textures/items/weapons/bow_legendary.png', 5, 700, 2.6),
-    ('Melee', 'Hellish Sword', '../textures/items/weapons/sword_hellish.png', 6, 2100, 3.6),
-    ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 1600, 3.2);
+    ('Melee', 'Rusty Sword', '../textures/items/weapons/sword_rusty.png', 1, 30, 1),
+    ('Ranged', 'Rusty Bow', '../textures/items/weapons/bow_rusty.png', 1, 25, 1),
+    ('Melee', 'Worn Sword', '../textures/items/weapons/sword_worn.png', 2, 150, 1.25),
+    ('Ranged', 'Worn Bow', '../textures/items/weapons/bow_worn.png', 2, 130, 1.15),
+    ('Melee', 'Regular Sword', '../textures/items/weapons/sword_regular.png', 3, 400, 1.65),
+    ('Ranged', 'Regular Bow', '../textures/items/weapons/bow_regular.png', 3, 320, 1.55),
+    ('Melee', 'Mythical Sword', '../textures/items/weapons/sword_mythical.png', 4, 1050, 2.2),
+    ('Ranged', 'Mythical Bow', '../textures/items/weapons/bow_mythical.png', 4, 850, 2.0),
+    ('Melee', 'Legendary Sword', '../textures/items/weapons/sword_legendary.png', 5, 2500, 2.8),
+    ('Ranged', 'Legendary Bow', '../textures/items/weapons/bow_legendary.png', 5, 1950, 2.6),
+    ('Melee', 'Hellish Sword', '../textures/items/weapons/sword_hellish.png', 6, 6000, 3.6),
+    ('Ranged', 'Hellish Bow', '../textures/items/weapons/bow_hellish.png', 6, 4500, 3.2);
 
 INSERT INTO `misc_items` (`name`, `img_path`, `value`) VALUES
     ('Amethyst', '../textures/items/misc/misc_amethyst.png', 500),

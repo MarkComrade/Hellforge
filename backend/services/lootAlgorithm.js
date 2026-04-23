@@ -1,14 +1,15 @@
-require('../sql/database');
 const {
     fetchWeaponByTier,
     fetchArmorByTier,
     fetchRandomMisc,
     insertIntoLoadout,
-    upgradeWeakestGearDB,
+    upgradeWeakestGearDB
+} = require('../sql/queries/shopQueries.js');
+const {
     getLoadout,
     getLoadoutCount,
     addGoldToInventory
-} = require('../sql/database.js');
+} = require('../sql/queries/inventoryQueries.js');
 const { pickCardsForItem } = require('../services/cardPool.js');
 const types = {
     crypt: 1,
@@ -245,7 +246,7 @@ function generateGoldReward(dungeon, level) {
     const dungeonKey = normalizeDungeonKey(dungeon);
     const dungeonDifficulty = types[dungeonKey] || 1;
 
-    const baseGold = level * 50 + dungeonDifficulty * 200;
+    const baseGold = level * 25 + dungeonDifficulty * 100;
 
     const variance = baseGold * (Math.random() * 0.4 - 0.2);
 

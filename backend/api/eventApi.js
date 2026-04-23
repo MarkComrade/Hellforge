@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../sql/database.js');
-const {
-    generateAndInsertLoot
-} = require('../services/lootAlgorithm.js');
+const database = {
+    ...require('../sql/queries/authUserQueries.js'),
+    ...require('../sql/queries/shopQueries.js')
+};
+const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
 const { withAdjustedPrice, getMaxAllowedPrice } = require('../services/pricing.js');
 const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');

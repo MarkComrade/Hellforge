@@ -542,8 +542,14 @@ async function showEnemyActions() {
         line.textContent = entry.message;
         logElement.appendChild(line);
         logElement.scrollTop = logElement.scrollHeight;
+
+        // Sync the player HP bar the moment a damage hit lands
+        if (entry.type === 'enemy' && entry.meta != null && entry.meta.playerHp !== undefined) {
+            if (typeof setHP === 'function') setHP(entry.meta.playerHp);
+        }
+
         if (entry.type === 'enemy' || entry.type === 'status') {
-            await delay(380);
+            await delay(420);
         }
     }
 }

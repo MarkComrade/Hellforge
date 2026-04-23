@@ -57,7 +57,7 @@ function renderDoors(doors, dungeon) {
         Labyrinth: '../textures/rooms/door_labyrinth.png',
         'Gates of Hell': '../textures/rooms/door_hell.png'
     };
-    const doorTexture = doorTextures[dungeon] || '../textures/rooms/door_hell.png';
+    const doorTexture = doorTextures[dungeon];
 
     const currentCell = document.querySelector('#map .cell[data-current="true"]');
     if (!currentCell) return;
@@ -198,7 +198,7 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                 const cell = document.querySelector('#map .cell[data-current="true"]');
                 if (cell && result.roomType) {
                     cell.dataset.roomType = result.roomType;
-                    roomEventHandler(cell, dungeonLevel, result);
+                    roomEventHandler(cell, dungeon, dungeonLevel, result);
                 }
             } catch (error) {
                 console.log('Move failed:', error.message);
@@ -230,7 +230,7 @@ function placeTraderInRoom(room) {
     room.appendChild(traderImg);
 }
 
-function roomEventHandler(room, dungeonLevel, result) {
+function roomEventHandler(room, dungeon, dungeonLevel, result) {
     const roomType = result.roomType || room.dataset.roomType;
 
     room.dataset.roomType = roomType || '';
@@ -299,7 +299,7 @@ function roomEventHandler(room, dungeonLevel, result) {
             createFrontendEvent(result.Event);
             break;
         case 'out':
-            outRoom(room, dungeonLevel);
+            outRoom(room, dungeon, dungeonLevel);
             break;
     }
 }

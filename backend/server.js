@@ -1,6 +1,6 @@
 //!Module-ok importálása
 require('dotenv').config(); //?npm install dotenv
-const { pool } = require('./sql/database.js'); //?Adatbázis kapcsolat
+const { pool } = require('./sql/core/connection.js'); //?Adatbázis kapcsolat
 const express = require('express'); //?npm install express
 const session = require('express-session'); //?npm install express-session
 const path = require('path');
