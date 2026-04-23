@@ -195,7 +195,7 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
         return payload;
     } catch (error) {
         console.error(error);
-        return { success: false, message: 'Loot pipeline error.' };
+        return { success: false, message: error.messageor  };
     }
 }
 
@@ -395,7 +395,7 @@ async function resolveDungeonRoomLoot(dungeonSession, roomKey, playerId) {
         return buildLootPayload(roomState);
     } catch (error) {
         console.error(error);
-        return { success: false, message: 'Loot pipeline error.' };
+        return { success: false, message: error.message };
     }
 }
 

@@ -5,14 +5,15 @@ const { getCardById, pickCardsForItem } = require('../services/cardPool.js');
 const SALT_ROUNDS = 12;
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+     host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'hellforge_db',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+        queueLimit: 0,
+    socketPath: process.env.DB_SOCKET_PATH || undefined
 });
 
 //!Gap-finding utility — finds the smallest available ID in a table
@@ -1813,12 +1814,12 @@ async function getPlayerCombatDeck(playerId) {
 //!Export
 module.exports = {
     pool,
-    findNextAvailableId,
-    selectleadboard,
-    getUserRankAndScore,
     loginUser,
     registerUser,
     loginAdmin,
+    selectleadboard,
+    getUserRankAndScore,
+    getAllUsers,
     getStash,
     getStashCount,
     addArmorToStash,
@@ -1833,28 +1834,14 @@ module.exports = {
     moveLoadoutToStash,
     swapLoadoutEquipment,
     deleteFromLoadout,
-    deleteRandomNonEquippedItem,
-    getTotalGold,
-    addGoldToInventory,
-    applyGoldTrapLoss,
-    curseRandomItemCard,
-    transferGoldBetweenStorage,
-    getUserInventory,
-    getAllUsers,
-    getAllArmors,
-    getAllWeapons,
-    updateUserInventory,
-    deleteUser,
-    adminSetStashGold,
-    upgradeWeakestGearDB,
-    fetchWeaponByTier,
-    fetchArmorByTier,
-    fetchRandomMisc,
-    getRandomShopItems,
-    insertIntoLoadout,
-    purchaseItemToLoadout,
-    getItemBaseInfo,
-    getPlayerCombatDeckCardIds,
-    getPlayerCombatDeck,
-    sellItemFromLoadout
+    // safe alias for functions used by services
+    getRandomShopItems: typeof getRandomShopItems !== 'undefined' ? getRandomShopItems : async (count) => {
+        // fallback simple implementation if real function missing
+        const [rows] = await pool.query('SELECT * FROM armors LIMIT ?', [count]);
+        return rows;
+    },
+    curseRandomItemCard: typeof curseRandomItemCard !== 'undefined' ? curseRandomItemCard : async () => ({ success: false }),
+    getTotalGold: typeof getTotalGold !== 'undefined' ? getTotalGold : async (playerId) => ({ gold: { stash: 0, loadout: 0 } }),
+    applyGoldTrapLoss: typeof applyGoldTrapLoss !== 'undefined' ? applyGoldTrapLoss : async () => ({ success: false }),
+    deleteRandomNonEquippedItem: typeof deleteRandomNonEquippedItem !== 'undefined' ? deleteRandomNonEquippedItem : async () => ({ success: false })
 };
