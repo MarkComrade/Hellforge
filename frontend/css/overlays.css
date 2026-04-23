@@ -379,6 +379,26 @@
     z-index: 12600;
 }
 
+.abandonBackdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 19000;
+}
+
+.abandonConfirmBtn {
+    border-color: rgba(220, 40, 40, 1) !important;
+    background-color: rgba(140, 20, 20, 0.98) !important;
+    color: #fff !important;
+}
+
+.abandonConfirmBtn:hover {
+    background-color: rgba(190, 30, 30, 0.98) !important;
+}
+
 .itemCardsPopup {
     width: min(64vh, 94vw);
     max-height: 82vh;

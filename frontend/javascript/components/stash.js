@@ -91,7 +91,7 @@ async function createStashGoldPanel(playerId) {
             return;
         }
         if (transferAmount > goldState.stashGold) {
-            alert('Not enough gold in stash.');
+            toast('Not enough gold in stash.', 'error');
             refreshGoldControls();
             return;
         }
@@ -106,12 +106,13 @@ async function createStashGoldPanel(playerId) {
 
             if (result.success && result.gold) {
                 goldState = mapStashGold(result.gold);
+                toast(`${transferAmount} gold moved to loadout`, 'success');
             } else {
-                alert(result.message || 'Failed to transfer gold.');
+                toast(result.message || 'Failed to transfer gold.', 'error');
                 goldState = await fetchStashGold(playerId);
             }
         } catch (error) {
-            alert('Failed to transfer gold.');
+            toast('Failed to transfer gold.', 'error');
             goldState = await fetchStashGold(playerId);
         } finally {
             amountSlider.value = '0';
@@ -131,12 +132,12 @@ async function openStash() {
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         if (!session.isLoggedIn || !session.userId) {
-            alert('You must be logged in to view your stash.');
+            toast('You must be logged in to view your stash.', 'error');
             return;
         }
         playerId = session.userId;
     } catch (error) {
-        alert('Could not retrieve session.');
+        toast('Could not retrieve session.', 'error');
         return;
     }
 
@@ -280,12 +281,13 @@ async function renderStashContent(playerId, grid, countText) {
                             slot: equipmentSlot
                         });
                         if (result.success) {
+                            toast(`${itemName} equipped!`, 'success');
                             await renderStashContent(playerId, grid, countText);
                         } else {
-                            alert(result.message || 'Failed to equip item.');
+                            toast(result.message || 'Failed to equip item.', 'error');
                         }
                     } catch (error) {
-                        alert('Error equipping item.');
+                        toast('Error equipping item.', 'error');
                     }
                 });
                 buttonRow.appendChild(equipButton);
@@ -314,12 +316,13 @@ async function renderStashContent(playerId, grid, countText) {
                             stashId: item.stashId
                         });
                         if (result.success) {
+                            toast(`${itemName} moved to loadout`, 'success');
                             await renderStashContent(playerId, grid, countText);
                         } else {
-                            alert(result.message || 'Failed to move item to inventory.');
+                            toast(result.message || 'Failed to move item to loadout.', 'error');
                         }
                     } catch (error) {
-                        alert('Error moving item to inventory.');
+                        toast('Error moving item to loadout.', 'error');
                     }
                 });
                 buttonRow.appendChild(moveToInventoryButton);
@@ -337,12 +340,13 @@ async function renderStashContent(playerId, grid, countText) {
                         playerId: playerId
                     });
                     if (result.success) {
+                        toast(`${itemName} deleted`, 'info');
                         await renderStashContent(playerId, grid, countText);
                     } else {
-                        alert(result.message || 'Failed to delete item.');
+                        toast(result.message || 'Failed to delete item.', 'error');
                     }
                 } catch (error) {
-                    alert('Error deleting item.');
+                    toast('Error deleting item.', 'error');
                 }
             });
             buttonRow.appendChild(deleteButton);
