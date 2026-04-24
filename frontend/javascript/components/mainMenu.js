@@ -39,6 +39,7 @@ async function Menu() {
 
     const buttons = [
         { text: 'Login', onClick: Login },
+        { text: 'Register', onClick: Register },
         { text: 'Logout', onClick: Logout },
         { text: 'New Game', onClick: StartGame },
         { text: 'Leaderboard', onClick: LeaderBoard },
@@ -51,7 +52,7 @@ async function Menu() {
     const columns = document.querySelectorAll('.container-fluid:last-child .col-md-12');
 
     buttons.forEach(({ text, onClick }, index) => {
-        const isLoginRelated = text === 'Login' || text === 'Admin';
+        const isLoginRelated = text === 'Login' || text === 'Register' || text === 'Admin';
 
         if (isAdmin && text !== 'Admin' && text !== 'Logout') return;
         if (!isAdmin && !isLoggedIn && !isLoginRelated) return;

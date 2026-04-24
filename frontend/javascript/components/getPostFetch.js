@@ -42,11 +42,14 @@ const postFetch = async (url, data) => {
         });
 
         if (!response.ok) {
-            throw new Error('hiba' + response.statusText + '(' + response.status + ')');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                errorData.message || 'Error ' + response.status + ' ' + response.statusText
+            );
         }
         return await response.json();
     } catch (error) {
-        throw new Error('hiba: ' + error.message);
+        throw new Error(error.message);
     }
 };
 

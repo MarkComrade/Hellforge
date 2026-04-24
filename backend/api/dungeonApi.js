@@ -3,9 +3,39 @@ const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
 const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
 const { eventManager } = require('../services/eventGeneration.js');
+const { getLoadout } = require('../sql/queries/inventoryQueries.js');
 
 // Valid dungeon names — reject anything not in this list
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
+
+const DUNGEON_GEAR_REQUIREMENTS = {
+    Crypt: { minTier: 1, requiredPieces: 0 },
+    Labyrinth: { minTier: 2, requiredPieces: 2 },
+    Laboratory: { minTier: 3, requiredPieces: 2 },
+    'Gates of Hell': { minTier: 4, requiredPieces: 2 }
+};
+
+async function checkGearRequirement(playerId, dungeonName) {
+    const req = DUNGEON_GEAR_REQUIREMENTS[dungeonName];
+    if (!req || req.requiredPieces === 0) return { allowed: true };
+
+    const result = await getLoadout(playerId);
+    if (!result.success) return { allowed: false, message: 'Could not verify gear requirements.' };
+
+    const qualifyingPieces = result.loadout.filter((row) => {
+        const armorTier = Number(row.armor_tier);
+        const weaponTier = Number(row.weapon_tier);
+        return armorTier >= req.minTier || weaponTier >= req.minTier;
+    }).length;
+
+    if (qualifyingPieces < req.requiredPieces) {
+        return {
+            allowed: false,
+            message: `You need at least ${req.requiredPieces} piece(s) of tier ${req.minTier}+ gear to enter ${dungeonName}.`
+        };
+    }
+    return { allowed: true };
+}
 
 // Simple per-session rate limiter for moves (prevents speedhack scripts)
 const MOVE_COOLDOWN_MS = 150; // minimum ms between moves
@@ -64,13 +94,19 @@ function enrichEvent(event) {
 // ───── Endpoints ─────
 
 // Creates a fresh dungeon — generates the map server-side and sends it to the client
-router.post('/start', requireLogin, (req, res) => {
+router.post('/start', requireLogin, async (req, res) => {
     try {
         const { dungeonName } = req.body;
         // SECURITY: only allow known dungeon names — prevents injection of arbitrary strings
         if (!dungeonName || !VALID_DUNGEONS.includes(dungeonName)) {
             return res.status(400).json({ success: false, message: 'Invalid dungeon name' });
         }
+
+        const gearCheck = await checkGearRequirement(req.session.playerId, dungeonName);
+        if (!gearCheck.allowed) {
+            return res.status(403).json({ success: false, message: gearCheck.message });
+        }
+
         // The constructor generates the map automatically (random walk algorithm)
         const dungeon = new DungeonSession(dungeonName);
         req.dungeon = dungeon;

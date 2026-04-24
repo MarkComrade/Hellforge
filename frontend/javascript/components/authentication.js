@@ -1,21 +1,8 @@
-async function Login() {
-    clearBody();
-
-    generateBootStrapGrid(1, 1, 12, 'loginMenu');
-    let menuTitle = document.createElement('h1');
-    menuTitle.setAttribute('class', 'menuTitle');
-    menuTitle.textContent = 'Login / Register';
-    document.querySelector('.loginMenu').appendChild(menuTitle);
-
-    generateBootStrapGrid(2, 1, 12, 'loginFormContainer');
+function buildAuthForm(fields) {
+    generateBootStrapGrid(fields.length, 1, 12, 'loginFormContainer');
     const loginRows = document.querySelectorAll('.loginFormContainer');
 
-    const forms = [
-        { label: 'Username:', type: 'text', id: 'usernameInput' },
-        { label: 'Password:', type: 'password', id: 'passwordInput' }
-    ];
-
-    forms.forEach((form, i) => {
+    fields.forEach((form, i) => {
         const row = document.createElement('div');
         row.setAttribute('class', 'row');
         loginRows[i].appendChild(row);
@@ -44,69 +31,135 @@ async function Login() {
         inputCol.appendChild(input);
         row.appendChild(inputCol);
     });
+}
 
-    generateBootStrapGrid(1, 2, 6, 'authButtonRow');
-    const buttonContainers = document.querySelectorAll('.authButtonRow');
+async function Login() {
+    clearBody();
+
+    generateBootStrapGrid(1, 1, 12, 'loginMenu');
+    let menuTitle = document.createElement('h1');
+    menuTitle.setAttribute('class', 'menuTitle');
+    menuTitle.textContent = 'Login';
+    document.querySelector('.loginMenu').appendChild(menuTitle);
+
+    buildAuthForm([
+        { label: 'Username:', type: 'text', id: 'usernameInput' },
+        { label: 'Password:', type: 'password', id: 'passwordInput' }
+    ]);
+
+    generateBootStrapGrid(1, 1, 12, 'authButtonRow');
+    const buttonContainer = document.querySelector('.authButtonRow');
+
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    const passwordRegex = /^.{6,128}$/;
 
     let loginButton = document.createElement('input');
     loginButton.setAttribute('type', 'button');
     loginButton.setAttribute('value', 'Login');
     loginButton.setAttribute('class', 'menuButton');
-    buttonContainers[0].appendChild(loginButton);
+    buttonContainer.appendChild(loginButton);
     loginButton.addEventListener('click', async function () {
-        let username = document.querySelector('#usernameInput').value;
-        let password = document.querySelector('#passwordInput').value;
+        const username = document.querySelector('#usernameInput').value.trim();
+        const password = document.querySelector('#passwordInput').value;
 
-        if (username && password) {
-            try {
-                const result = await postFetch('/api/loginAuthApi/loginUser', {
-                    username,
-                    password
-                });
+        if (!usernameRegex.test(username)) {
+            toast(
+                'Username must be 3–20 characters: letters, numbers, or underscores only.',
+                'error'
+            );
+            return;
+        }
+        if (!passwordRegex.test(password)) {
+            toast('Password must be between 6 and 128 characters.', 'error');
+            return;
+        }
 
-                if (result.success) {
-                    toast(result.message || 'Sikeresen bejelentkeztél!', 'success');
-                    Menu();
-                } else {
-                    toast(result.message, 'error');
-                }
-            } catch (error) {
-                toast('Hiba történt a bejelentkezés során', 'error');
-                console.error(error);
+        try {
+            const result = await postFetch('/api/loginAuthApi/loginUser', {
+                username,
+                password
+            });
+
+            if (result.success) {
+                toast(result.message || 'Login successful!', 'success');
+                Menu();
+            } else {
+                toast(result.message, 'error');
             }
-        } else {
-            toast('Kérlek töltsd ki az összes mezőt!', 'error');
+        } catch (error) {
+            toast('An error occurred during login.', 'error');
+            console.error(error);
         }
     });
+
+    generateBackToMenu();
+}
+
+async function Register() {
+    clearBody();
+
+    generateBootStrapGrid(1, 1, 12, 'loginMenu');
+    let menuTitle = document.createElement('h1');
+    menuTitle.setAttribute('class', 'menuTitle');
+    menuTitle.textContent = 'Register';
+    document.querySelector('.loginMenu').appendChild(menuTitle);
+
+    buildAuthForm([
+        { label: 'Username:', type: 'text', id: 'usernameInput' },
+        { label: 'Password:', type: 'password', id: 'passwordInput' },
+        { label: 'Confirm Password:', type: 'password', id: 'confirmPasswordInput' }
+    ]);
+
+    generateBootStrapGrid(1, 1, 12, 'authButtonRow');
+    const buttonContainer = document.querySelector('.authButtonRow');
+
+    const usernameRegex = /^[a-zA-Z0-9_]{3,12}$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
 
     let registerButton = document.createElement('input');
     registerButton.setAttribute('type', 'button');
     registerButton.setAttribute('value', 'Register');
     registerButton.setAttribute('class', 'menuButton');
-    buttonContainers[1].appendChild(registerButton);
+    buttonContainer.appendChild(registerButton);
     registerButton.addEventListener('click', async function () {
-        let username = document.querySelector('#usernameInput').value;
-        let password = document.querySelector('#passwordInput').value;
+        const username = document.querySelector('#usernameInput').value.trim();
+        const password = document.querySelector('#passwordInput').value;
+        const confirmPassword = document.querySelector('#confirmPasswordInput').value;
 
-        if (username && password) {
-            try {
-                const result = await postFetch('/api/loginAuthApi/registerUser', {
-                    username,
-                    password
-                });
+        if (!usernameRegex.test(username)) {
+            toast(
+                'Username must be 3–12 characters: letters, numbers, or underscores only.',
+                'error'
+            );
+            return;
+        }
+        if (!passwordRegex.test(password)) {
+            toast(
+                'Password must be 8–15 characters and include at least one letter and one number.',
+                'error'
+            );
+            return;
+        }
+        if (password !== confirmPassword) {
+            toast('Passwords do not match.', 'error');
+            return;
+        }
 
-                if (result.success) {
-                    toast(result.message || 'Sikeres regisztráció!', 'success');
-                    Menu();
-                } else {
-                    toast(result.message, 'error');
-                }
-            } catch (error) {
-                toast('Hiba történt a regisztráció során', 'error');
-                console.error(error);
+        try {
+            const result = await postFetch('/api/loginAuthApi/registerUser', {
+                username,
+                password
+            });
+
+            if (result.success) {
+                toast(result.message || 'Registration successful!', 'success');
+                Menu();
+            } else {
+                toast(result.message, 'error');
             }
-        } else {
-            toast('Kérlek töltsd ki az összes mezőt!', 'error');
+        } catch (error) {
+            toast('An error occurred during registration.', 'error');
+            console.error(error);
         }
     });
 
@@ -118,7 +171,7 @@ async function Logout() {
         await postFetch('/api/loginAuthApi/logout', {});
         Menu();
     } catch (error) {
-        console.error('Hiba a kijelentkezés során:', error);
+        console.error('An error occurred during logging out:', error);
         Menu();
     }
 }
