@@ -12,33 +12,30 @@ function newGame(dungeon) {
 
     sessionStorage.setItem('currentDungeon', dungeon);
 
-    // Apply dungeon-specific background
-    const bg = DUNGEON_BACKGROUNDS[dungeon];
-    if (bg) {
-        Object.assign(document.body.style, {
-            backgroundImage: bg,
-            backgroundSize: '98vw 95vh',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed',
-            backgroundColor: '#000000'
-        });
-    }
-
-    // Ask the server to generate the dungeon map — all game state lives server-side.
-    // The server returns: map layout, player position, door info, bounds, and a session token.
     postFetch('/api/dungeon/start', { dungeonName: dungeon })
         .then((data) => {
             if (!data.success) {
                 toast('Failed to start dungeon: ' + (data.message || 'Unknown error'), 'error');
                 return;
             }
+            const bg = DUNGEON_BACKGROUNDS[dungeon];
+            if (bg) {
+                Object.assign(document.body.style, {
+                    backgroundImage: bg,
+                    backgroundSize: '98vw 95vh',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    backgroundColor: '#000000'
+                });
+            }
+
             sessionStorage.setItem('dungeonSessionToken', data.sessionToken);
             toast('Entering ' + dungeon + '...', 'info', 2000);
             newLevelFromServer(dungeon, data, data.currentHP);
         })
         .catch((error) => {
-            toast('Dungeon start failed', 'error');
+            toast(error.message || 'Failed to enter dungeon.', 'error');
             console.error('Dungeon start failed:', error.message);
         });
 }

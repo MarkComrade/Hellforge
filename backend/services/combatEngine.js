@@ -10,8 +10,8 @@
 //   Player ends turn    →  endPlayerTurn(session)
 //     1. Tick player DoTs (bleed / scorch)
 //     2. Decrement player turn-based statuses (vulnerable / lifesteal)
-//     3. Enemy selects & executes cards  →  resolveEnemyCards(session)
-//     4. Tick enemy DoTs
+//     3. Tick enemy DoTs — enemies killed here skip their attack
+//     4. Enemy selects & executes cards  →  resolveEnemyCards(session)
 //     5. Decrement enemy turn-based statuses
 //     6. Advance turn, startPlayerTurn() (resets player block + strength)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -341,6 +341,19 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             message: `You gain ${effects.regen} regen.`
         });
     }
+
+    // ── cleanse (player cards only — removes all bleed and scorch stacks) ────
+    if (effects.cleanse && isPlayerCard) {
+        const removed = attacker.statuses.filter((s) => s.type === 'bleed' || s.type === 'scorch');
+        attacker.statuses = attacker.statuses.filter(
+            (s) => s.type !== 'bleed' && s.type !== 'scorch'
+        );
+        const msg =
+            removed.length > 0
+                ? `You cleanse ${removed.map((s) => s.type).join(' and ')} from yourself.`
+                : `You cleanse yourself. (No DoTs active.)`;
+        session.appendLog({ type: 'player', message: msg });
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -514,21 +527,21 @@ function endPlayerTurn(session) {
     // 2. Player turn-based statuses decrement
     tickTurnStatuses(session.player);
 
-    // 3. Enemy turn — each living enemy selects and executes cards
+    // 3. Enemy DoTs tick — enemies killed here skip their attack this turn
     session.startEnemyTurn(); // resets block + strength for all enemies
-    resolveEnemyCards(session);
-    if (!session.isActive()) return;
-
-    // 4. Enemy DoTs tick (each living enemy)
     for (const enemy of session.enemies) {
-        if (!session.isActive()) break;
+        if (!session.isActive()) return;
         if (enemy.hp > 0) {
             tickDots(session, enemy, false, enemy.index);
         }
     }
     if (!session.isActive()) return;
 
-    // 5. Enemy turn-based statuses decrement (each enemy)
+    // 4. Enemy turn — each surviving enemy selects and executes cards
+    resolveEnemyCards(session);
+    if (!session.isActive()) return;
+
+    // 5. Enemy turn-based statuses decrement (each surviving enemy)
     for (const enemy of session.enemies) {
         if (enemy.hp > 0) {
             tickTurnStatuses(enemy);

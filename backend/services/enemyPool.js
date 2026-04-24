@@ -35,18 +35,18 @@ const ENEMY_POOL = {
             id: 'skeleton',
             name: 'Skeleton',
             img_path: '/textures/characters/crypt_skeleton.png',
-            baseHp: 30,
-            hpPerLevel: 6,
-            cardsPerTurn: { min: 1, max: 3 },
+            baseHp: 22,
+            hpPerLevel: 4,
+            cardsPerTurn: { min: 1, max: 2 },
             cards: [
-                { name: 'Rusty Slash', likelihood: 30, effects: { damage: 9 } },
-                { name: 'Bone Tear', likelihood: 25, effects: { damage: 7, bleed: 3 } },
-                { name: 'Heavy Swing', likelihood: 20, effects: { damage: 13 } },
-                { name: 'Bone Shield', likelihood: 15, effects: { block: 13 }, defensive: true },
+                { name: 'Rusty Slash', likelihood: 30, effects: { damage: 6 } },
+                { name: 'Bone Tear', likelihood: 25, effects: { damage: 5, bleed: 2 } },
+                { name: 'Heavy Swing', likelihood: 20, effects: { damage: 9 } },
+                { name: 'Bone Shield', likelihood: 15, effects: { block: 10 }, defensive: true },
                 {
                     name: 'Dark Feast',
                     likelihood: 10,
-                    effects: { lifesteal: { pct: 25, turns: 2 } },
+                    effects: { lifesteal: { pct: 20, turns: 2 } },
                     defensive: true
                 }
             ]
@@ -55,18 +55,18 @@ const ENEMY_POOL = {
             id: 'zombie',
             name: 'Zombie',
             img_path: '/textures/characters/crypt_zombie.png',
-            baseHp: 44,
-            hpPerLevel: 7,
+            baseHp: 32,
+            hpPerLevel: 5,
             cardsPerTurn: { min: 1, max: 2 },
             cards: [
-                { name: 'Rotting Bite', likelihood: 30, effects: { damage: 11, bleed: 3 } },
-                { name: 'Crushing Slam', likelihood: 25, effects: { damage: 16 } },
-                { name: 'Corpse Burn', likelihood: 20, effects: { scorch: 4 } },
-                { name: 'Rotten Guard', likelihood: 15, effects: { block: 18 }, defensive: true },
+                { name: 'Rotting Bite', likelihood: 30, effects: { damage: 8, bleed: 2 } },
+                { name: 'Crushing Slam', likelihood: 25, effects: { damage: 11 } },
+                { name: 'Corpse Burn', likelihood: 20, effects: { scorch: 3 } },
+                { name: 'Rotten Guard', likelihood: 15, effects: { block: 13 }, defensive: true },
                 {
                     name: 'Undead Recovery',
                     likelihood: 10,
-                    effects: { healing: 13 },
+                    effects: { healing: 9 },
                     defensive: true
                 }
             ]
@@ -75,27 +75,27 @@ const ENEMY_POOL = {
             id: 'crypt_guard',
             name: 'Crypt Guard',
             img_path: '/textures/characters/crypt_guard.png',
-            baseHp: 38,
-            hpPerLevel: 7,
-            cardsPerTurn: { min: 1, max: 3 },
+            baseHp: 28,
+            hpPerLevel: 5,
+            cardsPerTurn: { min: 1, max: 2 },
             cards: [
-                { name: 'Guard Strike', likelihood: 30, effects: { damage: 12 } },
+                { name: 'Guard Strike', likelihood: 30, effects: { damage: 8 } },
                 {
                     name: 'Crippling Slash',
                     likelihood: 25,
-                    effects: { damage: 8, vulnerable: { pct: 25, turns: 1 } }
+                    effects: { damage: 6, vulnerable: { pct: 20, turns: 1 } }
                 },
-                { name: 'Shield Raise', likelihood: 20, effects: { block: 16 } },
+                { name: 'Shield Raise', likelihood: 20, effects: { block: 12 } },
                 {
                     name: 'Fortified Guard',
                     likelihood: 15,
-                    effects: { block: 22 },
+                    effects: { block: 16 },
                     defensive: true
                 },
                 {
                     name: 'Soul Drain',
                     likelihood: 10,
-                    effects: { lifesteal: { pct: 30, turns: 2 } },
+                    effects: { lifesteal: { pct: 20, turns: 2 } },
                     defensive: true
                 }
             ]
@@ -104,24 +104,82 @@ const ENEMY_POOL = {
             id: 'wraith',
             name: 'Wraith',
             img_path: '/textures/characters/crypt_wraith.png',
-            baseHp: 28,
-            hpPerLevel: 5,
-            cardsPerTurn: { min: 1, max: 3 },
+            baseHp: 20,
+            hpPerLevel: 3,
+            cardsPerTurn: { min: 1, max: 2 },
             cards: [
-                { name: 'Spectral Burn', likelihood: 25, effects: { damage: 8, scorch: 3 } },
-                { name: 'Phantom Claw', likelihood: 25, effects: { damage: 7, bleed: 3 } },
+                { name: 'Spectral Burn', likelihood: 25, effects: { damage: 5, scorch: 2 } },
+                { name: 'Phantom Claw', likelihood: 25, effects: { damage: 5, bleed: 2 } },
                 {
                     name: 'Haunting Hex',
                     likelihood: 20,
-                    effects: { vulnerable: { pct: 25, turns: 2 } }
+                    effects: { vulnerable: { pct: 20, turns: 2 } }
                 },
                 {
                     name: 'Soul Siphon',
                     likelihood: 20,
-                    effects: { lifesteal: { pct: 30, turns: 2 } },
+                    effects: { lifesteal: { pct: 20, turns: 2 } },
                     defensive: true
                 },
-                { name: 'Ghostly Veil', likelihood: 10, effects: { block: 14 }, defensive: true }
+                { name: 'Ghostly Veil', likelihood: 10, effects: { block: 10 }, defensive: true }
+            ]
+        },
+        {
+            id: 'giant_spider',
+            name: 'Giant Spider',
+            img_path: '/textures/characters/crypt_giant_spider.png',
+            baseHp: 18,
+            hpPerLevel: 3,
+            cardsPerTurn: { min: 1, max: 2 },
+            cards: [
+                { name: 'Venomous Bite', likelihood: 30, effects: { damage: 5, bleed: 3 } },
+                {
+                    name: 'Web Spit',
+                    likelihood: 25,
+                    effects: { damage: 4, vulnerable: { pct: 25, turns: 2 } }
+                },
+                { name: 'Fang Strike', likelihood: 20, effects: { damage: 7, scorch: 2 } },
+                {
+                    name: 'Silk Shroud',
+                    likelihood: 15,
+                    effects: { block: 9 },
+                    defensive: true
+                },
+                {
+                    name: 'Drain Prey',
+                    likelihood: 10,
+                    effects: { lifesteal: { pct: 25, turns: 2 } },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'lich',
+            name: 'Lich',
+            img_path: '/textures/characters/crypt_lich.png',
+            baseHp: 26,
+            hpPerLevel: 4,
+            cardsPerTurn: { min: 1, max: 2 },
+            cards: [
+                { name: 'Necrotic Bolt', likelihood: 28, effects: { damage: 7, bleed: 2 } },
+                { name: 'Plague Touch', likelihood: 24, effects: { bleed: 3, scorch: 2 } },
+                {
+                    name: 'Soul Sap',
+                    likelihood: 20,
+                    effects: { damage: 9, lifesteal: { pct: 30, turns: 1 } }
+                },
+                {
+                    name: 'Bone Fortress',
+                    likelihood: 18,
+                    effects: { block: 14 },
+                    defensive: true
+                },
+                {
+                    name: 'Dark Ritual',
+                    likelihood: 10,
+                    effects: { healing: 11 },
+                    defensive: true
+                }
             ]
         }
     ],
@@ -131,22 +189,22 @@ const ENEMY_POOL = {
             id: 'minotaur',
             name: 'Minotaur',
             img_path: '/textures/characters/labyrinth_minotaur.png',
-            baseHp: 62,
-            hpPerLevel: 10,
-            cardsPerTurn: { min: 2, max: 3 },
+            baseHp: 52,
+            hpPerLevel: 8,
+            cardsPerTurn: { min: 1, max: 3 },
             cards: [
-                { name: 'Brutal Smash', likelihood: 30, effects: { damage: 18 } },
-                { name: 'Horn Rend', likelihood: 25, effects: { damage: 14, bleed: 4 } },
+                { name: 'Brutal Smash', likelihood: 30, effects: { damage: 15 } },
+                { name: 'Horn Rend', likelihood: 25, effects: { damage: 12, bleed: 3 } },
                 {
                     name: 'Crippling Charge',
                     likelihood: 20,
-                    effects: { damage: 23, vulnerable: { pct: 30, turns: 1 } }
+                    effects: { damage: 19, vulnerable: { pct: 25, turns: 1 } }
                 },
-                { name: 'Thick Hide', likelihood: 15, effects: { block: 22 }, defensive: true },
+                { name: 'Thick Hide', likelihood: 15, effects: { block: 18 }, defensive: true },
                 {
                     name: 'Battle Recovery',
                     likelihood: 10,
-                    effects: { healing: 18 },
+                    effects: { healing: 15 },
                     defensive: true
                 }
             ]
@@ -155,41 +213,41 @@ const ENEMY_POOL = {
             id: 'stone_golem',
             name: 'Stone Golem',
             img_path: '/textures/characters/labyrinth_stone_golem.png',
-            baseHp: 82,
-            hpPerLevel: 12,
+            baseHp: 68,
+            hpPerLevel: 10,
             cardsPerTurn: { min: 1, max: 2 },
             cards: [
-                { name: 'Stone Fist', likelihood: 25, effects: { damage: 21 } },
+                { name: 'Stone Fist', likelihood: 25, effects: { damage: 18 } },
                 {
                     name: 'Crushing Blow',
                     likelihood: 25,
-                    effects: { damage: 16, vulnerable: { pct: 25, turns: 2 } }
+                    effects: { damage: 13, vulnerable: { pct: 20, turns: 2 } }
                 },
-                { name: 'Rock Shield', likelihood: 20, effects: { block: 28 } },
-                { name: 'Granite Wall', likelihood: 20, effects: { block: 34 }, defensive: true },
-                { name: 'Core Repair', likelihood: 10, effects: { healing: 20 }, defensive: true }
+                { name: 'Rock Shield', likelihood: 20, effects: { block: 24 } },
+                { name: 'Granite Wall', likelihood: 20, effects: { block: 28 }, defensive: true },
+                { name: 'Core Repair', likelihood: 10, effects: { healing: 17 }, defensive: true }
             ]
         },
         {
             id: 'shadow_knight',
             name: 'Shadow Knight',
             img_path: '/textures/characters/labyrinth_shadow_knight.png',
-            baseHp: 55,
-            hpPerLevel: 9,
-            cardsPerTurn: { min: 2, max: 3 },
+            baseHp: 46,
+            hpPerLevel: 7,
+            cardsPerTurn: { min: 1, max: 3 },
             cards: [
-                { name: 'Shadow Rend', likelihood: 25, effects: { damage: 16, bleed: 4 } },
+                { name: 'Shadow Rend', likelihood: 25, effects: { damage: 14, bleed: 3 } },
                 {
                     name: 'Darkened Strike',
                     likelihood: 25,
-                    effects: { damage: 19, vulnerable: { pct: 30, turns: 2 } }
+                    effects: { damage: 16, vulnerable: { pct: 25, turns: 2 } }
                 },
-                { name: 'Cursed Flame', likelihood: 20, effects: { damage: 13, scorch: 4 } },
-                { name: 'Night Guard', likelihood: 20, effects: { block: 24 }, defensive: true },
+                { name: 'Cursed Flame', likelihood: 20, effects: { damage: 11, scorch: 3 } },
+                { name: 'Night Guard', likelihood: 20, effects: { block: 20 }, defensive: true },
                 {
                     name: 'Blood Drain',
                     likelihood: 10,
-                    effects: { lifesteal: { pct: 35, turns: 2 } },
+                    effects: { lifesteal: { pct: 28, turns: 2 } },
                     defensive: true
                 }
             ]
@@ -198,24 +256,82 @@ const ENEMY_POOL = {
             id: 'labyrinth_stalker',
             name: 'Labyrinth Stalker',
             img_path: '/textures/characters/labyrinth_stalker.png',
-            baseHp: 48,
-            hpPerLevel: 8,
-            cardsPerTurn: { min: 2, max: 3 },
+            baseHp: 40,
+            hpPerLevel: 7,
+            cardsPerTurn: { min: 1, max: 3 },
             cards: [
-                { name: 'Jagged Claw', likelihood: 25, effects: { damage: 14, bleed: 4 } },
-                { name: 'Burning Pounce', likelihood: 25, effects: { damage: 11, scorch: 5 } },
+                { name: 'Jagged Claw', likelihood: 25, effects: { damage: 12, bleed: 3 } },
+                { name: 'Burning Pounce', likelihood: 25, effects: { damage: 9, scorch: 4 } },
                 {
                     name: 'Predator Gaze',
                     likelihood: 20,
-                    effects: { vulnerable: { pct: 35, turns: 2 } }
+                    effects: { vulnerable: { pct: 28, turns: 2 } }
                 },
                 {
                     name: 'Life Drain',
                     likelihood: 20,
-                    effects: { lifesteal: { pct: 35, turns: 2 } },
+                    effects: { lifesteal: { pct: 28, turns: 2 } },
                     defensive: true
                 },
-                { name: 'Smoke Veil', likelihood: 10, effects: { block: 20 }, defensive: true }
+                { name: 'Smoke Veil', likelihood: 10, effects: { block: 17 }, defensive: true }
+            ]
+        },
+        {
+            id: 'cursed_archer',
+            name: 'Cursed Archer',
+            img_path: '/textures/characters/labyrinth_cursed_archer.png',
+            baseHp: 38,
+            hpPerLevel: 6,
+            cardsPerTurn: { min: 1, max: 3 },
+            cards: [
+                { name: 'Venomous Arrow', likelihood: 28, effects: { damage: 11, bleed: 3 } },
+                {
+                    name: 'Crippling Shot',
+                    likelihood: 25,
+                    effects: { damage: 9, vulnerable: { pct: 30, turns: 2 } }
+                },
+                { name: 'Barrage', likelihood: 20, effects: { damage: 14 } },
+                {
+                    name: 'Shadow Step',
+                    likelihood: 17,
+                    effects: { block: 16 },
+                    defensive: true
+                },
+                {
+                    name: 'Blood Arrow',
+                    likelihood: 10,
+                    effects: { damage: 8, lifesteal: { pct: 25, turns: 1 } },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'mummy',
+            name: 'Mummy',
+            img_path: '/textures/characters/labyrinth_mummy.png',
+            baseHp: 72,
+            hpPerLevel: 11,
+            cardsPerTurn: { min: 1, max: 2 },
+            cards: [
+                { name: 'Cursed Grasp', likelihood: 30, effects: { damage: 16, bleed: 4 } },
+                {
+                    name: 'Ancient Curse',
+                    likelihood: 25,
+                    effects: { damage: 13, vulnerable: { pct: 25, turns: 2 } }
+                },
+                { name: 'Bandage Slam', likelihood: 20, effects: { damage: 20 } },
+                {
+                    name: 'Embalmed Hide',
+                    likelihood: 15,
+                    effects: { block: 26 },
+                    defensive: true
+                },
+                {
+                    name: 'Burial Rites',
+                    likelihood: 10,
+                    effects: { healing: 18 },
+                    defensive: true
+                }
             ]
         }
     ],
@@ -261,7 +377,7 @@ const ENEMY_POOL = {
                     likelihood: 24,
                     effects: { damage: 22, vulnerable: { pct: 30, turns: 2 } }
                 },
-                { name: 'Shock Baton', likelihood: 20, effects: { damage: 20, bleed: 5 } },
+                { name: 'Iron Flail', likelihood: 20, effects: { damage: 20, bleed: 5 } },
                 {
                     name: 'Reinforced Plating',
                     likelihood: 20,
@@ -269,7 +385,7 @@ const ENEMY_POOL = {
                     defensive: true
                 },
                 {
-                    name: 'Repair Protocol',
+                    name: 'Stone Mending',
                     likelihood: 10,
                     effects: { healing: 22 },
                     defensive: true
@@ -321,6 +437,64 @@ const ENEMY_POOL = {
                     name: 'Feeding Frenzy',
                     likelihood: 10,
                     effects: { lifesteal: { pct: 35, turns: 2 } },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'abomination',
+            name: 'Abomination',
+            img_path: '/textures/characters/laboratory_abomination.png',
+            baseHp: 65,
+            hpPerLevel: 10,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                { name: 'Flesh Rend', likelihood: 28, effects: { damage: 19, bleed: 5 } },
+                { name: 'Bile Spew', likelihood: 25, effects: { damage: 16, scorch: 4 } },
+                {
+                    name: 'Grotesque Roar',
+                    likelihood: 20,
+                    effects: { damage: 13, vulnerable: { pct: 30, turns: 2 } }
+                },
+                {
+                    name: 'Necrotic Hide',
+                    likelihood: 17,
+                    effects: { block: 26 },
+                    defensive: true
+                },
+                {
+                    name: 'Consume Flesh',
+                    likelihood: 10,
+                    effects: { lifesteal: { pct: 35, turns: 2 } },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'parasite',
+            name: 'Parasite',
+            img_path: '/textures/characters/laboratory_parasite.png',
+            baseHp: 78,
+            hpPerLevel: 12,
+            cardsPerTurn: { min: 1, max: 3 },
+            cards: [
+                { name: 'Burrow', likelihood: 26, effects: { damage: 18, bleed: 5 } },
+                { name: 'Infect', likelihood: 24, effects: { bleed: 4, scorch: 3 } },
+                {
+                    name: 'Toxic Latch',
+                    likelihood: 20,
+                    effects: { damage: 15, vulnerable: { pct: 30, turns: 2 } }
+                },
+                {
+                    name: 'Chitinous Shell',
+                    likelihood: 18,
+                    effects: { block: 24 },
+                    defensive: true
+                },
+                {
+                    name: 'Leech',
+                    likelihood: 12,
+                    effects: { lifesteal: { pct: 40, turns: 2 } },
                     defensive: true
                 }
             ]
@@ -427,6 +601,72 @@ const ENEMY_POOL = {
                     defensive: true
                 }
             ]
+        },
+        {
+            id: 'incubus',
+            name: 'Incubus',
+            img_path: '/textures/characters/gates_of_hell_incubus.png',
+            baseHp: 88,
+            hpPerLevel: 14,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                {
+                    name: 'Seductive Gaze',
+                    likelihood: 28,
+                    effects: { damage: 22, vulnerable: { pct: 40, turns: 2 } }
+                },
+                {
+                    name: 'Life Kiss',
+                    likelihood: 25,
+                    effects: { damage: 18, lifesteal: { pct: 50, turns: 2 } }
+                },
+                { name: 'Charm Lash', likelihood: 20, effects: { damage: 28, bleed: 5 } },
+                {
+                    name: 'Dark Embrace',
+                    likelihood: 17,
+                    effects: { lifesteal: { pct: 60, turns: 2 } },
+                    defensive: true
+                },
+                {
+                    name: 'Infernal Allure',
+                    likelihood: 10,
+                    effects: { healing: 24 },
+                    defensive: true
+                }
+            ]
+        },
+        {
+            id: 'cultist',
+            name: 'Cultist',
+            img_path: '/textures/characters/gates_of_hell_cultist.png',
+            baseHp: 72,
+            hpPerLevel: 12,
+            cardsPerTurn: { min: 2, max: 3 },
+            cards: [
+                {
+                    name: 'Blood Offering',
+                    likelihood: 28,
+                    effects: { damage: 38, scorch: 6 }
+                },
+                {
+                    name: 'Ritual Curse',
+                    likelihood: 25,
+                    effects: { damage: 24, vulnerable: { pct: 45, turns: 3 } }
+                },
+                { name: 'Hellfire Chant', likelihood: 20, effects: { scorch: 8 } },
+                {
+                    name: 'Sacrificial Ward',
+                    likelihood: 17,
+                    effects: { block: 38 },
+                    defensive: true
+                },
+                {
+                    name: 'Dark Communion',
+                    likelihood: 10,
+                    effects: { healing: 32 },
+                    defensive: true
+                }
+            ]
         }
     ]
 };
@@ -506,7 +746,11 @@ function generateEnemy(dungeonType, dungeonLevel) {
     const maxHp = archetype.baseHp + (level - 1) * archetype.hpPerLevel;
 
     const scaledCards = archetype.cards.map((card) => {
-        const scaled = { likelihood: card.likelihood, effects: { ...card.effects } };
+        const scaled = {
+            name: card.name,
+            likelihood: card.likelihood,
+            effects: { ...card.effects }
+        };
         if (scaled.effects.damage !== undefined)
             scaled.effects.damage = scaleForLevel(scaled.effects.damage, level);
         if (scaled.effects.healing !== undefined)
@@ -545,6 +789,8 @@ function generateEnemyGroup(dungeonType, dungeonLevel, count) {
 
 function rollEnemyCount(dungeonType, dungeonLevel = 1) {
     const level = Math.max(1, Math.min(10, Number(dungeonLevel) || 1));
+
+    if (level <= 3) return 1;
 
     const levelScale = (level - 1) / 9;
 

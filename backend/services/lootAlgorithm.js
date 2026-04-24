@@ -246,13 +246,21 @@ function generateGoldReward(dungeon, level) {
     const dungeonKey = normalizeDungeonKey(dungeon);
     const dungeonDifficulty = types[dungeonKey] || 1;
 
-    const baseGold = level * 25 + dungeonDifficulty * 100;
+    const dungeonMultiplier =
+        {
+            1: 0.35, // crypt
+            2: 0.6, // labyrinth
+            3: 0.85, // laboratory
+            4: 1.0 // gates_of_hell
+        }[dungeonDifficulty] ?? 1.0;
+
+    const baseGold = (level * 25 + dungeonDifficulty * 100) * dungeonMultiplier;
 
     const variance = baseGold * (Math.random() * 0.4 - 0.2);
 
     let gold = Math.floor(baseGold + variance);
 
-    gold = Math.max(100, Math.min(gold, 10000));
+    gold = Math.max(10, Math.min(gold, 10000));
 
     return gold;
 }
