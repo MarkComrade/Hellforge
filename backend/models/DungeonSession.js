@@ -96,7 +96,15 @@ class DungeonSession {
         let typeIdx = 0;
         for (const key of unassigned) {
             if (!grid[key].roomType) {
-                grid[key].roomType = types[typeIdx % types.length];
+                let roll = Math.random();
+                if (roll < 0.5) {
+                    grid[key].roomType = 'combat';
+                } else if (roll < 0.8) {
+                    grid[key].roomType = 'event';
+                } else {
+                    grid[key].roomType = 'loot';
+                }
+                grid[key].cleared = false;
                 typeIdx++;
             }
         }

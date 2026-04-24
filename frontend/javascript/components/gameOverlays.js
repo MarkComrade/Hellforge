@@ -42,68 +42,79 @@ function openSettings() {
 // Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
 async function abandonDungeon() {
     if (document.getElementById('combat-scene')) return;
-    showAbandonConfirm(async () => {
-        try {
-            await postFetch('/api/dungeon/abandon', {
-                sessionToken: sessionStorage.getItem('dungeonSessionToken')
-            });
-        } catch (error) {
-            toast('Failed to abandon dungeon', 'error');
-            console.error('Abandon failed:', error.message);
-        }
-        exitDungeon(true);
-    });
+
+    const confirmed = await areYouSure(
+        'You are about to flee this accursed place. Your current run will be lost and you will leave empty-handed. Are you certain?',
+        'Abandon Dungeon',
+        'Stay and Fight',
+        'Flee'
+    );
+
+    if (!confirmed) return;
+
+    try {
+        await postFetch('/api/dungeon/abandon', {
+            sessionToken: sessionStorage.getItem('dungeonSessionToken')
+        });
+    } catch (error) {
+        toast('Failed to abandon dungeon', 'error');
+        console.error('Abandon failed:', error.message);
+    }
+    exitDungeon(true);
 }
+function areYouSure(dialogue, title, refuse, approve) {
+    return new Promise((resolve) => {
+        const backdrop = document.createElement('div');
+        backdrop.className = 'abandonBackdrop';
 
-function showAbandonConfirm(onConfirm) {
-    const backdrop = document.createElement('div');
-    backdrop.className = 'abandonBackdrop';
+        const popup = document.createElement('div');
+        popup.className = 'eventDialoguePopup';
 
-    const popup = document.createElement('div');
-    popup.className = 'eventDialoguePopup';
+        const header = document.createElement('div');
+        header.className = 'eventDialogueHeader';
 
-    const header = document.createElement('div');
-    header.className = 'eventDialogueHeader';
+        const titleElement = document.createElement('h3');
+        titleElement.className = 'eventDialogueTitle';
+        titleElement.textContent = title;
 
-    const title = document.createElement('h3');
-    title.className = 'eventDialogueTitle';
-    title.textContent = 'Abandon Dungeon';
+        const badge = document.createElement('span');
+        badge.className = 'eventDialogueBadge';
+        badge.textContent = 'WARNING';
 
-    const badge = document.createElement('span');
-    badge.className = 'eventDialogueBadge';
-    badge.textContent = 'WARNING';
+        header.appendChild(titleElement);
+        header.appendChild(badge);
 
-    header.appendChild(title);
-    header.appendChild(badge);
+        const body = document.createElement('p');
+        body.className = 'eventDialogueBody';
+        body.textContent = dialogue;
 
-    const body = document.createElement('p');
-    body.className = 'eventDialogueBody';
-    body.textContent =
-        'You are about to flee this accursed place. Your current run will be lost and you will leave empty-handed. Are you certain?';
+        const footer = document.createElement('div');
+        footer.className = 'eventDialogueFooter';
 
-    const footer = document.createElement('div');
-    footer.className = 'eventDialogueFooter';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'eventDialogueButton';
+        cancelBtn.textContent = refuse;
+        cancelBtn.addEventListener('click', () => {
+            backdrop.remove();
+            resolve(false);
+        });
 
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'eventDialogueButton';
-    cancelBtn.textContent = 'Stay and Fight';
-    cancelBtn.addEventListener('click', () => backdrop.remove());
+        const confirmBtn = document.createElement('button');
+        confirmBtn.type = 'button';
+        confirmBtn.className = 'eventDialogueButton primary abandonConfirmBtn';
+        confirmBtn.textContent = approve;
+        confirmBtn.addEventListener('click', () => {
+            backdrop.remove();
+            resolve(true);
+        });
 
-    const confirmBtn = document.createElement('button');
-    confirmBtn.type = 'button';
-    confirmBtn.className = 'eventDialogueButton primary abandonConfirmBtn';
-    confirmBtn.textContent = 'Abandon Run';
-    confirmBtn.addEventListener('click', () => {
-        backdrop.remove();
-        onConfirm();
-    });
-
-    footer.appendChild(cancelBtn);
-    footer.appendChild(confirmBtn);
-    popup.appendChild(header);
-    popup.appendChild(body);
-    popup.appendChild(footer);
-    backdrop.appendChild(popup);
-    document.body.appendChild(backdrop);
+        footer.appendChild(cancelBtn);
+        footer.appendChild(confirmBtn);
+        popup.appendChild(header);
+        popup.appendChild(body);
+        popup.appendChild(footer);
+        backdrop.appendChild(popup);
+        document.body.appendChild(backdrop);
+    }); // end Promise
 }
