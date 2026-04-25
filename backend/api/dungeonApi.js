@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireLogin } = require('./middleware');
 const DungeonSession = require('../models/DungeonSession.js');
 const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
 const { eventManager } = require('../services/eventGeneration.js');
@@ -45,16 +46,10 @@ const MAX_DUNGEON_LEVEL = 20;
 
 // ───── Middleware ─────
 // These functions run BEFORE the actual route handler.
-// Express calls them in order: requireSession → requireDungeon → route handler.
+// Express calls them in order: requireLogin → requireDungeon → route handler.
 // If any middleware calls res.status().json() it stops the chain (the route never runs).
 
-// Rejects unauthenticated requests — players must be logged in to use dungeon features.
-function requireLogin(req, res, next) {
-    if (!req.session.isLoggedIn) {
-        return res.status(401).json({ success: false, message: 'Login required' });
-    }
-    next();
-}
+// requireLogin is imported from middleware.js
 
 // Reconstructs the DungeonSession object from the session store and attaches it to req.dungeon.
 // express-session stores data as plain JSON, so we lose the class prototype and Set objects.
@@ -100,11 +95,6 @@ router.post('/start', requireLogin, async (req, res) => {
         // SECURITY: only allow known dungeon names — prevents injection of arbitrary strings
         if (!dungeonName || !VALID_DUNGEONS.includes(dungeonName)) {
             return res.status(400).json({ success: false, message: 'Invalid dungeon name' });
-        }
-
-        const gearCheck = await checkGearRequirement(req.session.playerId, dungeonName);
-        if (!gearCheck.allowed) {
-            return res.status(403).json({ success: false, message: gearCheck.message });
         }
 
         // The constructor generates the map automatically (random walk algorithm)
@@ -276,7 +266,7 @@ router.get('/state', requireLogin, requireDungeon, (req, res) => {
 
 // Attempt to pick up a stored room item (inventory was full at first visit).
 // Must be standing on a loot room that has an uncollected item.
-router.post('/pickup-room-loot', requireDungeon, async (req, res) => {
+router.post('/pickup-room-loot', requireLogin, requireDungeon, async (req, res) => {
     try {
         const dungeon = req.dungeon;
         const currentKey = `${dungeon.playerX},${dungeon.playerY}`;

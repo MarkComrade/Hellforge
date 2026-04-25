@@ -26,7 +26,8 @@ class DungeonSession {
     // Higher dungeonLevel = more rooms (formula: random(1-3) + level + 4).
     generateMap() {
         const grid = {};
-        const totalRooms = Math.floor(Math.random() * 3 + 1) + this.dungeonLevel + 4;
+        const totalRooms =
+            Math.floor(Math.random() * 3 + 1) + Math.floor(this.dungeonLevel / 3) + 4;
         let roomCount = 1;
         let currentX = 5;
         let currentY = 5;
@@ -97,7 +98,7 @@ class DungeonSession {
         for (const key of unassigned) {
             if (!grid[key].roomType) {
                 let roll = Math.random();
-                if (roll < 0.5) {
+                if (roll < 0.6) {
                     grid[key].roomType = 'combat';
                 } else if (roll < 0.8) {
                     grid[key].roomType = 'event';

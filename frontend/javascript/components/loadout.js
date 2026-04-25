@@ -15,7 +15,7 @@ function mapLoadoutGold(gold) {
 
 async function fetchLoadoutGold(playerId) {
     try {
-        const result = await getMethodFetch(`/api/inventory/gold/${playerId}`);
+        const result = await getMethodFetch(`/api/inventory/gold`);
         if (result.success && result.gold) {
             return mapLoadoutGold(result.gold);
         }
@@ -108,7 +108,6 @@ async function createLoadoutGoldPanel(playerId) {
         transferButton.disabled = true;
         try {
             const result = await postFetch('/api/inventory/gold/transfer', {
-                playerId: playerId,
                 from: 'loadout',
                 amount: transferAmount
             });
@@ -224,7 +223,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
 
     let inventory = null;
     try {
-        const result = await getMethodFetch(`/api/inventory/equipment/${playerId}`);
+        const result = await getMethodFetch(`/api/inventory/equipment`);
         if (result.success) {
             inventory = result.inventory;
         }
@@ -341,7 +340,7 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
     const LOADOUT_LIMIT = 10;
     let loadoutItems = [];
     try {
-        const result = await getMethodFetch(`/api/inventory/loadout/${playerId}`);
+        const result = await getMethodFetch(`/api/inventory/loadout`);
         if (result.success) {
             loadoutItems = result.loadout;
         }
@@ -432,7 +431,6 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                     event.stopPropagation();
                     try {
                         const result = await postFetch('/api/inventory/loadout/swap', {
-                            playerId: playerId,
                             loadoutId: item.loadoutId,
                             slot: equipmentSlot
                         });
@@ -473,7 +471,6 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                     event.stopPropagation();
                     try {
                         const result = await postFetch('/api/inventory/loadout/moveToStash', {
-                            playerId: playerId,
                             loadoutId: item.loadoutId
                         });
                         if (result.success) {
@@ -508,7 +505,6 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
                 if (confirmed) {
                     try {
                         const result = await deleteFetch('/api/inventory/loadout/remove', {
-                            playerId: playerId,
                             loadoutId: item.loadoutId
                         });
                         if (result.success) {

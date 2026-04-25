@@ -5,6 +5,8 @@ const { findNextAvailableId } = require('../core/idHelpers.js');
 const { createItemInstance } = require('../core/itemInstanceHelpers.js');
 
 const SALT_ROUNDS = 12;
+const MAX_PASSWORD_LENGTH = 128;
+const MAX_USERNAME_LENGTH = 30;
 
 async function selectall() {
     const [rows] = await pool.query('SELECT * FROM user');
@@ -13,6 +15,12 @@ async function selectall() {
 
 async function loginUser(username, password) {
     try {
+        if (!username || !password) {
+            return { success: false, message: 'Hiányzó felhasználónév vagy jelszó' };
+        }
+        if (typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
+            return { success: false, message: 'Helytelen jelszó' };
+        }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length === 0) {
@@ -35,16 +43,35 @@ async function loginUser(username, password) {
 
 async function registerUser(username, password) {
     try {
+        if (!username || !password) {
+            return { success: false, message: 'Missing username or password' };
+        }
+        if (
+            typeof username !== 'string' ||
+            username.length < 1 ||
+            username.length > MAX_USERNAME_LENGTH
+        ) {
+            return {
+                success: false,
+                message: `Username must be between 1 and ${MAX_USERNAME_LENGTH} characters long`
+            };
+        }
+        if (typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
+            return {
+                success: false,
+                message: `Password must be at most ${MAX_PASSWORD_LENGTH} characters long`
+            };
+        }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length > 0) {
-            return { success: false, message: 'A felhasználónév már létezik' };
+            return { success: false, message: 'User already exists' };
         }
 
         if (password.length < 5) {
             return {
                 success: false,
-                message: 'A jelszónak legalább 5 karakter hosszúnak kell lennie'
+                message: 'Password must be at least 5 characters long'
             };
         }
 
