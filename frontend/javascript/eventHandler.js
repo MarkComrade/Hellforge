@@ -286,10 +286,10 @@ async function outRoom(room, dungeon, dungeonLevel) {
         document.body.appendChild(exitButton);
         exitButton.addEventListener('click', async () => {
             try {
-                await postFetch('/api/dungeon/exit', {
+                const result = await postFetch('/api/dungeon/exit', {
                     sessionToken: sessionStorage.getItem('dungeonSessionToken')
                 });
-                exitDungeon();
+                exitDungeon(null, result?.stats || null);
             } catch (error) {
                 toast('Failed to exit dungeon', 'error');
                 console.error('Exit failed:', error.message);
@@ -318,6 +318,35 @@ async function outRoom(room, dungeon, dungeonLevel) {
             }
         });
     });
+}
+
+async function fetchCurrentGold() {
+    try {
+        const session = await getMethodFetch('/api/loginAuthApi/session');
+        if (!session || !session.isLoggedIn || !session.userId) return null;
+        const result = await getMethodFetch(`/api/inventory/gold/${session.userId}`);
+        if (result && result.success) return result;
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+function createGoldDisplay() {
+    const element = document.createElement('div');
+    element.className = 'shopGoldDisplay';
+    element.textContent = 'Gold: ...';
+
+    function update(goldData) {
+        if (!goldData || !goldData.gold) {
+            element.textContent = 'Gold: —';
+            return;
+        }
+        const loadout = goldData.gold.loadout ?? 0;
+        element.textContent = `Gold: ${Math.round(loadout)}`;
+    }
+
+    return { el: element, update };
 }
 
 async function fetchShopItems() {
@@ -394,7 +423,9 @@ function createStatsDisplay() {
         lines.type.textContent = `Type: ${item.type || '—'}`;
         lines.tier.textContent = `Tier: ${item.tier ?? '—'}`;
 
-        let displayPrice = item.adjustedPrice !== undefined ? item.adjustedPrice : item.price;
+        let displayPrice = Math.round(
+            item.adjustedPrice !== undefined ? item.adjustedPrice : item.price
+        );
         lines.price.textContent = `Price: ${displayPrice ?? '—'} gold`;
 
         if (item.category === 'weapon') {
@@ -436,8 +467,9 @@ function createShopGrid(items, onSelect) {
         name.className = 'shopSlotName';
         name.textContent = item.name || 'Unknown';
 
-        let displayPrice =
-            item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0);
+        let displayPrice = Math.round(
+            item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0)
+        );
 
         const price = document.createElement('span');
         price.className = 'shopSlotValue';
@@ -501,8 +533,9 @@ function createPromptPanel(options = {}) {
 
     function setItem(item) {
         if (item) {
-            let displayPrice =
-                item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0);
+            let displayPrice = Math.round(
+                item.adjustedPrice !== undefined ? item.adjustedPrice : (item.price ?? 0)
+            );
             promptText.textContent = `Buy ${item.name} for ${displayPrice} gold?`;
         } else {
             promptText.textContent = idleText;
@@ -549,6 +582,10 @@ function createTradeEventOverlay(tradeEvent) {
     shopTitle.className = 'shopTitle';
     shopTitle.textContent = sanitizeEventText(tradeEvent?.title, 'Traveling Merchant');
     shopPanel.appendChild(shopTitle);
+
+    const { el: goldEl, update: updateGold } = createGoldDisplay();
+    shopPanel.appendChild(goldEl);
+    fetchCurrentGold().then(updateGold);
 
     const closeButton = document.createElement('button');
     closeButton.className = 'shopCloseButton';
@@ -658,6 +695,10 @@ async function renderShop() {
     shopTitle.textContent = 'Trader Stock';
     shopPanel.appendChild(shopTitle);
 
+    const { el: goldEl, update: updateGold } = createGoldDisplay();
+    shopPanel.appendChild(goldEl);
+    fetchCurrentGold().then(updateGold);
+
     const closeButton = document.createElement('button');
     closeButton.className = 'shopCloseButton';
     closeButton.textContent = '✕';
@@ -744,6 +785,7 @@ async function renderShop() {
         if (loadoutItems.length > 0) {
             const sellSection = createSellGrid(loadoutItems, (remainingGold) => {
                 setStatus(`Gold remaining: ${remainingGold}`, 'success');
+                fetchCurrentGold().then(updateGold);
             });
             shopPanel.appendChild(sellSection);
         }
@@ -866,7 +908,7 @@ function createSellGrid(loadoutItems, onSellComplete) {
                     });
 
                     if (result && result.success) {
-                        sellStatus.textContent = `Sold ${result.itemName} for ${result.soldFor} gold. Gold: ${result.remainingGold}`;
+                        sellStatus.textContent = `Sold ${result.itemName} for ${Math.round(result.soldFor)} gold. Gold: ${Math.round(result.remainingGold)}`;
                         sellStatus.className = 'shopStatusText shopStatus--success';
                         toast(`+${result.soldFor} gold`, 'success');
                         if (onSellComplete) {

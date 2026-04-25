@@ -42,7 +42,26 @@ function openSettings() {
 // Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
 async function abandonDungeon() {
     if (document.getElementById('combat-scene')) return;
+    showAbandonConfirm(async () => {
+        let stats = null;
+        let penalty = null;
+        try {
+            const result = await postFetch('/api/dungeon/abandon', {
+                sessionToken: sessionStorage.getItem('dungeonSessionToken')
+            });
+            if (result) {
+                stats = result.stats || null;
+                penalty = result.penalty || null;
+            }
+        } catch (error) {
+            toast('Failed to abandon dungeon', 'error');
+            console.error('Abandon failed:', error.message);
+        }
+        exitDungeon('abandoned', stats, penalty);
+    });
+}
 
+async function showAbandonConfirm(onConfirm) {
     const confirmed = await areYouSure(
         'You are about to flee this accursed place. Your current run will be lost and you will leave empty-handed. Are you certain?',
         'Abandon Dungeon',
@@ -51,16 +70,7 @@ async function abandonDungeon() {
     );
 
     if (!confirmed) return;
-
-    try {
-        await postFetch('/api/dungeon/abandon', {
-            sessionToken: sessionStorage.getItem('dungeonSessionToken')
-        });
-    } catch (error) {
-        toast('Failed to abandon dungeon', 'error');
-        console.error('Abandon failed:', error.message);
-    }
-    exitDungeon(true);
+    await onConfirm();
 }
 function areYouSure(dialogue, title, refuse, approve) {
     return new Promise((resolve) => {

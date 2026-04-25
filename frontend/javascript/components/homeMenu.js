@@ -23,7 +23,7 @@ async function Home() {
                 equippedGear = equipmentResult.inventory;
             }
             if (goldResult.success) {
-                gold = Number(goldResult.gold.stash) + Number(goldResult.gold.loadout);
+                gold = Math.round(Number(goldResult.gold.stash) + Number(goldResult.gold.loadout));
             }
         }
     } catch (error) {
@@ -33,16 +33,15 @@ async function Home() {
     generateBootStrapGrid(1, 1, 12, 'homeMenuRow');
     let menuTitle = document.createElement('div');
     menuTitle.setAttribute('class', 'menuTitle homeMenu');
-    menuTitle.style = 'font-size: 8vh;';
     menuTitle.textContent = 'Home';
     document.querySelector('.homeMenuRow').appendChild(menuTitle);
 
-    generateBootStrapGrid(1, 2, 6, 'homeUI');
+    generateBootStrapGrid(1, 1, 12, 'homeUI');
 
     let homeUI = document.querySelectorAll('.homeUI');
     homeUI[0].setAttribute(
         'class',
-        'characterInfoDiv col-sm-3 col-md-3 d-flex flex-column align-items-center'
+        'characterInfoDiv col-12 d-flex flex-column align-items-center'
     );
 
     let userNameText = document.createElement('h2');
@@ -145,33 +144,11 @@ async function Home() {
         }
     });
 
-    characterInfoDiv[0].appendChild(armourRow);
-    characterInfoDiv[0].appendChild(weaponsRow);
-
-    homeUI[1].setAttribute(
-        'class',
-        'characterStashDiv col-sm-7 col-md-7 d-flex flex-column align-items-center'
-    );
-
-    equipmentSlots.forEach(({ img }) => {
-        let rowDiv = document.createElement('div');
-        rowDiv.setAttribute('class', 'equipmentRow');
-
-        let leftBox = document.createElement('div');
-        leftBox.setAttribute('class', 'equipmentLeft');
-
-        let slotImg = document.createElement('img');
-        slotImg.setAttribute('src', img);
-        slotImg.setAttribute('class', 'itemImage');
-        leftBox.appendChild(slotImg);
-
-        let rightBox = document.createElement('div');
-        rightBox.setAttribute('class', 'equipmentRight');
-
-        rowDiv.appendChild(leftBox);
-        rowDiv.appendChild(rightBox);
-        homeUI[1].appendChild(rowDiv);
-    });
+    let gearRowsWrapper = document.createElement('div');
+    gearRowsWrapper.setAttribute('class', 'gearRowsWrapper');
+    gearRowsWrapper.appendChild(armourRow);
+    gearRowsWrapper.appendChild(weaponsRow);
+    characterInfoDiv[0].appendChild(gearRowsWrapper);
 
     let stashButton = document.createElement('input');
     stashButton.setAttribute('type', 'button');

@@ -9,6 +9,7 @@ const { generateEnemy, generateEnemyGroup, rollEnemyCount } = require('../servic
 const { buildDeckFromEquipment, getCardById } = require('../services/cardPool.js');
 const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
 const { generateFinalLoot } = require('../services/lootAlgorithm.js');
+const { clearLoadoutAndResetGear } = require('../sql/queries/inventoryQueries.js');
 const database = require('../sql/queries/inventoryQueries.js');
 const { requireLogin } = require('./middleware');
 
@@ -224,6 +225,13 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         if (dungeonData) {
             const key = `${dungeonData.playerX},${dungeonData.playerY}`;
             if (dungeonData.map[key]) dungeonData.map[key].cleared = true;
+
+            if (!dungeonData.stats) {
+                dungeonData.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
+            }
+            dungeonData.stats.enemiesKilled += combat.enemies.length;
+            dungeonData.stats.goldCollected += reward.gold || 0;
+
             req.session.dungeonData = dungeonData;
         }
 
@@ -232,6 +240,44 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         res.json({ reward });
     } catch (error) {
         console.error('Claim reward error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+router.post('/death', requireLogin, requireCombat, async (req, res) => {
+    try {
+        const combat = req.combat;
+        if (!combat.isGameOver) {
+            return res.status(400).json({ success: false, message: 'Combat not over' });
+        }
+
+        const playerId = Number(req.session.userId);
+        console.log(`[death] Processing death penalty for player ${playerId}`);
+
+        const stats = req.session.dungeonData?.stats || {
+            enemiesKilled: 0,
+            floorsCleared: 0,
+            goldCollected: 0
+        };
+
+        const penaltyResult = await clearLoadoutAndResetGear(playerId);
+        if (!penaltyResult.success) {
+            console.error(
+                'clearLoadoutAndResetGear failed for player',
+                playerId,
+                penaltyResult.message
+            );
+        } else {
+            console.log(`[death] Loadout cleared and gear reset for player ${playerId}`);
+        }
+
+        delete req.session.combatData;
+        delete req.session.combatToken;
+        delete req.session.dungeonData;
+
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error('Death endpoint error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
