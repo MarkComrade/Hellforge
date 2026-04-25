@@ -653,8 +653,9 @@ function createTradeEventOverlay(tradeEvent) {
             });
 
             if (result && result.success) {
+                const spentGold = selectedItem.adjustedPrice ?? selectedItem.price;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
-                fetchCurrentGold().then(updateGold);
+                toast(`-${spentGold} gold`, 'info');
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
@@ -752,8 +753,9 @@ async function renderShop() {
             });
 
             if (result && result.success) {
+                const spentGold = selectedItem.adjustedPrice ?? selectedItem.price;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
-                fetchCurrentGold().then(updateGold);
+                toast(`-${spentGold} gold`, 'info');
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
@@ -798,7 +800,7 @@ async function fetchLoadoutForSelling() {
         if (!session || !session.isLoggedIn || !session.userId) {
             return [];
         }
-        const result = await getMethodFetch(`/api/inventory/loadout/${session.userId}`);
+        const result = await getMethodFetch(`/api/inventory/loadout`);
         if (result && result.success) {
             return result.loadout;
         }
@@ -908,6 +910,7 @@ function createSellGrid(loadoutItems, onSellComplete) {
                     if (result && result.success) {
                         sellStatus.textContent = `Sold ${result.itemName} for ${Math.round(result.soldFor)} gold. Gold: ${Math.round(result.remainingGold)}`;
                         sellStatus.className = 'shopStatusText shopStatus--success';
+                        toast(`+${result.soldFor} gold`, 'success');
                         if (onSellComplete) {
                             onSellComplete(result.remainingGold);
                         }

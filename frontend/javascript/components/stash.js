@@ -15,7 +15,7 @@ function mapStashGold(gold) {
 
 async function fetchStashGold(playerId) {
     try {
-        const result = await getMethodFetch(`/api/inventory/gold/${playerId}`);
+        const result = await getMethodFetch(`/api/inventory/gold`);
         if (result.success && result.gold) {
             return mapStashGold(result.gold);
         }
@@ -99,7 +99,6 @@ async function createStashGoldPanel(playerId) {
         transferButton.disabled = true;
         try {
             const result = await postFetch('/api/inventory/gold/transfer', {
-                playerId: playerId,
                 from: 'stash',
                 amount: transferAmount
             });
@@ -185,7 +184,7 @@ async function renderStashContent(playerId, grid, countText) {
 
     let stashItems = [];
     try {
-        const result = await getMethodFetch(`/api/inventory/stash/${playerId}`);
+        const result = await getMethodFetch(`/api/inventory/stash`);
         if (result.success) {
             stashItems = result.stash;
         }
@@ -276,7 +275,6 @@ async function renderStashContent(playerId, grid, countText) {
                     event.stopPropagation();
                     try {
                         const result = await postFetch('/api/inventory/stash/swap', {
-                            playerId: playerId,
                             stashId: item.stashId,
                             slot: equipmentSlot
                         });
@@ -312,7 +310,6 @@ async function renderStashContent(playerId, grid, countText) {
                     event.stopPropagation();
                     try {
                         const result = await postFetch('/api/inventory/stash/moveToInventory', {
-                            playerId: playerId,
                             stashId: item.stashId
                         });
                         if (result.success) {
@@ -342,8 +339,7 @@ async function renderStashContent(playerId, grid, countText) {
                 if (confirmed) {
                     try {
                         const result = await deleteFetch('/api/inventory/stash/remove', {
-                            stashId: item.stashId,
-                            playerId: playerId
+                            stashId: item.stashId
                         });
                         if (result.success) {
                             toast(`${itemName} deleted`, 'info');

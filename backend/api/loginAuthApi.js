@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const database = require('../sql/queries/authUserQueries.js');
 const fs = require('fs/promises');
 
@@ -18,9 +19,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // max 20 attempts per window per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many attempts, please try again later.' }
+});
+
 //!Endpoints:
 
-router.post('/loginUser', async (request, response) => {
+router.post('/loginUser', authLimiter, async (request, response) => {
     const { username, password } = request.body;
     try {
         const result = await database.loginUser(username, password);
@@ -32,11 +41,11 @@ router.post('/loginUser', async (request, response) => {
         }
         response.json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
+        response.status(500).json({ success: false, message: 'server error' });
     }
 });
 
-router.post('/registerUser', async (request, response) => {
+router.post('/registerUser', authLimiter, async (request, response) => {
     const { username, password } = request.body;
     try {
         const result = await database.registerUser(username, password);
@@ -47,16 +56,16 @@ router.post('/registerUser', async (request, response) => {
         }
         response.json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
+        response.status(500).json({ success: false, message: 'server error' });
     }
 });
 
 router.post('/logout', (request, response) => {
     request.session.destroy((err) => {
         if (err) {
-            response.status(500).json({ success: false, message: 'Hiba a kijelentkezés során' });
+            response.status(500).json({ success: false, message: 'server error' });
         } else {
-            response.json({ success: true, message: 'Sikeres kijelentkezés' });
+            response.json({ success: true, message: 'successful logout' });
         }
     });
 });
@@ -67,7 +76,7 @@ router.post('/guest', (request, response) => {
     response.json({ success: true, userName: 'Guest' });
 });
 
-router.post('/loginAdmin', async (request, response) => {
+router.post('/loginAdmin', authLimiter, async (request, response) => {
     const { username, password } = request.body;
     try {
         const result = await database.loginAdmin(username, password);
@@ -79,7 +88,7 @@ router.post('/loginAdmin', async (request, response) => {
         }
         response.json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
+        response.status(500).json({ success: false, message: 'server error' });
     }
 });
 

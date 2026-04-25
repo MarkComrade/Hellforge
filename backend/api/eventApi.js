@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { requireLogin } = require('./middleware');
 const database = {
     ...require('../sql/queries/authUserQueries.js'),
     ...require('../sql/queries/shopQueries.js')
@@ -40,35 +41,7 @@ router.get('/testsql', async (request, response) => {
         });
     }
 });
-router.get('/lootAlgorithm/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId);
-    try {
-        const dungeon = getDungeonFromSession(request);
-        if (!dungeon) {
-            return response.status(400).json({
-                success: false,
-                message: 'No active dungeon'
-            });
-        }
-
-        const loot = await generateAndInsertLoot(
-            playerId,
-            dungeon.dungeonName,
-            dungeon.dungeonLevel
-        );
-        response.status(200).json({
-            success: true,
-            loot: loot
-        });
-    } catch (error) {
-        response.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
-router.get('/shop-items', async (request, response) => {
+router.get('/shop-items', requireLogin, async (request, response) => {
     try {
         const dungeon = getDungeonFromSession(request);
         if (!dungeon) {
@@ -117,7 +90,7 @@ router.get('/shop-items', async (request, response) => {
     }
 });
 
-router.post('/buy-item', async (request, response) => {
+router.post('/buy-item', requireLogin, async (request, response) => {
     const { itemId, category, adjustedPrice } = request.body;
     const playerId = request.session?.userId;
 
@@ -141,16 +114,36 @@ router.post('/buy-item', async (request, response) => {
         return response.status(400).json({ success: false, message: 'Invalid price value.' });
     }
 
+    const dungeon = getDungeonFromSession(request);
+    if (!dungeon) {
+        return response
+            .status(400)
+            .json({ success: false, message: 'You must be in a dungeon to purchase items.' });
+    }
+    const shopKey = dungeon.playerX + ',' + dungeon.playerY;
+    const shopRoom = dungeon.map[shopKey];
+    const isShopRoom = shopRoom?.roomType === 'shop';
+    const isTradeRoom =
+        shopRoom?.roomType === 'event' &&
+        Array.isArray(dungeon.shopStock[shopKey]) &&
+        dungeon.shopStock[shopKey].length > 0;
+    if (!isShopRoom && !isTradeRoom) {
+        return response.status(400).json({
+            success: false,
+            message: 'You must be in a shop or trade event room to purchase items.'
+        });
+    }
+
     try {
         const itemInfo = await database.getItemBaseInfo(itemId, category);
         if (!itemInfo) {
             return response.status(200).json({ success: false, message: 'Item not found.' });
         }
 
-        const dungeon = getDungeonFromSession(request);
+        // dungeon is already resolved above
 
         // Check if item was already bought from this room stock and lock the price to the cached offer.
-        if (dungeon) {
+        {
             const roomKey = dungeon.playerX + ',' + dungeon.playerY;
             let stock = dungeon.shopStock[roomKey];
             if (stock) {
@@ -179,21 +172,16 @@ router.post('/buy-item', async (request, response) => {
             }
         }
 
-        let serverPrice = itemInfo.price;
-
-        if (dungeon) {
-            const maxAllowedPrice = getMaxAllowedPrice(
-                itemInfo.price,
-                itemInfo.tier,
-                dungeon.dungeonName,
-                dungeon.dungeonLevel
-            );
-
-            if (parsedPrice > maxAllowedPrice) {
-                parsedPrice = maxAllowedPrice;
-            }
-            serverPrice = parsedPrice;
+        const maxAllowedPrice = getMaxAllowedPrice(
+            itemInfo.price,
+            itemInfo.tier,
+            dungeon.dungeonName,
+            dungeon.dungeonLevel
+        );
+        if (parsedPrice > maxAllowedPrice) {
+            parsedPrice = maxAllowedPrice;
         }
+        const serverPrice = parsedPrice;
 
         const result = await database.purchaseItemToLoadout(
             playerId,
@@ -207,7 +195,7 @@ router.post('/buy-item', async (request, response) => {
         }
 
         // Mark item as sold in cached shop stock
-        if (dungeon) {
+        {
             const roomKey = dungeon.playerX + ',' + dungeon.playerY;
             if (dungeon.shopStock[roomKey]) {
                 let stock = dungeon.shopStock[roomKey];
@@ -237,7 +225,7 @@ router.post('/buy-item', async (request, response) => {
     }
 });
 
-router.post('/sell-item', async (request, response) => {
+router.post('/sell-item', requireLogin, async (request, response) => {
     const playerId = request.session?.userId;
 
     if (!playerId) {

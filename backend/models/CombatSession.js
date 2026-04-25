@@ -438,6 +438,7 @@ class CombatSession {
                 hp: this.player.hp,
                 maxHp: this.player.maxHp,
                 block: this.player.block,
+                strength: this.player.strength,
                 statuses: this.player.statuses
             },
             enemies: this.enemies.map((e) => ({
@@ -447,6 +448,7 @@ class CombatSession {
                 hp: e.hp,
                 maxHp: e.maxHp,
                 block: e.block,
+                strength: e.strength,
                 statuses: e.statuses
             })),
             hand: this.deck.hand,

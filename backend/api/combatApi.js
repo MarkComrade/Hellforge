@@ -11,6 +11,7 @@ const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
 const { generateFinalLoot } = require('../services/lootAlgorithm.js');
 const { clearLoadoutAndResetGear } = require('../sql/queries/inventoryQueries.js');
 const database = require('../sql/queries/inventoryQueries.js');
+const { requireLogin } = require('./middleware');
 
 function normalizeDungeonType(name) {
     return String(name || '')
@@ -21,13 +22,7 @@ function normalizeDungeonType(name) {
 
 // ───── Middleware ─────
 
-// Rejects unauthenticated requests — players must be logged in to use combat features.
-function requireLogin(req, res, next) {
-    if (!req.session.isLoggedIn) {
-        return res.status(401).json({ success: false, message: 'Login required' });
-    }
-    next();
-}
+// requireLogin is imported from middleware.js
 
 // Reconstructs CombatSession from the session store and validates the combat token.
 function requireCombat(req, res, next) {
@@ -68,7 +63,9 @@ router.post('/start', requireLogin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Not on a combat room' });
         }
         if (currentRoom.cleared) {
-            return res.status(400).json({ success: false, cleared: true, message: 'Room already cleared' });
+            return res
+                .status(400)
+                .json({ success: false, cleared: true, message: 'Room already cleared' });
         }
 
         const dungeonType = normalizeDungeonType(dungeon.dungeonName);

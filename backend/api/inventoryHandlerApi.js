@@ -1,16 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const database = require('../sql/queries/inventoryQueries.js');
+const { requireLogin } = require('./middleware');
+
+// All inventory endpoints require an active login — the playerId is always
+// taken from the session so no client can touch another player's data.
+router.use(requireLogin);
 
 //!Endpoints:
 
-router.get('/stash/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId);
-    if (!playerId) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
-    }
+router.get('/stash', async (request, response) => {
+    const playerId = parseInt(request.session.userId, 10);
     try {
         const result = await database.getStash(playerId);
         response.status(result.success ? 200 : 500).json(result);
@@ -19,13 +19,8 @@ router.get('/stash/:playerId', async (request, response) => {
     }
 });
 
-router.get('/stash/count/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId);
-    if (!playerId) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
-    }
+router.get('/stash/count', async (request, response) => {
+    const playerId = parseInt(request.session.userId, 10);
     try {
         const count = await database.getStashCount(playerId);
         response.status(200).json({ success: true, count, limit: 50 });
@@ -34,48 +29,10 @@ router.get('/stash/count/:playerId', async (request, response) => {
     }
 });
 
-router.post('/stash/addArmor', async (request, response) => {
-    const { playerId, armorId } = request.body;
-    if (!playerId || !armorId) {
-        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
-    }
-    try {
-        const result = await database.addArmorToStash(playerId, armorId);
-        response.status(result.success ? 200 : 400).json(result);
-    } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
-    }
-});
-
-router.post('/stash/addWeapon', async (request, response) => {
-    const { playerId, weaponId } = request.body;
-    if (!playerId || !weaponId) {
-        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
-    }
-    try {
-        const result = await database.addWeaponToStash(playerId, weaponId);
-        response.status(result.success ? 200 : 400).json(result);
-    } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
-    }
-});
-
-router.post('/stash/addMisc', async (request, response) => {
-    const { playerId, miscItemId } = request.body;
-    if (!playerId || !miscItemId) {
-        return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
-    }
-    try {
-        const result = await database.addMiscToStash(playerId, miscItemId);
-        response.status(result.success ? 200 : 400).json(result);
-    } catch (error) {
-        response.status(500).json({ success: false, message: 'Szerver hiba' });
-    }
-});
-
 router.delete('/stash/remove', async (request, response) => {
-    const { stashId, playerId } = request.body;
-    if (!stashId || !playerId) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { stashId } = request.body;
+    if (!stashId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -86,13 +43,8 @@ router.delete('/stash/remove', async (request, response) => {
     }
 });
 
-router.get('/equipment/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId);
-    if (!playerId) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
-    }
+router.get('/equipment', async (request, response) => {
+    const playerId = parseInt(request.session.userId, 10);
     try {
         const result = await database.getPlayerInventory(playerId);
         response.status(result.success ? 200 : 404).json(result);
@@ -102,8 +54,9 @@ router.get('/equipment/:playerId', async (request, response) => {
 });
 
 router.post('/stash/swap', async (request, response) => {
-    const { playerId, stashId, slot } = request.body;
-    if (!playerId || !stashId || !slot) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { stashId, slot } = request.body;
+    if (!stashId || !slot) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -114,13 +67,8 @@ router.post('/stash/swap', async (request, response) => {
     }
 });
 
-router.get('/loadout/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId);
-    if (!playerId) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
-    }
+router.get('/loadout', async (request, response) => {
+    const playerId = parseInt(request.session.userId, 10);
     try {
         const result = await database.getLoadout(playerId);
         response.status(result.success ? 200 : 500).json(result);
@@ -130,8 +78,9 @@ router.get('/loadout/:playerId', async (request, response) => {
 });
 
 router.post('/stash/moveToInventory', async (request, response) => {
-    const { playerId, stashId } = request.body;
-    if (!playerId || !stashId) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { stashId } = request.body;
+    if (!stashId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -143,8 +92,9 @@ router.post('/stash/moveToInventory', async (request, response) => {
 });
 
 router.post('/loadout/swap', async (request, response) => {
-    const { playerId, loadoutId, slot } = request.body;
-    if (!playerId || !loadoutId || !slot) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { loadoutId, slot } = request.body;
+    if (!loadoutId || !slot) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -156,8 +106,9 @@ router.post('/loadout/swap', async (request, response) => {
 });
 
 router.delete('/loadout/remove', async (request, response) => {
-    const { playerId, loadoutId } = request.body;
-    if (!playerId || !loadoutId) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { loadoutId } = request.body;
+    if (!loadoutId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -169,8 +120,9 @@ router.delete('/loadout/remove', async (request, response) => {
 });
 
 router.post('/loadout/moveToStash', async (request, response) => {
-    const { playerId, loadoutId } = request.body;
-    if (!playerId || !loadoutId) {
+    const playerId = parseInt(request.session.userId, 10);
+    const { loadoutId } = request.body;
+    if (!loadoutId) {
         return response.status(400).json({ success: false, message: 'Hiányzó paraméterek' });
     }
     try {
@@ -181,13 +133,8 @@ router.post('/loadout/moveToStash', async (request, response) => {
     }
 });
 
-router.get('/gold/:playerId', async (request, response) => {
-    const playerId = parseInt(request.params.playerId, 10);
-    if (!playerId || isNaN(playerId)) {
-        return response
-            .status(400)
-            .json({ success: false, message: 'Érvénytelen játékos azonosító' });
-    }
+router.get('/gold', async (request, response) => {
+    const playerId = parseInt(request.session.userId, 10);
     try {
         const result = await database.getTotalGold(playerId);
         response.status(result.success ? 200 : 500).json(result);
@@ -197,8 +144,8 @@ router.get('/gold/:playerId', async (request, response) => {
 });
 
 router.post('/gold/transfer', async (request, response) => {
-    const { playerId, from, amount } = request.body;
-    const parsedPlayerId = parseInt(playerId, 10);
+    const parsedPlayerId = parseInt(request.session.userId, 10);
+    const { from, amount } = request.body;
     const parsedAmount = parseInt(amount, 10);
 
     if (!from || !Number.isInteger(parsedPlayerId) || parsedPlayerId <= 0) {

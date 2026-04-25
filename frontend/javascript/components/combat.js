@@ -145,14 +145,7 @@ function createPlayerSection() {
     const infoBox = document.createElement('div');
     infoBox.className = 'combat-character-info';
 
-    if (combatState.player.block > 0) {
-        const blockBadge = document.createElement('div');
-        blockBadge.className = 'combat-block-badge';
-        blockBadge.textContent = '\uD83D\uDEE1\uFE0F ' + combatState.player.block;
-        infoBox.appendChild(blockBadge);
-    }
-
-    infoBox.appendChild(createStatusRow(combatState.player.statuses));
+    infoBox.appendChild(createEffectsRow(combatState.player));
     section.appendChild(infoBox);
 
     return section;
@@ -227,8 +220,8 @@ function createEnemyPanel(enemy) {
     nameLabel.textContent = enemy.archetype || 'Enemy';
     infoBox.appendChild(nameLabel);
 
-    infoBox.appendChild(createHealthBar(enemy.hp, enemy.maxHp, enemy.block));
-    infoBox.appendChild(createStatusRow(enemy.statuses));
+    infoBox.appendChild(createHealthBar(enemy.hp, enemy.maxHp));
+    infoBox.appendChild(createEffectsRow(enemy));
 
     panel.appendChild(infoBox);
 
@@ -242,7 +235,7 @@ function updateEnemyHighlights() {
     });
 }
 
-function createHealthBar(currentHealth, maxHealth, block) {
+function createHealthBar(currentHealth, maxHealth) {
     const wrapper = document.createElement('div');
     wrapper.className = 'combat-hp-wrapper';
 
@@ -267,47 +260,86 @@ function createHealthBar(currentHealth, maxHealth, block) {
 
     wrapper.appendChild(track);
 
-    if (block > 0) {
-        const badge = document.createElement('div');
-        badge.className = 'combat-block-badge';
-        badge.textContent = '\uD83D\uDEE1\uFE0F ' + block;
-        wrapper.appendChild(badge);
-    }
-
     return wrapper;
 }
 
-function createStatusRow(statuses) {
+function createEffectsRow(entity) {
+    const effects = [];
+
+    if ((entity.block || 0) > 0)
+        effects.push({
+            icon: '../textures/effects/effects_block.png',
+            label: entity.block,
+            tooltip: `Block \u2014 absorbs incoming damage (${entity.block})`
+        });
+    if ((entity.strength || 0) > 0)
+        effects.push({
+            icon: '../textures/effects/effects_strenght.png',
+            label: entity.strength,
+            tooltip: `Strength \u2014 increases damage dealt (${entity.strength})`
+        });
+
+    (entity.statuses || []).forEach((s) => {
+        const val = s.stacks != null ? s.stacks : s.turns != null ? s.turns + 't' : '';
+        effects.push({ icon: getStatusIcon(s.type), label: val, tooltip: getStatusLabel(s) });
+    });
+
     const row = document.createElement('div');
-    row.className = 'combat-statuses';
-    if (!statuses || !statuses.length) return row;
+    row.className = 'combat-effects-row';
+    if (!effects.length) return row;
 
-    statuses.forEach((status) => {
+    effects.forEach(({ icon, label, tooltip }) => {
         const badge = document.createElement('div');
-        badge.className = 'combat-status-badge';
+        badge.className = 'combat-effect-badge';
+        badge.dataset.tooltip = tooltip;
 
-        const icon = document.createElement('img');
-        icon.src = getStatusIcon(status.type);
-        icon.alt = status.type;
-        icon.onerror = function () {
-            this.onerror = null;
-            this.src = '../textures/misc/defaultportrait.png';
+        const img = document.createElement('img');
+        img.src = icon;
+        img.alt = '';
+        img.onerror = function () {
+            this.style.display = 'none';
         };
-        badge.appendChild(icon);
+        badge.appendChild(img);
 
-        const label = document.createElement('span');
-        label.textContent = status.stacks != null ? status.stacks : status.turns + 't';
-        badge.appendChild(label);
+        const span = document.createElement('span');
+        span.textContent = label;
+        badge.appendChild(span);
 
         row.appendChild(badge);
     });
+
     return row;
 }
 
 function getStatusIcon(type) {
-    if (type === 'bleed') return '../textures/misc/status_blood.png';
-    if (type === 'scorch') return '../textures/misc/status_burn.png';
-    return '../textures/misc/defaultportrait.png';
+    const icons = {
+        block: '../textures/effects/effects_block.png',
+        strength: '../textures/effects/effects_strenght.png',
+        regen: '../textures/effects/effects_regen.png',
+        vulnerable: '../textures/effects/effects_vulnerable%20.png',
+        cleanse: '../textures/effects/effects_cleanse.png',
+        deflect: '../textures/effects/effects_deflect.png',
+        bleed: '../textures/effects/effects_blood.png',
+        scorch: '../textures/effects/effects_scorch.png'
+    };
+    return icons[type] || '../textures/misc/defaultportrait.png';
+}
+
+function getStatusLabel(status) {
+    const names = {
+        bleed: 'Bleed \u2014 damage over time',
+        scorch: 'Scorch \u2014 fire damage over time',
+        strength: 'Strength \u2014 increases damage dealt',
+        regen: 'Regen \u2014 heals HP each turn',
+        vulnerable: 'Vulnerable \u2014 takes increased damage',
+        cleanse: 'Cleanse \u2014 removes debuffs',
+        deflect: 'Deflect \u2014 chance to avoid damage',
+        lifesteal: 'Lifesteal \u2014 heals on dealing damage'
+    };
+    const name = names[status.type] || status.type;
+    if (status.stacks != null) return `${name} (${status.stacks} stacks)`;
+    if (status.turns != null) return `${name} (${status.turns} turns)`;
+    return name;
 }
 
 function createCardSection() {
@@ -379,7 +411,7 @@ function createCardElement(card, cardIndex, canPlayCards) {
     // Effects description box
     const descBox = document.createElement('div');
     descBox.className = 'combat-card-desc-box';
-    descBox.textContent = formatCardEffects(card.effects);
+    buildCardEffectsDOM(card.effects, descBox);
     inner.appendChild(descBox);
 
     // Footer: type | target | exhaust
@@ -472,20 +504,108 @@ function getTargetLabel(card) {
     return 'Select  Target';
 }
 
-function formatCardEffects(effects) {
-    if (!effects) return '';
-    const parts = [];
-    if (effects.damage) parts.push('DMG ' + effects.damage);
-    if (effects.block) parts.push('BLK ' + effects.block);
-    if (effects.bleed) parts.push('BLD ' + effects.bleed);
-    if (effects.scorch) parts.push('SCH ' + effects.scorch);
-    if (effects.healing) parts.push('HEAL ' + effects.healing);
-    if (effects.extraPlays) parts.push('+' + effects.extraPlays + ' play');
-    if (effects.strength) parts.push('STR ' + effects.strength);
-    if (effects.backfire) parts.push('SELF ' + effects.backfire);
-    if (effects.vulnerable) parts.push('VULN ' + effects.vulnerable.pct + '%');
-    if (effects.lifesteal) parts.push('LS ' + effects.lifesteal.pct + '%');
-    return parts.join('  ') || '\u2014';
+const EFFECT_ICONS = {
+    damage: null,
+    block: '../textures/effects/effects_block.png',
+    healing: null,
+    extraPlays: null,
+    backfire: null,
+    bleed: '../textures/effects/effects_blood.png',
+    scorch: '../textures/effects/effects_scorch.png',
+    strength: '../textures/effects/effects_strenght.png',
+    regen: '../textures/effects/effects_regen.png',
+    vulnerable: '../textures/effects/effects_vulnerable%20.png',
+    deflect: '../textures/effects/effects_deflect.png',
+    cleanse: '../textures/effects/effects_cleanse.png',
+    lifesteal: null
+};
+
+function getEffectRows(effects) {
+    if (!effects) return [];
+    const rows = [];
+
+    for (const key of Object.keys(effects)) {
+        const v = effects[key];
+        switch (key) {
+            case 'damage':
+                rows.push({ icon: EFFECT_ICONS.damage, label: `Deal ${v} damage` });
+                break;
+            case 'block':
+                rows.push({ icon: EFFECT_ICONS.block, label: `Gain ${v} block` });
+                break;
+            case 'healing':
+                rows.push({ icon: EFFECT_ICONS.healing, label: `Heal ${v} HP` });
+                break;
+            case 'extraPlays':
+                rows.push({ icon: EFFECT_ICONS.extraPlays, label: `+${v} card play` });
+                break;
+            case 'backfire':
+                rows.push({ icon: EFFECT_ICONS.backfire, label: `Self-damage: ${v}` });
+                break;
+            case 'bleed':
+                rows.push({ icon: EFFECT_ICONS.bleed, label: `Apply ${v} bleed` });
+                break;
+            case 'scorch':
+                rows.push({ icon: EFFECT_ICONS.scorch, label: `Apply ${v} scorch` });
+                break;
+            case 'strength':
+                rows.push({ icon: EFFECT_ICONS.strength, label: `Gain ${v} strength` });
+                break;
+            case 'regen':
+                rows.push({ icon: EFFECT_ICONS.regen, label: `Regen ${v} HP/turn` });
+                break;
+            case 'vulnerable':
+                rows.push({
+                    icon: EFFECT_ICONS.vulnerable,
+                    label: `Vulnerable ${v.pct}% (${v.turns}t)`
+                });
+                break;
+            case 'deflect':
+                rows.push({ icon: EFFECT_ICONS.deflect, label: `Deflect ${v.pct}% (${v.turns}t)` });
+                break;
+            case 'cleanse':
+                rows.push({ icon: EFFECT_ICONS.cleanse, label: `Cleanse debuffs` });
+                break;
+            case 'lifesteal':
+                rows.push({
+                    icon: EFFECT_ICONS.lifesteal,
+                    label: `Lifesteal ${v.pct}% (${v.turns}t)`
+                });
+                break;
+        }
+    }
+
+    return rows;
+}
+
+function buildCardEffectsDOM(effects, container) {
+    if (!effects) {
+        container.textContent = '\u2014';
+        return;
+    }
+    const rows = getEffectRows(effects);
+    if (!rows.length) {
+        container.textContent = '\u2014';
+        return;
+    }
+    rows.forEach(({ icon, label }) => {
+        const row = document.createElement('div');
+        row.className = 'combat-card-effect-row';
+        if (icon) {
+            const img = document.createElement('img');
+            img.className = 'combat-card-effect-icon';
+            img.src = icon;
+            img.alt = '';
+            img.onerror = function () {
+                this.style.display = 'none';
+            };
+            row.appendChild(img);
+        }
+        const text = document.createElement('span');
+        text.textContent = label;
+        row.appendChild(text);
+        container.appendChild(row);
+    });
 }
 
 function delay(ms) {

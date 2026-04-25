@@ -15,8 +15,8 @@ async function Home() {
             playerName = session.userName;
 
             const [equipmentResult, goldResult] = await Promise.all([
-                getMethodFetch(`/api/inventory/equipment/${playerId}`),
-                getMethodFetch(`/api/inventory/gold/${playerId}`)
+                getMethodFetch(`/api/inventory/equipment`),
+                getMethodFetch(`/api/inventory/gold`)
             ]);
 
             if (equipmentResult.success) {

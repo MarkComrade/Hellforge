@@ -3154,7 +3154,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, strength: 4 }
         },
         {
             id: 155,
