@@ -42,6 +42,42 @@ function openSettings() {
 // Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
 async function abandonDungeon() {
     if (document.getElementById('combat-scene')) return;
+    showAbandonConfirm(async () => {
+        let stats = null;
+        let penalty = null;
+        try {
+            const result = await postFetch('/api/dungeon/abandon', {
+                sessionToken: sessionStorage.getItem('dungeonSessionToken')
+            });
+            if (result) {
+                stats = result.stats || null;
+                penalty = result.penalty || null;
+            }
+        } catch (error) {
+            toast('Failed to abandon dungeon', 'error');
+            console.error('Abandon failed:', error.message);
+        }
+        exitDungeon('abandoned', stats, penalty);
+    });
+}
+
+function showAbandonConfirm(onConfirm) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'abandonBackdrop';
+
+    const popup = document.createElement('div');
+    popup.className = 'eventDialoguePopup';
+
+    const header = document.createElement('div');
+    header.className = 'eventDialogueHeader';
+
+    const title = document.createElement('h3');
+    title.className = 'eventDialogueTitle';
+    title.textContent = 'Abandon Dungeon';
+
+    const badge = document.createElement('span');
+    badge.className = 'eventDialogueBadge';
+    badge.textContent = 'WARNING';
 
     const confirmed = await areYouSure(
         'You are about to flee this accursed place. Your current run will be lost and you will leave empty-handed. Are you certain?',

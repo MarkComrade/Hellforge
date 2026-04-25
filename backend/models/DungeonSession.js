@@ -15,6 +15,7 @@ class DungeonSession {
         this.shopStock = {}; // key: "x,y" → array of shop items (cached per shop room)
         this.roomLoot = {}; // key: "x,y" → generated loot state for that room
         this.bounds = { minX: 1, maxX: 9, minY: 1, maxY: 9, adaptiveSize: 9 };
+        this.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
 
         this.generateMap(); // auto-generate on construction
     }
@@ -207,7 +208,8 @@ class DungeonSession {
             visitedRooms: Array.from(this.visitedRooms), // Set → Array for JSON
             shopStock: this.shopStock,
             roomLoot: this.roomLoot,
-            bounds: this.bounds
+            bounds: this.bounds,
+            stats: this.stats
         };
     }
 
@@ -227,6 +229,7 @@ class DungeonSession {
         d.shopStock = data.shopStock || {};
         d.roomLoot = data.roomLoot || {};
         d.bounds = data.bounds;
+        d.stats = data.stats || { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
         return d;
     }
 
@@ -254,7 +257,8 @@ class DungeonSession {
             map: fogMap,
             bounds: this.bounds,
             doors: this._getAdjacentDoors(),
-            currentHP: this.currentHP
+            currentHP: this.currentHP,
+            stats: this.stats
         };
     }
 }

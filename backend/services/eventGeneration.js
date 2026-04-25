@@ -660,5 +660,6 @@ function generateDialogue(dungeonName, dungeonLevel) {
 }
 
 module.exports = {
-    eventManager
+    eventManager,
+    CURSED_TRAP_CARD_POOL
 };

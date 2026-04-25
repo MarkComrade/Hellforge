@@ -383,11 +383,4 @@ async function renderStashContent(playerId, grid, countText) {
 
     const existingMsg = grid.parentElement.querySelector('.stashEmpty');
     if (existingMsg) existingMsg.remove();
-
-    if (stashItems.length === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.setAttribute('class', 'stashEmpty');
-        emptyMsg.textContent = 'Your stash is empty.';
-        grid.parentElement.insertBefore(emptyMsg, grid.nextSibling);
-    }
 }

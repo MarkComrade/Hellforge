@@ -159,6 +159,17 @@
     padding-bottom: 0.8vh;
 }
 
+.shopGoldDisplay {
+    font-size: 1.5vh;
+    color: #f0c040;
+    background: rgba(0, 0, 0, 0.35);
+    border: 0.15vh solid rgba(240, 192, 64, 0.3);
+    border-radius: 0.4vh;
+    padding: 0.5vh 1vh;
+    margin-top: 0.8vh;
+    letter-spacing: 0.05em;
+}
+
 .shopCloseButton {
     position: absolute;
     top: 2vh;

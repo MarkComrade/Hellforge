@@ -32,8 +32,8 @@ function renderMap(mapData, bounds) {
         if (col < minX || col > maxX || row < minY || row > maxY) {
             cell.style.display = 'none';
         } else {
-            cell.style.width = 23 / adaptiveSize + 'vh';
-            cell.style.height = 23 / adaptiveSize + 'vh';
+            cell.style.width = (23 / adaptiveSize).toFixed(2) + 'vh';
+            cell.style.height = (23 / adaptiveSize).toFixed(2) + 'vh';
         }
     });
 }

@@ -1,15 +1,23 @@
 /* Character and equipment styles */
+.gearRowsWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+}
+
 .characterArmourRow,
 .characterWeaponsRow {
     display: flex;
     width: 50%;
     align-items: center;
     justify-content: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .characterImage {
-    width: 8vw;
+    width: clamp(60px, 8vw, 150px);
     height: auto;
     border: 0.4vh solid #000000;
     outline: 0.2vh solid rgb(220, 40, 40);
@@ -25,7 +33,7 @@
 }
 
 .itemImage {
-    width: 4vw;
+    width: clamp(40px, 4vw, 80px);
     height: auto;
     margin: 0.5vh;
 }
@@ -37,28 +45,33 @@
     margin-left: 3vw;
     margin-right: 3vw;
     background-color: rgba(0, 0, 0, 0.5);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .equipmentRow {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    height: 25%;
     width: 100%;
     box-sizing: border-box;
     padding: 0.5vh 0.5vw;
+    border-bottom: 0.1vh solid rgba(220, 40, 40, 0.2);
 }
 
 .equipmentLeft {
     width: 7vw;
     min-width: 7vw;
-    height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     box-sizing: border-box;
+    padding-top: 0.3vh;
     border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
+    padding-right: 0.3vw;
 }
 
 .equipmentRight {
@@ -69,4 +82,198 @@
     justify-content: flex-start;
     box-sizing: border-box;
     padding-left: 1vw;
+}
+
+/* ── Card reroll panel ─────────────────────────────────────── */
+.rerollItemName {
+    font-size: 0.7vw;
+    color: rgb(180, 180, 180);
+    text-align: center;
+    margin-top: 0.3vh;
+    max-width: 6.5vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rerollCardsContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4vw;
+    padding: 0.3vh 0;
+    align-items: flex-start;
+}
+
+@media screen and (max-height: 500px) {
+    .characterImage {
+        width: 36px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+    .itemImage {
+        width: 24px;
+        margin: 2px;
+    }
+    .equipmentSlot {
+        margin: 2px;
+        padding: 1px;
+    }
+    .characterInfoDiv,
+    .characterStashDiv {
+        padding: 2px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.rerollCardSlot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2vh;
+    background: rgba(0, 0, 0, 0.45);
+    border: 0.15vh solid rgba(220, 40, 40, 0.4);
+    padding: 0.4vh 0.4vw;
+    min-width: 5.5vw;
+    max-width: 5.5vw;
+}
+
+.rerollCardSlot--cursed {
+    border-color: rgba(160, 0, 200, 0.7);
+    background: rgba(60, 0, 80, 0.45);
+}
+
+.rerollCardName {
+    font-size: 0.7vw;
+    color: rgb(220, 40, 40);
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.rerollCardBadge {
+    font-size: 0.55vw;
+    padding: 0.1vh 0.3vw;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #000;
+    background: rgba(180, 180, 180, 0.8);
+}
+
+.rerollCardBadge--melee {
+    background: rgba(200, 80, 40, 0.85);
+    color: #fff;
+}
+.rerollCardBadge--ranged {
+    background: rgba(40, 140, 200, 0.85);
+    color: #fff;
+}
+.rerollCardBadge--helmet {
+    background: rgba(140, 140, 40, 0.85);
+    color: #fff;
+}
+.rerollCardBadge--armour {
+    background: rgba(80, 140, 80, 0.85);
+    color: #fff;
+}
+.rerollCardBadge--cursed {
+    background: rgba(140, 0, 200, 0.85);
+    color: #fff;
+}
+
+.rerollBtn {
+    font-size: 0.6vw;
+    padding: 0.2vh 0.3vw;
+    background: rgba(220, 40, 40, 0.15);
+    border: 0.15vh solid rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+    text-align: center;
+}
+
+.rerollBtn:hover {
+    background: rgba(220, 40, 40, 0.35);
+}
+
+.rerollConfirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3vh;
+    width: 100%;
+}
+
+.rerollConfirmText {
+    font-size: 0.6vw;
+    color: rgb(220, 200, 50);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.rerollConfirmBtn {
+    font-size: 0.6vw;
+    padding: 0.2vh 0.4vw;
+    border: 0.15vh solid;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+}
+
+.rerollConfirmBtn--yes {
+    background: rgba(40, 160, 40, 0.2);
+    border-color: rgb(40, 160, 40);
+    color: rgb(100, 220, 100);
+}
+
+.rerollConfirmBtn--yes:hover {
+    background: rgba(40, 160, 40, 0.45);
+}
+.rerollConfirmBtn--yes:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rerollConfirmBtn--no {
+    background: rgba(220, 40, 40, 0.15);
+    border-color: rgb(220, 40, 40);
+    color: rgb(220, 40, 40);
+}
+
+.rerollConfirmBtn--no:hover {
+    background: rgba(220, 40, 40, 0.35);
+}
+
+.rerollNoCards {
+    font-size: 0.75vw;
+    color: rgba(180, 180, 180, 0.5);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .characterArmourRow,
+    .characterWeaponsRow {
+        width: 80%;
+    }
+
+    .characterInfoDiv,
+    .characterStashDiv {
+        margin-left: 2vw;
+        margin-right: 2vw;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .characterArmourRow,
+    .characterWeaponsRow {
+        width: 95%;
+    }
+
+    .equipmentSlot {
+        flex: 1 1 45%;
+    }
 }

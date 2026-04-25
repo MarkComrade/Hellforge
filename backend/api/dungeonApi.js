@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const DungeonSession = require('../models/DungeonSession.js');
 const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
-const { eventManager } = require('../services/eventGeneration.js');
-const { getLoadout } = require('../sql/queries/inventoryQueries.js');
+const { eventManager, CURSED_TRAP_CARD_POOL } = require('../services/eventGeneration.js');
+const {
+    getEquippedGearTiers,
+    applyAbandonPenalty,
+    curseRandomItemCard
+} = require('../sql/queries/inventoryQueries.js');
 
-// Valid dungeon names — reject anything not in this list
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
 
 const DUNGEON_GEAR_REQUIREMENTS = {
@@ -19,10 +22,9 @@ async function checkGearRequirement(playerId, dungeonName) {
     const req = DUNGEON_GEAR_REQUIREMENTS[dungeonName];
     if (!req || req.requiredPieces === 0) return { allowed: true };
 
-    const result = await getLoadout(playerId);
-    if (!result.success) return { allowed: false, message: 'Could not verify gear requirements.' };
+    const rows = await getEquippedGearTiers(playerId);
 
-    const qualifyingPieces = result.loadout.filter((row) => {
+    const qualifyingPieces = rows.filter((row) => {
         const armorTier = Number(row.armor_tier);
         const weaponTier = Number(row.weapon_tier);
         return armorTier >= req.minTier || weaponTier >= req.minTier;
@@ -102,7 +104,7 @@ router.post('/start', requireLogin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid dungeon name' });
         }
 
-        const gearCheck = await checkGearRequirement(req.session.playerId, dungeonName);
+        const gearCheck = await checkGearRequirement(req.session.userId, dungeonName);
         if (!gearCheck.allowed) {
             return res.status(403).json({ success: false, message: gearCheck.message });
         }
@@ -223,6 +225,13 @@ router.post('/next-level', requireLogin, requireDungeon, (req, res) => {
         nextLevel.sessionToken = dungeon.sessionToken; // keep the same token across levels
         nextLevel.currentHP = dungeon.currentHP; // carry over the player's HP
 
+        // Carry run stats forward and count this completed floor
+        nextLevel.stats = {
+            enemiesKilled: dungeon.stats?.enemiesKilled || 0,
+            floorsCleared: (dungeon.stats?.floorsCleared || 0) + 1,
+            goldCollected: dungeon.stats?.goldCollected || 0
+        };
+
         req.dungeon = nextLevel;
         saveDungeon(req);
 
@@ -245,8 +254,9 @@ router.post('/exit', requireLogin, requireDungeon, (req, res) => {
         }
 
         // Wipe dungeon data from the session so the player can start a new run
+        const stats = dungeon.stats || { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
         delete req.session.dungeonData;
-        res.json({ success: true, message: 'Dungeon exited' });
+        res.json({ success: true, message: 'Dungeon exited', stats });
     } catch (error) {
         console.error('Exit error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -254,10 +264,25 @@ router.post('/exit', requireLogin, requireDungeon, (req, res) => {
 });
 
 // Abandon — quit the dungeon from any room (no exit-room check)
-router.post('/abandon', requireLogin, requireDungeon, (req, res) => {
+router.post('/abandon', requireLogin, requireDungeon, async (req, res) => {
     try {
+        const playerId = Number(req.session.userId);
+        const stats = req.dungeon.stats || { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
+
+        const penalty = await applyAbandonPenalty(playerId);
+        await curseRandomItemCard(playerId, CURSED_TRAP_CARD_POOL);
+
         delete req.session.dungeonData;
-        res.json({ success: true, message: 'Dungeon abandoned' });
+        res.json({
+            success: true,
+            message: 'Dungeon abandoned',
+            stats,
+            penalty: {
+                lostGold: penalty.lostGold || 0,
+                lostItems: penalty.lostItems || [],
+                cardCursed: true
+            }
+        });
     } catch (error) {
         console.error('Abandon error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
