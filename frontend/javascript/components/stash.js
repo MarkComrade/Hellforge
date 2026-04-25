@@ -333,20 +333,27 @@ async function renderStashContent(playerId, grid, countText) {
             deleteButton.textContent = 'Delete';
             deleteButton.addEventListener('click', async (event) => {
                 event.stopPropagation();
-                if (!confirm(`Delete ${itemName}? This cannot be undone.`)) return;
-                try {
-                    const result = await deleteFetch('/api/inventory/stash/remove', {
-                        stashId: item.stashId,
-                        playerId: playerId
-                    });
-                    if (result.success) {
-                        toast(`${itemName} deleted`, 'info');
-                        await renderStashContent(playerId, grid, countText);
-                    } else {
-                        toast(result.message || 'Failed to delete item.', 'error');
+                const confirmed = await areYouSure(
+                    `Delete ${itemName}? This cannot be undone.`,
+                    'Confirm Deletion',
+                    'Cancel',
+                    'Delete'
+                );
+                if (confirmed) {
+                    try {
+                        const result = await deleteFetch('/api/inventory/stash/remove', {
+                            stashId: item.stashId,
+                            playerId: playerId
+                        });
+                        if (result.success) {
+                            toast(`${itemName} deleted`, 'info');
+                            await renderStashContent(playerId, grid, countText);
+                        } else {
+                            toast(result.message || 'Failed to delete item.', 'error');
+                        }
+                    } catch (error) {
+                        toast('Error deleting item.', 'error');
                     }
-                } catch (error) {
-                    toast('Error deleting item.', 'error');
                 }
             });
             buttonRow.appendChild(deleteButton);

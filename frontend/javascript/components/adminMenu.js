@@ -207,25 +207,28 @@ async function renderUserManagement() {
             const username = selectedOption ? selectedOption.textContent : 'this user';
 
             // TODO: In the future, this will add user to ban list instead of deleting
-            const confirmed = confirm(
-                `Are you sure you want to delete ${username}?\n\nThis action cannot be undone and will permanently remove:\n- User account\n- Inventory data\n\nNote: This will be replaced with a ban system in the future.`
+            const confirmed = await areYouSure(
+                `You are about to delete ${username}. This action cannot be undone and will permanently remove the user's account and inventory data. Are you sure?`,
+                'Confirm User Deletion',
+                'Cancel',
+                'Delete'
             );
-            if (!confirmed) return;
-
-            try {
-                const response = await postFetch(`/api/adminActions/deleteUser/${userId}`, {});
-                if (response.success) {
-                    toast('User deleted successfully!', 'success');
-                    document.querySelector('.inventoryContainer').innerHTML =
-                        '<p class="menuText">User deleted. Select another user.</p>';
-                    selectedOption?.remove();
-                    select.value = '';
-                } else {
-                    toast('Error deleting user: ' + response.message, 'error');
+            if (confirmed) {
+                try {
+                    const response = await postFetch(`/api/adminActions/deleteUser/${userId}`, {});
+                    if (response.success) {
+                        toast('User deleted successfully!', 'success');
+                        document.querySelector('.inventoryContainer').innerHTML =
+                            '<p class="menuText">User deleted. Select another user.</p>';
+                        selectedOption?.remove();
+                        select.value = '';
+                    } else {
+                        toast('Error deleting user: ' + response.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    toast('Error deleting user: ' + error.message, 'error');
                 }
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                toast('Error deleting user: ' + error.message, 'error');
             }
         });
         deleteCol.appendChild(deleteButton);

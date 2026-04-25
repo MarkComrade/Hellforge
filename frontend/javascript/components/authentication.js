@@ -135,7 +135,7 @@ async function Register() {
         }
         if (!passwordRegex.test(password)) {
             toast(
-                'Password must be 8–15 characters and include at least one letter and one number.',
+                'Password must be 6–15 characters and include at least one letter and one number.',
                 'error'
             );
             return;

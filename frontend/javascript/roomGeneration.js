@@ -20,6 +20,7 @@ function renderMap(mapData, bounds) {
         if (mapData[key] && mapData[key].exists) {
             cell.dataset.room = 'true';
             cell.dataset.visited = mapData[key].visited ? 'true' : 'false';
+            cell.dataset.cleared = mapData[key].cleared ? 'true' : 'false';
             if (mapData[key].roomType) {
                 cell.dataset.roomType = mapData[key].roomType;
             }
@@ -270,6 +271,7 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
         case 'start':
             break;
         case 'combat': {
+            if (result.cleared || room.dataset.cleared === 'true') break;
             const sessionToken = sessionStorage.getItem('dungeonSessionToken');
             postFetch('/api/combat/start', { sessionToken })
                 .then((data) => {
@@ -278,6 +280,7 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
                         console.error('Combat start failed:', data.message);
                         return;
                     }
+                    room.dataset.cleared = 'false';
                     sessionStorage.setItem('combatToken', data.combatToken);
                     startCombat(data.combatToken, data.state);
                 })

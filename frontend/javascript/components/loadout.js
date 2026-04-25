@@ -499,25 +499,32 @@ async function renderInventoryContent(playerId, equippedGrid, loadoutGrid, loado
             deleteButton.textContent = 'Delete';
             deleteButton.addEventListener('click', async (event) => {
                 event.stopPropagation();
-                if (!confirm(`Delete ${itemName}? This cannot be undone.`)) return;
-                try {
-                    const result = await deleteFetch('/api/inventory/loadout/remove', {
-                        playerId: playerId,
-                        loadoutId: item.loadoutId
-                    });
-                    if (result.success) {
-                        toast(`${itemName} deleted`, 'info');
-                        await renderInventoryContent(
-                            playerId,
-                            equippedGrid,
-                            loadoutGrid,
-                            loadoutCount
-                        );
-                    } else {
-                        toast(result.message || 'Failed to delete item.', 'error');
+                const confirmed = await areYouSure(
+                    `Are you sure you want to delete ${itemName}?`,
+                    'Confirm Deletion',
+                    'Cancel',
+                    'Delete'
+                );
+                if (confirmed) {
+                    try {
+                        const result = await deleteFetch('/api/inventory/loadout/remove', {
+                            playerId: playerId,
+                            loadoutId: item.loadoutId
+                        });
+                        if (result.success) {
+                            toast(`${itemName} deleted`, 'info');
+                            await renderInventoryContent(
+                                playerId,
+                                equippedGrid,
+                                loadoutGrid,
+                                loadoutCount
+                            );
+                        } else {
+                            toast(result.message || 'Failed to delete item.', 'error');
+                        }
+                    } catch (error) {
+                        toast('Error deleting item.', 'error');
                     }
-                } catch (error) {
-                    toast('Error deleting item.', 'error');
                 }
             });
             buttonRow.appendChild(deleteButton);

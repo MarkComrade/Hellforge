@@ -67,6 +67,9 @@ router.post('/start', requireLogin, async (req, res) => {
         if (!currentRoom || currentRoom.roomType !== 'combat') {
             return res.status(400).json({ success: false, message: 'Not on a combat room' });
         }
+        if (currentRoom.cleared) {
+            return res.status(400).json({ success: false, cleared: true, message: 'Room already cleared' });
+        }
 
         const dungeonType = normalizeDungeonType(dungeon.dungeonName);
         const dungeonLevel = Number(dungeon.dungeonLevel) || 1;
