@@ -116,12 +116,22 @@ router.post('/buy-item', requireLogin, async (request, response) => {
 
     const dungeon = getDungeonFromSession(request);
     if (!dungeon) {
-        return response.status(400).json({ success: false, message: 'You must be in a dungeon to purchase items.' });
+        return response
+            .status(400)
+            .json({ success: false, message: 'You must be in a dungeon to purchase items.' });
     }
     const shopKey = dungeon.playerX + ',' + dungeon.playerY;
     const shopRoom = dungeon.map[shopKey];
-    if (!shopRoom || shopRoom.roomType !== 'shop') {
-        return response.status(400).json({ success: false, message: 'You must be in a shop room to purchase items.' });
+    const isShopRoom = shopRoom?.roomType === 'shop';
+    const isTradeRoom =
+        shopRoom?.roomType === 'event' &&
+        Array.isArray(dungeon.shopStock[shopKey]) &&
+        dungeon.shopStock[shopKey].length > 0;
+    if (!isShopRoom && !isTradeRoom) {
+        return response.status(400).json({
+            success: false,
+            message: 'You must be in a shop or trade event room to purchase items.'
+        });
     }
 
     try {

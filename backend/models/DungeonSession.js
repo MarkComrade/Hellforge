@@ -93,7 +93,7 @@ class DungeonSession {
         }
 
         // ─── Fill the rest with combat / event / loot in round-robin order ───
-        const types = ['combat', 'event', 'loot'];
+
         let typeIdx = 0;
         for (const key of unassigned) {
             if (!grid[key].roomType) {
