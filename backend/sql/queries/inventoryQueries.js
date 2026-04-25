@@ -197,19 +197,27 @@ async function getPlayerInventory(playerId) {
         const cardsByInstance = {};
         if (instanceIds.length > 0) {
             const [cardRows] = await pool.query(
-                'SELECT instance_id, card_id FROM item_instance_cards WHERE instance_id IN (?)',
+                'SELECT id AS card_row_id, instance_id, card_id, slot AS card_slot FROM item_instance_cards WHERE instance_id IN (?) ORDER BY slot',
                 [instanceIds]
             );
             for (const c of cardRows) {
                 if (!cardsByInstance[c.instance_id]) cardsByInstance[c.instance_id] = [];
-                cardsByInstance[c.instance_id].push(c.card_id);
+                cardsByInstance[c.instance_id].push({
+                    card_row_id: c.card_row_id,
+                    card_id: c.card_id,
+                    card_slot: c.card_slot
+                });
             }
         }
 
         const inventory = {};
         for (const row of rows) {
             const cards = (cardsByInstance[row.instance_id] || [])
-                .map((id) => getCardById(id))
+                .map(({ card_row_id, card_id, card_slot }) => {
+                    const cardData = getCardById(card_id);
+                    if (!cardData) return null;
+                    return { ...cardData, card_row_id, card_slot };
+                })
                 .filter(Boolean);
 
             if (row.slot === 'helmet') {
@@ -218,6 +226,7 @@ async function getPlayerInventory(playerId) {
                 inventory.helmet_img = row.armor_img;
                 inventory.helmet_tier = row.armor_tier;
                 inventory.helmet_defense = row.defense_multiplier;
+                inventory.helmet_instance_id = row.instance_id;
                 inventory.helmet_cards = cards;
             } else if (row.slot === 'armor') {
                 inventory.armor = row.armor_id;
@@ -225,6 +234,7 @@ async function getPlayerInventory(playerId) {
                 inventory.armor_img = row.armor_img;
                 inventory.armor_tier = row.armor_tier;
                 inventory.armor_defense = row.defense_multiplier;
+                inventory.armor_instance_id = row.instance_id;
                 inventory.armor_cards = cards;
             } else if (row.slot === 'melee') {
                 inventory.melee = row.weapon_id;
@@ -232,6 +242,7 @@ async function getPlayerInventory(playerId) {
                 inventory.melee_img = row.weapon_img;
                 inventory.melee_tier = row.weapon_tier;
                 inventory.melee_attack = row.attack_multiplier;
+                inventory.melee_instance_id = row.instance_id;
                 inventory.melee_cards = cards;
             } else if (row.slot === 'ranged') {
                 inventory.ranged = row.weapon_id;
@@ -239,6 +250,7 @@ async function getPlayerInventory(playerId) {
                 inventory.ranged_img = row.weapon_img;
                 inventory.ranged_tier = row.weapon_tier;
                 inventory.ranged_attack = row.attack_multiplier;
+                inventory.ranged_instance_id = row.instance_id;
                 inventory.ranged_cards = cards;
             }
         }
@@ -356,6 +368,19 @@ async function getLoadout(playerId) {
     } catch (error) {
         return { success: false, message: 'Hiba történt a loadout lekérése során' };
     }
+}
+
+async function getEquippedGearTiers(playerId) {
+    const [rows] = await pool.query(
+        `SELECT a.tier AS armor_tier, w.tier AS weapon_tier
+         FROM player_loadout l
+         LEFT JOIN armors a ON l.armor_id = a.armorId
+         LEFT JOIN weapons w ON l.weapon_id = w.weaponId
+         WHERE l.playerId = ? AND l.equipped = 1
+           AND (l.armor_id IS NOT NULL OR l.weapon_id IS NOT NULL)`,
+        [playerId]
+    );
+    return rows;
 }
 
 async function getLoadoutCount(playerId) {
@@ -734,6 +759,180 @@ async function applyGoldTrapLoss(playerId, amountToLose) {
     }
 }
 
+async function clearLoadoutAndResetGear(playerId) {
+    const T1_CARDS = {
+        helmet: [121, 122, 123, 124, 125],
+        armor: [181, 182, 183, 184, 185],
+        melee: [1, 2, 3, 4, 5],
+        ranged: [61, 62, 63, 64, 65]
+    };
+
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [nonEquipped] = await connection.query(
+            `SELECT instance_id FROM player_loadout
+             WHERE playerId = ? AND equipped = 0 AND instance_id IS NOT NULL`,
+            [playerId]
+        );
+
+        await connection.query(`DELETE FROM player_loadout WHERE playerId = ? AND equipped = 0`, [
+            playerId
+        ]);
+
+        for (const row of nonEquipped) {
+            await connection.query(`DELETE FROM item_instance_cards WHERE instance_id = ?`, [
+                row.instance_id
+            ]);
+            await connection.query(`DELETE FROM item_instances WHERE instanceId = ?`, [
+                row.instance_id
+            ]);
+        }
+
+        const [[helmetRow]] = await connection.query(
+            `SELECT armorId FROM armors WHERE type = 'Helmet' AND tier = 1 ORDER BY armorId LIMIT 1`
+        );
+        const [[armorRow]] = await connection.query(
+            `SELECT armorId FROM armors WHERE type = 'Armor' AND tier = 1 ORDER BY armorId LIMIT 1`
+        );
+        const [[meleeRow]] = await connection.query(
+            `SELECT weaponId FROM weapons WHERE type = 'Melee' AND tier = 1 ORDER BY weaponId LIMIT 1`
+        );
+        const [[rangedRow]] = await connection.query(
+            `SELECT weaponId FROM weapons WHERE type = 'Ranged' AND tier = 1 ORDER BY weaponId LIMIT 1`
+        );
+
+        const t1 = {
+            helmet: { armor_id: helmetRow?.armorId ?? null, weapon_id: null },
+            armor: { armor_id: armorRow?.armorId ?? null, weapon_id: null },
+            melee: { armor_id: null, weapon_id: meleeRow?.weaponId ?? null },
+            ranged: { armor_id: null, weapon_id: rangedRow?.weaponId ?? null }
+        };
+
+        const [equippedRows] = await connection.query(
+            `SELECT loadoutId, slot, instance_id FROM player_loadout WHERE playerId = ? AND equipped = 1`,
+            [playerId]
+        );
+        for (const row of equippedRows) {
+            const slot = row.slot;
+            const slotData = t1[slot];
+            const cards = T1_CARDS[slot];
+            if (!slotData || !cards) continue;
+
+            await connection.query(
+                `UPDATE player_loadout SET armor_id = ?, weapon_id = ? WHERE loadoutId = ?`,
+                [slotData.armor_id, slotData.weapon_id, row.loadoutId]
+            );
+
+            if (row.instance_id) {
+                const itemRefId = slotData.armor_id ?? slotData.weapon_id;
+                const itemType = slot === 'helmet' || slot === 'armor' ? 'armor' : 'weapon';
+                await connection.query(
+                    `UPDATE item_instances SET item_type = ?, item_ref_id = ? WHERE instanceId = ?`,
+                    [itemType, itemRefId, row.instance_id]
+                );
+                await connection.query(`DELETE FROM item_instance_cards WHERE instance_id = ?`, [
+                    row.instance_id
+                ]);
+                for (let slotNum = 1; slotNum <= cards.length; slotNum++) {
+                    const newId = await findNextAvailableId(
+                        'item_instance_cards',
+                        'id',
+                        connection
+                    );
+                    await connection.query(
+                        `INSERT INTO item_instance_cards (id, instance_id, card_id, slot) VALUES (?, ?, ?, ?)`,
+                        [newId, row.instance_id, cards[slotNum - 1], slotNum]
+                    );
+                }
+            }
+        }
+
+        await connection.commit();
+        return { success: true };
+    } catch (error) {
+        await connection.rollback();
+        console.error('clearLoadoutAndResetGear error:', error);
+        return { success: false, message: 'Failed to reset loadout.' };
+    } finally {
+        connection.release();
+    }
+}
+
+async function applyAbandonPenalty(playerId, goldLossPercent = 30, itemsToLose = 2) {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [goldRows] = await connection.query(
+            `SELECT loadoutId, gold_amount FROM player_loadout
+             WHERE playerId = ? AND gold_amount IS NOT NULL FOR UPDATE`,
+            [playerId]
+        );
+        const totalGold = goldRows.reduce((s, r) => s + Number(r.gold_amount || 0), 0);
+        const goldToLose = Math.min(totalGold, Math.floor((totalGold * goldLossPercent) / 100));
+
+        let remainingLoss = goldToLose;
+        for (const row of goldRows) {
+            if (remainingLoss <= 0) break;
+            const rowGold = Number(row.gold_amount || 0);
+            const deduct = Math.min(rowGold, remainingLoss);
+            remainingLoss -= deduct;
+            const newAmount = rowGold - deduct;
+            if (newAmount === 0) {
+                await connection.query(`DELETE FROM player_loadout WHERE loadoutId = ?`, [
+                    row.loadoutId
+                ]);
+            } else {
+                await connection.query(
+                    `UPDATE player_loadout SET gold_amount = ? WHERE loadoutId = ?`,
+                    [newAmount, row.loadoutId]
+                );
+            }
+        }
+
+        const lostItems = [];
+        for (let i = 0; i < itemsToLose; i++) {
+            const [rows] = await connection.query(
+                `SELECT loadoutId, instance_id, armor_id, weapon_id, misc_item_id
+                 FROM player_loadout
+                 WHERE playerId = ? AND equipped = 0
+                   AND (armor_id IS NOT NULL OR weapon_id IS NOT NULL OR misc_item_id IS NOT NULL)
+                 ORDER BY RAND() LIMIT 1`,
+                [playerId]
+            );
+            if (rows.length === 0) break;
+            const row = rows[0];
+            await connection.query(`DELETE FROM player_loadout WHERE loadoutId = ?`, [
+                row.loadoutId
+            ]);
+            if (row.instance_id) {
+                await connection.query(`DELETE FROM item_instance_cards WHERE instance_id = ?`, [
+                    row.instance_id
+                ]);
+                await connection.query(`DELETE FROM item_instances WHERE instanceId = ?`, [
+                    row.instance_id
+                ]);
+            }
+            lostItems.push({
+                armor_id: row.armor_id,
+                weapon_id: row.weapon_id,
+                misc_item_id: row.misc_item_id
+            });
+        }
+
+        await connection.commit();
+        return { success: true, lostGold: goldToLose, lostItems };
+    } catch (error) {
+        await connection.rollback();
+        console.error('applyAbandonPenalty error:', error);
+        return { success: false, lostGold: 0, lostItems: [] };
+    } finally {
+        connection.release();
+    }
+}
+
 async function moveLoadoutToStash(playerId, loadoutId) {
     const connection = await pool.getConnection();
     try {
@@ -1024,5 +1223,8 @@ module.exports = {
     getTotalGold,
     addGoldToInventory,
     transferGoldBetweenStorage,
-    adminSetStashGold
+    adminSetStashGold,
+    getEquippedGearTiers,
+    clearLoadoutAndResetGear,
+    applyAbandonPenalty
 };

@@ -201,7 +201,7 @@ function setHP(currentHP) {
     const hpFill = document.getElementById('hpFill');
     const hpValue = document.getElementById('hpValue');
     // Százalékos HP számítás nem lehet kisebb 0-nál és nagyobb mint a maxHP
-    const percent = Math.max(0, Math.min(currentHP, maxHP));
+    const percent = Math.round(Math.max(0, Math.min(currentHP, maxHP)));
 
     hpFill.style.width = percent + '%';
     hpValue.textContent = percent;

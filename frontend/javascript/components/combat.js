@@ -610,9 +610,22 @@ function showResultOverlay() {
         const returnToMenuButton = document.createElement('button');
         returnToMenuButton.className = 'combat-btn';
         returnToMenuButton.textContent = 'Return to Menu';
-        returnToMenuButton.addEventListener('click', () => {
+        returnToMenuButton.addEventListener('click', async () => {
+            returnToMenuButton.disabled = true;
+            let stats = null;
+            try {
+                const data = await postFetch('/api/combat/death', { combatToken: combatToken });
+                if (data?.success === false) {
+                    toast(data.message || 'Death penalty failed', 'error');
+                    console.error('Death penalty rejected:', data.message);
+                }
+                stats = data?.stats || null;
+            } catch (err) {
+                toast('Could not apply death penalty', 'error');
+                console.error('Death request failed:', err.message);
+            }
             removeCombatOverlay();
-            if (typeof exitDungeon === 'function') exitDungeon(true);
+            if (typeof exitDungeon === 'function') exitDungeon('defeated', stats);
         });
         overlay.appendChild(returnToMenuButton);
     } else {
@@ -664,7 +677,7 @@ function showRewardPopup(reward) {
 
     const goldText = document.createElement('div');
     goldText.className = 'combat-reward-text';
-    goldText.textContent = 'Gold: ' + ((reward && reward.gold) || 0);
+    goldText.textContent = 'Gold: ' + Math.round((reward && reward.gold) || 0);
     popup.appendChild(goldText);
 
     const closeButton = document.createElement('button');

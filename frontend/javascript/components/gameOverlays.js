@@ -43,15 +43,21 @@ function openSettings() {
 async function abandonDungeon() {
     if (document.getElementById('combat-scene')) return;
     showAbandonConfirm(async () => {
+        let stats = null;
+        let penalty = null;
         try {
-            await postFetch('/api/dungeon/abandon', {
+            const result = await postFetch('/api/dungeon/abandon', {
                 sessionToken: sessionStorage.getItem('dungeonSessionToken')
             });
+            if (result) {
+                stats = result.stats || null;
+                penalty = result.penalty || null;
+            }
         } catch (error) {
             toast('Failed to abandon dungeon', 'error');
             console.error('Abandon failed:', error.message);
         }
-        exitDungeon(true);
+        exitDungeon('abandoned', stats, penalty);
     });
 }
 
