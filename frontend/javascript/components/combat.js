@@ -327,7 +327,7 @@ function getStatusIcon(type) {
         deflect: '../textures/effects/effects_deflect.png',
         bleed: '../textures/effects/effects_blood.png',
         scorch: '../textures/effects/effects_scorch.png',
-        lifesteal: '../textures/effects/effects_blood.png'
+        lifesteal: '../textures/effects/effects_life_steal.png'
     };
     return icons[type] || null;
 }
@@ -340,7 +340,7 @@ function getStatusLabel(status) {
         regen: 'Regen \u2014 heals HP each turn',
         vulnerable: 'Vulnerable \u2014 takes increased damage',
         cleanse: 'Cleanse \u2014 removes debuffs',
-        deflect: 'Deflect \u2014 chance to avoid damage',
+        deflect: 'Deflect \u2014 reflects a portion of incoming damage',
         lifesteal: 'Lifesteal \u2014 heals on dealing damage'
     };
     const name = names[status.type] || status.type;
@@ -524,7 +524,7 @@ const EFFECT_ICONS = {
     vulnerable: '../textures/effects/effects_vulnerable%20.png',
     deflect: '../textures/effects/effects_deflect.png',
     cleanse: '../textures/effects/effects_cleanse.png',
-    lifesteal: null
+    lifesteal: '../textures/effects/effects_life_steal.png'
 };
 
 function getEffectRows(effects) {

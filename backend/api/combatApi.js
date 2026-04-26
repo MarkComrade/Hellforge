@@ -64,7 +64,7 @@ router.post('/start', requireLogin, async (req, res) => {
         }
         if (currentRoom.cleared) {
             return res
-                .status(400)
+                .status(200)
                 .json({ success: false, cleared: true, message: 'Room already cleared' });
         }
 

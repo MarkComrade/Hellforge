@@ -9,6 +9,7 @@
     justify-content: flex-start;
     z-index: 10000;
     padding: 3vh 2vw;
+    overflow-y: auto;
 }
 
 .settingsOverlay {
@@ -81,8 +82,9 @@
 .stashGrid {
     margin-top: 3vh;
     display: grid;
-    grid-template-columns: repeat(10, 6.5vw);
-    gap: 1.5vh;
+    width: 96vw;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 1vw;
     justify-content: center;
 }
 
@@ -91,10 +93,10 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin: 0.3vh;
+    margin: 0;
     padding: 0.3vh;
-    height: 12vh;
-    width: 13vh;
+    width: 100%;
+    aspect-ratio: 1;
     border: 0.2vh solid rgb(220, 40, 40);
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 0.4vh;
