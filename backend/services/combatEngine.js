@@ -187,10 +187,13 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         const postHitPlayerHp = !isPlayerCard ? defender.hp : undefined;
 
         // deflect — if player is taking damage and has deflect status, reflect % back
-        if (!isPlayerCard && damageTaken > 0) {
+        if (!isPlayerCard && (damageTaken > 0 || blocked > 0)) {
             const deflect = findStatus(session.player.statuses, 'deflect');
             if (deflect && deflect.pct > 0) {
-                const reflected = Math.max(1, Math.floor(damageTaken * (deflect.pct / 100)));
+                const reflected = Math.max(
+                    1,
+                    Math.floor((damageTaken + blocked) * (deflect.pct / 100))
+                );
                 const reflectTarget = attacker; // the enemy that attacked
                 const { damageTaken: reflDmg } = applyDamage(reflectTarget, reflected, false);
                 if (reflDmg > 0) {

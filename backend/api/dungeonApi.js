@@ -98,6 +98,10 @@ router.post('/start', requireLogin, async (req, res) => {
         if (!dungeonName || !VALID_DUNGEONS.includes(dungeonName)) {
             return res.status(400).json({ success: false, message: 'Invalid dungeon name' });
         }
+        const gearCheck = await checkGearRequirement(req.session.userId, dungeonName);
+        if (!gearCheck.allowed) {
+            return res.status(403).json({ success: false, message: gearCheck.message });
+        }
 
         // The constructor generates the map automatically (random walk algorithm)
         const dungeon = new DungeonSession(dungeonName);

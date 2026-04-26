@@ -275,6 +275,10 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
             const sessionToken = sessionStorage.getItem('dungeonSessionToken');
             postFetch('/api/combat/start', { sessionToken })
                 .then((data) => {
+                    if (data.cleared) {
+                        toast('Room already cleared', 'info');
+                        return;
+                    }
                     if (!data.combatToken) {
                         toast('Failed to start combat', 'error');
                         console.error('Combat start failed:', data.message);
@@ -297,6 +301,8 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
             room.dataset.lootItemName = result.Event?.item?.name || 'Pick up item';
             if (result.Event && result.Event.success) {
                 createFrontendEvent({ success: true, type: 'loot', loot: result.Event });
+            } else if (!result.Event) {
+                toast('Already looted', 'info');
             }
             syncLootPickupButton(room);
             break;
@@ -305,7 +311,11 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
             renderShop();
             break;
         case 'event':
-            createFrontendEvent(result.Event);
+            if (result.Event) {
+                createFrontendEvent(result.Event);
+            } else {
+                toast('Event already completed', 'info');
+            }
             break;
         case 'out':
             outRoom(room, dungeon, dungeonLevel);

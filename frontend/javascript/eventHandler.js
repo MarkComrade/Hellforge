@@ -324,7 +324,7 @@ async function fetchCurrentGold() {
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         if (!session || !session.isLoggedIn || !session.userId) return null;
-        const result = await getMethodFetch(`/api/inventory/gold/${session.userId}`);
+        const result = await getMethodFetch(`/api/inventory/gold`);
         if (result && result.success) return result;
         return null;
     } catch {

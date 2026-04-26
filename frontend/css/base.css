@@ -174,8 +174,9 @@ body.ready {
         -0.3vw 0.3vw 0 #000,
         0.3vw 0.3vw 0 #000;
     text-transform: uppercase;
-    z-index: 9999;
+    z-index: 99999;
     background-color: rgba(0, 0, 0, 1);
+    pointer-events: all;
 }
 .hellToastContainer {
     position: fixed;
