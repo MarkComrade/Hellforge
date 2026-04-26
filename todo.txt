@@ -9,7 +9,7 @@ MAP
 
 Badó:
 <br>
-SQL Adatbázis
+SQL Database
 <br>
 Login
 <>

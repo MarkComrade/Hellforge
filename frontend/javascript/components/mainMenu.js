@@ -12,7 +12,7 @@ async function Menu() {
             userName = 'Guest';
         }
     } catch (error) {
-        console.error('Session check hiba:', error);
+        console.error('Session check error:', error);
     }
 
     let body = document.getElementsByTagName('body');

@@ -6,7 +6,7 @@ async function Admin() {
             return;
         }
     } catch (error) {
-        console.error('Session check hiba:', error);
+        console.error('Session check error:', error);
     }
 
     renderAdminLogin();
@@ -80,11 +80,11 @@ function renderAdminLogin() {
             if (result.success) {
                 adminTools();
             } else {
-                toast(result.message, 'error');
+                toast(result.message, 'hiba');
             }
         } catch (error) {
-            toast('Hiba történt az admin bejelentkezés során', 'error');
-            console.error(error);
+            toast('An error occurred while logging in as admin', 'error');
+            console.error('Admin login error:', error);
         }
     });
 

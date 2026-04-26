@@ -33,8 +33,12 @@ function generateBootStrapGrid(row, col, col_md_value, className) {
 }
 
 function clearBody() {
+    const toastContainer = document.querySelector('.hellToastContainer');
     const body = document.body;
     body.replaceChildren();
+    if (toastContainer) {
+        body.appendChild(toastContainer);
+    }
 }
 
 function generateBackToMenu() {
@@ -160,30 +164,42 @@ function showItemCardsPopup(itemName, cards) {
     popup.addEventListener('click', closeItemCardsPopup);
 }
 function toast(message, type = 'info', duration = 3000) {
-    let container = document.querySelector('.toast-container');
-
+    let container = document.querySelector('.hellToastContainer');
     if (!container) {
         container = document.createElement('div');
-        container.className =
-            'toast-container position-fixed bottom-0 end-0 translate-middle-x m-3';
+        container.className = 'hellToastContainer';
         document.body.appendChild(container);
     }
-    if (document.querySelectorAll('.toast').length <= 2) {
-        const toast = document.createElement('div');
-        toast.classList.add('toast', `toast-${type}`);
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
 
-        const body = document.createElement('div');
-        body.classList.add('toast-body');
-        body.textContent = message;
-        toast.appendChild(body);
+    if (container.children.length >= 3) return;
 
-        container.appendChild(toast);
+    const typeLabels = { error: 'Error', success: 'Success', info: 'Info', warning: 'Warning' };
 
-        const bsToast = new bootstrap.Toast(toast, { delay: duration });
-        bsToast.show();
-        toast.addEventListener('hidden.bs.toast', () => toast.remove());
-    }
+    const toastEl = document.createElement('div');
+    toastEl.className = `hellToast hellToast-${type}`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.setAttribute('aria-live', 'assertive');
+    toastEl.setAttribute('aria-atomic', 'true');
+
+    const header = document.createElement('div');
+    header.className = 'hellToastHeader';
+
+    const badge = document.createElement('span');
+    badge.className = 'hellToastBadge';
+    badge.textContent = typeLabels[type] ?? type.toUpperCase();
+
+    const body = document.createElement('p');
+    body.className = 'hellToastBody';
+    body.textContent = message;
+
+    header.appendChild(badge);
+    toastEl.appendChild(header);
+    toastEl.appendChild(body);
+    container.appendChild(toastEl);
+
+    const removeToast = () => {
+        toastEl.classList.add('hellToast-hide');
+        toastEl.addEventListener('animationend', () => toastEl.remove(), { once: true });
+    };
+    setTimeout(removeToast, duration);
 }

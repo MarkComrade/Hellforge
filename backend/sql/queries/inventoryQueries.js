@@ -34,7 +34,7 @@ async function getStash(playerId) {
 
         return { success: true, stash };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a stash lekérése során' };
+        return { success: false, message: 'An error occurred while fetching the stash' };
     }
 }
 
@@ -61,7 +61,7 @@ async function addArmorToStash(playerId, armorId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
+            return { success: false, message: 'Stash is full! Maximum 50 items allowed.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
@@ -71,10 +71,10 @@ async function addArmorToStash(playerId, armorId) {
         );
 
         await connection.commit();
-        return { success: true, message: 'Páncél hozzáadva a stash-hez' };
+        return { success: true, message: 'Armor added to stash' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a páncél hozzáadása során' };
+        return { success: false, message: 'An error occurred while adding armor to stash' };
     } finally {
         connection.release();
     }
@@ -92,7 +92,7 @@ async function addWeaponToStash(playerId, weaponId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
+            return { success: false, message: 'Stash is full! Maximum 50 items allowed.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
@@ -102,10 +102,10 @@ async function addWeaponToStash(playerId, weaponId) {
         );
 
         await connection.commit();
-        return { success: true, message: 'Fegyver hozzáadva a stash-hez' };
+        return { success: true, message: 'Weapon added to stash' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a fegyver hozzáadása során' };
+        return { success: false, message: 'An error occurred while adding weapon to stash' };
     } finally {
         connection.release();
     }
@@ -123,7 +123,7 @@ async function addMiscToStash(playerId, miscItemId) {
         );
         if (Number(countRows[0].count) >= STASH_LIMIT) {
             await connection.rollback();
-            return { success: false, message: 'A stash megtelt! Maximum 50 tárgy tárolható.' };
+            return { success: false, message: 'Stash is full! Maximum 50 items allowed.' };
         }
 
         const stashId = await findNextAvailableId('player_stash', 'stashId', connection);
@@ -133,10 +133,10 @@ async function addMiscToStash(playerId, miscItemId) {
         );
 
         await connection.commit();
-        return { success: true, message: 'Tárgy hozzáadva a stash-hez' };
+        return { success: true, message: 'Misc item added to stash' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a tárgy hozzáadása során' };
+        return { success: false, message: 'An error occurred while adding misc item to stash' };
     } finally {
         connection.release();
     }
@@ -153,7 +153,7 @@ async function removeFromStash(stashId, playerId) {
         );
         if (rows.length === 0) {
             await connection.rollback();
-            return { success: false, message: 'A tárgy nem található a stash-ben' };
+            return { success: false, message: 'Item not found in stash' };
         }
 
         const instanceId = rows[0].instance_id;
@@ -168,10 +168,10 @@ async function removeFromStash(stashId, playerId) {
         }
 
         await connection.commit();
-        return { success: true, message: 'Tárgy eltávolítva a stash-ből' };
+        return { success: true, message: 'Item removed from stash' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a tárgy eltávolítása során' };
+        return { success: false, message: 'An error occurred while removing item from stash' };
     } finally {
         connection.release();
     }
@@ -190,7 +190,7 @@ async function getPlayerInventory(playerId) {
             [playerId]
         );
         if (rows.length === 0) {
-            return { success: false, message: 'Játékos nem található' };
+            return { success: false, message: 'Player not found' };
         }
 
         const instanceIds = rows.map((r) => r.instance_id).filter((id) => id != null);
@@ -257,14 +257,14 @@ async function getPlayerInventory(playerId) {
 
         return { success: true, inventory };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a felszerelés lekérése során' };
+        return { success: false, message: 'An error occurred while fetching the equipment' };
     }
 }
 
 async function swapEquipment(playerId, stashId, slot) {
     const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
     if (!validSlots.includes(slot)) {
-        return { success: false, message: 'Érvénytelen slot' };
+        return { success: false, message: 'Invalid slot' };
     }
 
     const connection = await pool.getConnection();
@@ -277,7 +277,7 @@ async function swapEquipment(playerId, stashId, slot) {
         );
         if (stashRows.length === 0) {
             await connection.rollback();
-            return { success: false, message: 'A tárgy nem található a stash-ben' };
+            return { success: false, message: 'Item not found in stash' };
         }
         const stashItem = stashRows[0];
 
@@ -286,13 +286,13 @@ async function swapEquipment(playerId, stashId, slot) {
             newItemId = stashItem.armor_id;
             if (!newItemId) {
                 await connection.rollback();
-                return { success: false, message: 'Ez a tárgy nem páncél' };
+                return { success: false, message: 'This item is not armor' };
             }
         } else {
             newItemId = stashItem.weapon_id;
             if (!newItemId) {
                 await connection.rollback();
-                return { success: false, message: 'Ez a tárgy nem fegyver' };
+                return { success: false, message: 'This item is not a weapon' };
             }
         }
 
@@ -305,7 +305,7 @@ async function swapEquipment(playerId, stashId, slot) {
         );
         if (equippedRows.length === 0) {
             await connection.rollback();
-            return { success: false, message: 'Felszerelés slot nem található' };
+            return { success: false, message: 'Equipment slot not found' };
         }
         const currentEquippedId = equippedRows[0][itemColumn];
         const equippedInstanceId = equippedRows[0].instance_id || null;
@@ -329,10 +329,10 @@ async function swapEquipment(playerId, stashId, slot) {
         }
 
         await connection.commit();
-        return { success: true, message: 'Felszerelés cserélve' };
+        return { success: true, message: 'Equipment swapped' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Hiba történt a csere során' };
+        return { success: false, message: 'An error occurred while swapping equipment' };
     } finally {
         connection.release();
     }
@@ -366,7 +366,7 @@ async function getLoadout(playerId) {
 
         return { success: true, loadout };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a loadout lekérése során' };
+        return { success: false, message: 'An error occurred while fetching the loadout' };
     }
 }
 
@@ -443,7 +443,7 @@ async function moveStashToLoadout(playerId, stashId) {
         return { success: true, message: 'Item moved to inventory.' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Error moving item to inventory.' };
+        return { success: false, message: 'An error occurred while moving item to inventory' };
     } finally {
         connection.release();
     }
@@ -452,7 +452,7 @@ async function moveStashToLoadout(playerId, stashId) {
 async function swapLoadoutEquipment(playerId, loadoutId, slot) {
     const validSlots = ['helmet', 'armor', 'melee', 'ranged'];
     if (!validSlots.includes(slot)) {
-        return { success: false, message: 'Érvénytelen slot' };
+        return { success: false, message: 'Invalid slot' };
     }
 
     const connection = await pool.getConnection();
@@ -1007,7 +1007,7 @@ async function getTotalGold(playerId) {
         };
     } catch (error) {
         console.error('getTotalGold error:', error);
-        return { success: false, message: 'Hiba történt az arany lekérése során' };
+        return { success: false, message: 'An error occurred while fetching total gold' };
     }
 }
 
@@ -1043,7 +1043,7 @@ async function addGoldToInventory(playerId, amount) {
         return { success: true, message: 'Gold added to loadout.' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Error adding gold to loadout.' };
+        return { success: false, message: 'An error occurred while adding gold to loadout' };
     } finally {
         connection.release();
     }
@@ -1153,7 +1153,7 @@ async function transferGoldBetweenStorage(playerId, from, amount) {
         };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Error transferring gold.' };
+        return { success: false, message: 'An error occurred while transferring gold.' };
     } finally {
         connection.release();
     }
@@ -1196,7 +1196,7 @@ async function adminSetStashGold(userId, amount) {
         return { success: true, message: 'Stash gold updated.' };
     } catch (error) {
         await connection.rollback();
-        return { success: false, message: 'Error updating stash gold.' };
+        return { success: false, message: 'An error occurred while updating stash gold.' };
     } finally {
         connection.release();
     }

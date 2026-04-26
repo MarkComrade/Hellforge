@@ -17,12 +17,12 @@ async function getPlayerCombatDeck(playerId) {
     try {
         const rows = await getPlayerCombatDeckCardIds(playerId);
         if (rows.length === 0) {
-            return { success: false, message: 'Játékos nem található' };
+            return { success: false, message: 'Player not found' };
         }
         const deck = rows.map((row) => getCardById(row.card_id)).filter(Boolean);
         return { success: true, deck };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a kártyapakli lekérése során' };
+        return { success: false, message: 'An error occurred while fetching the combat deck' };
     }
 }
 

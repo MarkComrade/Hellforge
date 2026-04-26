@@ -73,6 +73,34 @@
     border-right: 0.2vh solid rgba(220, 40, 40, 0.35);
 }
 
+.passwordWrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.passwordToggle {
+    position: absolute;
+    right: 0.6vw;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: rgba(220, 40, 40, 0.7);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+    color: rgb(220, 40, 40);
+}
+
+.eyeIcon {
+    width: 1.4vw;
+    height: 1.4vw;
+}
+
 .loginFormContainer .menuInput {
     font-size: 1.8vw;
     padding: 1vh 1vw;

@@ -16,15 +16,15 @@ async function selectall() {
 async function loginUser(username, password) {
     try {
         if (!username || !password) {
-            return { success: false, message: 'Hiányzó felhasználónév vagy jelszó' };
+            return { success: false, message: 'Missing username or password' };
         }
         if (typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
-            return { success: false, message: 'Helytelen jelszó' };
+            return { success: false, message: 'Incorrect password' };
         }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length === 0) {
-            return { success: false, message: 'A felhasználónév nem létezik' };
+            return { success: false, message: 'Username does not exist' };
         }
 
         const user = rows[0];
@@ -32,12 +32,12 @@ async function loginUser(username, password) {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            return { success: false, message: 'Helytelen jelszó' };
+            return { success: false, message: 'Incorrect password' };
         }
 
-        return { success: true, userId: user.userId, message: 'Sikeres bejelentkezés' };
+        return { success: true, userId: user.userId, message: 'Successful login' };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a bejelentkezés során' };
+        return { success: false, message: 'An error occurred during login' };
     }
 }
 
@@ -126,15 +126,15 @@ async function registerUser(username, password) {
             }
 
             await connection.commit();
-            return { success: true, userId, message: 'Sikeres regisztráció' };
+            return { success: true, userId, message: 'Successful registration' };
         } catch (error) {
             await connection.rollback();
-            return { success: false, message: 'Hiba történt a regisztráció során' };
+            return { success: false, message: 'An error occurred during registration' };
         } finally {
             connection.release();
         }
     } catch (error) {
-        return { success: false, message: 'Hiba történt a regisztráció során' };
+        return { success: false, message: 'An error occurred during registration' };
     }
 }
 
@@ -143,7 +143,7 @@ async function loginAdmin(username, password) {
         const [rows] = await pool.query('SELECT * FROM admin WHERE name = ?', [username]);
 
         if (rows.length === 0) {
-            return { success: false, message: 'A felhasználónév nem létezik' };
+            return { success: false, message: 'Username does not exist' };
         }
 
         const admin = rows[0];
@@ -151,24 +151,32 @@ async function loginAdmin(username, password) {
         const passwordMatch = await bcrypt.compare(password, admin.password);
 
         if (!passwordMatch) {
-            return { success: false, message: 'Helytelen jelszó' };
+            return { success: false, message: 'Incorrect password' };
         }
 
-        return { success: true, adminId: admin.adminId, message: 'Sikeres bejelentkezés' };
+        return { success: true, adminId: admin.adminId, message: 'Successful login' };
     } catch (error) {
-        return { success: false, message: 'Hiba történt a bejelentkezés során' };
+        return { success: false, message: 'An error occurred during login' };
     }
 }
 
 async function selectleadboard() {
     const query = `
         SELECT u.name,
-               COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0) AS score
+               COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0) AS score
         FROM user u
-        LEFT JOIN player_loadout pl ON u.userId = pl.playerId AND pl.gold_amount IS NOT NULL
-        LEFT JOIN player_stash ps ON u.userId = ps.playerId
-            AND ps.armor_id IS NULL AND ps.weapon_id IS NULL AND ps.misc_item_id IS NULL
-        GROUP BY u.userId, u.name
+        LEFT JOIN (
+            SELECT playerId, SUM(gold_amount) AS total
+            FROM player_loadout
+            WHERE gold_amount IS NOT NULL
+            GROUP BY playerId
+        ) AS loadout_gold ON u.userId = loadout_gold.playerId
+        LEFT JOIN (
+            SELECT playerId, SUM(gold) AS total
+            FROM player_stash
+            WHERE armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
+            GROUP BY playerId
+        ) AS stash_gold ON u.userId = stash_gold.playerId
         ORDER BY score DESC
         LIMIT 10
     `;
@@ -179,26 +187,42 @@ async function selectleadboard() {
 async function getUserRankAndScore(username) {
     const query = `
         SELECT u.name,
-               COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0) AS score,
+               COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0) AS score,
                (
                    SELECT COUNT(*) + 1
                    FROM (
                        SELECT u2.userId,
-                              COALESCE(SUM(pl2.gold_amount), 0) + COALESCE(SUM(ps2.gold), 0) AS g
+                              COALESCE(lg2.total, 0) + COALESCE(sg2.total, 0) AS g
                        FROM user u2
-                       LEFT JOIN player_loadout pl2 ON u2.userId = pl2.playerId AND pl2.gold_amount IS NOT NULL
-                       LEFT JOIN player_stash ps2 ON u2.userId = ps2.playerId
-                           AND ps2.armor_id IS NULL AND ps2.weapon_id IS NULL AND ps2.misc_item_id IS NULL
-                       GROUP BY u2.userId
+                       LEFT JOIN (
+                           SELECT playerId, SUM(gold_amount) AS total
+                           FROM player_loadout
+                           WHERE gold_amount IS NOT NULL
+                           GROUP BY playerId
+                       ) AS lg2 ON u2.userId = lg2.playerId
+                       LEFT JOIN (
+                           SELECT playerId, SUM(gold) AS total
+                           FROM player_stash
+                           WHERE armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
+                           GROUP BY playerId
+                       ) AS sg2 ON u2.userId = sg2.playerId
                    ) AS totals
-                   WHERE totals.g > COALESCE(SUM(pl.gold_amount), 0) + COALESCE(SUM(ps.gold), 0)
+                   WHERE totals.g > COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0)
                ) AS \`rank\`
         FROM user u
-        LEFT JOIN player_loadout pl ON u.userId = pl.playerId AND pl.gold_amount IS NOT NULL
-        LEFT JOIN player_stash ps ON u.userId = ps.playerId
-            AND ps.armor_id IS NULL AND ps.weapon_id IS NULL AND ps.misc_item_id IS NULL
+        LEFT JOIN (
+            SELECT playerId, SUM(gold_amount) AS total
+            FROM player_loadout
+            WHERE gold_amount IS NOT NULL
+            GROUP BY playerId
+        ) AS loadout_gold ON u.userId = loadout_gold.playerId
+        LEFT JOIN (
+            SELECT playerId, SUM(gold) AS total
+            FROM player_stash
+            WHERE armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
+            GROUP BY playerId
+        ) AS stash_gold ON u.userId = stash_gold.playerId
         WHERE u.name = ?
-        GROUP BY u.userId, u.name
     `;
     const [rows] = await pool.execute(query, [username]);
     return rows[0];

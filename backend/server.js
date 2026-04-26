@@ -50,7 +50,7 @@ app.use('/api/events', events);
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez
 app.listen(port, ip, () => {
-    console.log(`Szerver elérhetősége: http://${ip}:${port}`);
+    console.log(`Server is running at http://${ip}:${port}`);
 });
 //!Database test
 
@@ -59,12 +59,12 @@ async function connectWithRetry(retries = 10, delay = 2000) {
     for (let i = 0; i < retries; i++) {
         try {
             await pool.query('SELECT 1');
-            console.log('Sikeres adatbázis kapcsolat!');
+            console.log('successfully connected to the database');
             return;
         } catch (err) {
-            console.log(`Adatbázis kapcsolat próbálkozás ${i + 1}/${retries}...`);
+            console.log(`Database connection attempt ${i + 1}/${retries}...`);
             if (i === retries - 1) {
-                console.error('Hiba az adatbázis kapcsolat során:', err);
+                console.error('Error connecting to the database:', err);
                 process.exit(1);
             }
             await new Promise((resolve) => setTimeout(resolve, delay));

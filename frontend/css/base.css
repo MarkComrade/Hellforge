@@ -177,29 +177,117 @@ body.ready {
     z-index: 9999;
     background-color: rgba(0, 0, 0, 1);
 }
-.toast-container {
-    z-index: 99999 !important;
-}
-.toast {
-    font-size: 2vw;
-    color: #fff !important;
+.hellToastContainer {
+    position: fixed;
+    bottom: 2vh;
+    right: 2vw;
     display: flex;
-    justify-content: center;
-    text-shadow:
-        -0.1vw -0.1vw 0 #000,
-        0.1vw -0.1vw 0 #000,
-        -0.1vw 0.1vw 0 #000,
-        0.1vw 0.1vw 0 #000;
+    flex-direction: column;
+    gap: 0.8vh;
+    z-index: 99999;
+    pointer-events: none;
 }
-.toast-warning {
-    background-color: rgb(220, 121, 40) !important;
+
+.hellToast {
+    width: min(42vh, 88vw);
+    padding: 1.1vh 1.4vh;
+    background-color: rgba(10, 10, 10, 0.97);
+    border: 0.2vh solid rgba(220, 40, 40, 0.45);
+    border-left-width: 0.5vh;
+    box-shadow:
+        0.3vh 0.3vh 0 rgba(0, 0, 0, 0.95),
+        0.6vh 0.6vh 0 rgba(0, 0, 0, 0.6);
+    animation: hellToastIn 220ms ease-out forwards;
+    pointer-events: auto;
 }
-.toast-info {
-    background-color: rgb(217, 124, 124) !important;
+
+.hellToast-hide {
+    animation: hellToastOut 280ms ease-in forwards;
 }
-.toast-success {
-    background-color: rgb(177, 171, 63) !important;
+
+.hellToast-error {
+    border-color: rgba(220, 40, 40, 0.45);
+    border-left-color: rgb(220, 40, 40);
 }
-.toast-error {
-    background-color: rgb(220, 40, 40) !important;
+
+.hellToast-success {
+    border-color: rgba(60, 180, 80, 0.45);
+    border-left-color: rgb(60, 180, 80);
+}
+
+.hellToast-info {
+    border-color: rgba(80, 140, 220, 0.45);
+    border-left-color: rgb(80, 140, 220);
+}
+
+.hellToast-warning {
+    border-color: rgba(220, 140, 40, 0.45);
+    border-left-color: rgb(220, 140, 40);
+}
+
+.hellToastHeader {
+    margin-bottom: 0.5vh;
+}
+
+.hellToastBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2vh 0.7vh;
+    border: 0.15vh solid;
+    background-color: rgba(20, 8, 8, 0.92);
+    font-size: 1.2vh;
+    font-weight: 600;
+    letter-spacing: 0.12vh;
+    text-transform: uppercase;
+    text-shadow: 0.1vh 0.1vh 0 rgba(0, 0, 0, 0.9);
+}
+
+.hellToast-error .hellToastBadge {
+    color: rgb(232, 140, 140);
+    border-color: rgba(220, 40, 40, 0.85);
+}
+
+.hellToast-success .hellToastBadge {
+    color: rgb(140, 232, 160);
+    border-color: rgba(60, 180, 80, 0.85);
+}
+
+.hellToast-info .hellToastBadge {
+    color: rgb(140, 180, 232);
+    border-color: rgba(80, 140, 220, 0.85);
+}
+
+.hellToast-warning .hellToastBadge {
+    color: rgb(232, 192, 140);
+    border-color: rgba(220, 140, 40, 0.85);
+}
+
+.hellToastBody {
+    margin: 0;
+    color: rgb(210, 210, 210);
+    font-size: clamp(1.4vh, 1.7vh, 1.9vh);
+    line-height: 1.45;
+    text-shadow: 0.1vh 0.1vh 0 rgba(0, 0, 0, 0.8);
+}
+
+@keyframes hellToastIn {
+    from {
+        opacity: 0;
+        transform: translateX(2vh);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes hellToastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(2vh);
+    }
 }

@@ -213,7 +213,7 @@ router.post('/next-level', requireLogin, requireDungeon, (req, res) => {
         // then copy over the session token and HP so the run feels continuous.
         const nextLevel = new DungeonSession(dungeon.dungeonName, dungeon.dungeonLevel + 1);
         nextLevel.sessionToken = dungeon.sessionToken; // keep the same token across levels
-        nextLevel.currentHP = dungeon.currentHP; // carry over the player's HP
+        nextLevel.currentHP = nextLevel.maxHP; // restore HP to full on a new level
 
         // Carry run stats forward and count this completed floor
         nextLevel.stats = {

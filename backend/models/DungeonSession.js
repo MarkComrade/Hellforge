@@ -9,6 +9,7 @@ class DungeonSession {
         this.dungeonLevel = dungeonLevel;
         this.playerX = 5; // start at center of 9×9 grid
         this.playerY = 5;
+        this.maxHP = 100;
         this.currentHP = 100;
         this.map = {}; // key: "x,y" → { exists, roomType, visited }
         this.visitedRooms = new Set(); // tracks which rooms the player has entered
@@ -205,6 +206,7 @@ class DungeonSession {
             playerX: this.playerX,
             playerY: this.playerY,
             currentHP: this.currentHP,
+            maxHP: this.maxHP,
             map: this.map,
             visitedRooms: Array.from(this.visitedRooms), // Set → Array for JSON
             shopStock: this.shopStock,
@@ -225,6 +227,7 @@ class DungeonSession {
         d.playerX = data.playerX;
         d.playerY = data.playerY;
         d.currentHP = data.currentHP;
+        d.maxHP = data.maxHP ?? 100;
         d.map = data.map;
         d.visitedRooms = new Set(data.visitedRooms); // Array → Set
         d.shopStock = data.shopStock || {};
@@ -259,6 +262,7 @@ class DungeonSession {
             bounds: this.bounds,
             doors: this._getAdjacentDoors(),
             currentHP: this.currentHP,
+            maxHP: this.maxHP,
             stats: this.stats
         };
     }

@@ -95,6 +95,7 @@
     right: 3vh;
     width: 22vh;
     font-size: 1.8vh;
+    display: none;
 }
 
 /* Shop overlay */

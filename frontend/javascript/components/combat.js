@@ -81,6 +81,7 @@ function exitCombatMode() {
 
     const bottomRight = document.querySelector('#ui .bottom-right');
     if (bottomRight) bottomRight.innerHTML = '';
+    if (bottomRight) bottomRight.style.display = 'none';
 }
 
 function renderCombat() {
@@ -94,6 +95,9 @@ function renderCombat() {
     if (typeof setHP === 'function') setHP(combatState.player.hp);
 
     fillBottomRightControls();
+
+    const bottomRight = document.querySelector('#ui .bottom-right');
+    if (bottomRight) bottomRight.style.display = 'flex';
 
     if (combatState.isResolved) showResultOverlay();
 }
@@ -293,13 +297,15 @@ function createEffectsRow(entity) {
         badge.className = 'combat-effect-badge';
         badge.dataset.tooltip = tooltip;
 
-        const img = document.createElement('img');
-        img.src = icon;
-        img.alt = '';
-        img.onerror = function () {
-            this.style.display = 'none';
-        };
-        badge.appendChild(img);
+        if (icon) {
+            const img = document.createElement('img');
+            img.src = icon;
+            img.alt = '';
+            img.onerror = function () {
+                this.style.display = 'none';
+            };
+            badge.appendChild(img);
+        }
 
         const span = document.createElement('span');
         span.textContent = label;
@@ -320,9 +326,10 @@ function getStatusIcon(type) {
         cleanse: '../textures/effects/effects_cleanse.png',
         deflect: '../textures/effects/effects_deflect.png',
         bleed: '../textures/effects/effects_blood.png',
-        scorch: '../textures/effects/effects_scorch.png'
+        scorch: '../textures/effects/effects_scorch.png',
+        lifesteal: '../textures/effects/effects_blood.png'
     };
-    return icons[type] || '../textures/misc/defaultportrait.png';
+    return icons[type] || null;
 }
 
 function getStatusLabel(status) {

@@ -15,12 +15,86 @@ const TRAP_GOLD_LOSS_MIN = 10;
 const TRAP_GOLD_LOSS_MAX = 40;
 
 const CURSED_TRAP_CARD_POOL = [
-    { id: 901, name: 'Sussy Combo', effect: 'self damage' },
-    { id: 902, name: 'Oops, All Regret', effect: 'self damage' },
-    { id: 903, name: 'Monday Simulator', effect: 'does nothing' },
-    { id: 904, name: 'German Stare', effect: 'does nothing' },
-    { id: 905, name: 'Crazy Hamburger', effect: 'self damage' },
-    { id: 906, name: 'Absolutely Nothing', effect: 'does nothing' }
+    { id: 901, name: 'Hellpact', effect: 'Power borrowed from hell is power paid in flesh' },
+    {
+        id: 902,
+        name: 'Soul Sacrifice',
+        effect: 'The souls you burn will not forget the hand that lit them'
+    },
+    { id: 903, name: 'Blood Pact', effect: 'Strength signed in blood is always collected' },
+    {
+        id: 904,
+        name: 'Infernal Contract',
+        effect: 'Every clause of this contract was written against you'
+    },
+    {
+        id: 905,
+        name: 'Damnation Strike',
+        effect: "Strike with damnation's edge and bleed alongside your enemy"
+    },
+    { id: 906, name: 'Void Gamble', effect: 'The void gives generously and takes back everything' },
+    { id: 907, name: 'Sacrifice Play', effect: 'To win the board, you lay yourself down first' },
+    { id: 908, name: 'Black Mark', effect: 'Something has noticed you. It does not wish you well' },
+    { id: 909, name: 'Tainted Blow', effect: 'The poison on this blade knows no master' },
+    {
+        id: 910,
+        name: 'Cursed Reflex',
+        effect: "Your instincts have been rewritten in someone else's ink"
+    },
+    { id: 911, name: 'Hex Wound', effect: 'The wound is not where the blade landed' },
+    { id: 912, name: 'Void Drain', effect: 'Something feeds on your vitality from the other side' },
+    { id: 913, name: 'Berserker Pact', effect: 'Fury this pure burns the one who holds it' },
+    {
+        id: 914,
+        name: 'Cursed Flurry',
+        effect: 'Swing wild enough and your own hands become the enemy'
+    },
+    { id: 915, name: 'Doom Volley', effect: 'When everything burns, so do you' },
+    { id: 916, name: 'Forbidden Strength', effect: 'With great strength, great drawback comes' },
+    { id: 917, name: 'Hell Roulette', effect: 'Spin the cylinder. The odds were never yours' },
+    { id: 918, name: 'Ruinous Step', effect: 'Every step forward here costs something' },
+    { id: 919, name: 'Cursed Whisper', effect: 'What you heard was not meant for living ears' },
+    { id: 920, name: 'Hollow Strike', effect: 'The blow connected. So did the curse' },
+    {
+        id: 921,
+        name: 'Marked',
+        effect: 'Something has written your name somewhere you cannot read'
+    },
+    { id: 922, name: 'Wretched Touch', effect: 'Whatever this card once was, it is wretched now' },
+    { id: 923, name: 'Blight Grasp', effect: 'To reach for this power is to grasp a thorn' },
+    {
+        id: 924,
+        name: 'Doom Brand',
+        effect: 'The brand is already on you. You just cannot see it yet'
+    },
+    { id: 925, name: 'Spectral Leech', effect: 'The ghost drinks from both ends of the wound' },
+    { id: 926, name: 'Cursed Burden', effect: 'Some burdens, once carried, cannot be set down' },
+    { id: 927, name: 'Hex Pulse', effect: 'The hex is brief. The memory is not' },
+    { id: 928, name: 'Vile Scar', effect: 'Every scar from this place heals wrong' },
+    { id: 929, name: 'Rot Touch', effect: 'What you touch rots. What touches you rots faster' },
+    { id: 930, name: 'Tainted Pulse', effect: 'The taint has no loyalty' },
+    {
+        id: 931,
+        name: 'Forsaken Strike',
+        effect: 'Even the forsaken land their blows — on themselves'
+    },
+    { id: 932, name: 'Cursed Ache', effect: 'It does not hurt much. It just does not stop' },
+    {
+        id: 933,
+        name: 'Withered Blow',
+        effect: 'Withered by curse, it still falls — just not very far'
+    },
+    { id: 934, name: 'Shadow Sting', effect: 'Shadows do not sting without cause' },
+    { id: 935, name: 'Foul Brand', effect: 'The brand is foul because it chose you freely' },
+    { id: 936, name: 'Hex Lash', effect: 'The lash cuts twice: once forward, once back' },
+    { id: 937, name: 'Plagued Touch', effect: 'The plague does not ask permission' },
+    { id: 938, name: 'Cursed Miasma', effect: 'Breathe deep. The miasma was already inside you' },
+    {
+        id: 939,
+        name: 'Wretched Blow',
+        effect: 'The blow is wretched, but it still lands somewhere'
+    },
+    { id: 940, name: 'Dark Fumble', effect: 'In the dark, your hands work against you' }
 ];
 
 function generateEventType() {

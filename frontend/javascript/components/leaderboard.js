@@ -98,7 +98,7 @@ function generatePiles(players, loggedUser) {
     const container = document.createElement('div');
     container.className = 'leadboardContainer container-fluid';
 
-    const maxScore = players[0].score;
+    const maxScore = Number(players[0].score);
 
     players.forEach((entry) => {
         const entryDiv = document.createElement('div');
@@ -120,13 +120,13 @@ function generatePiles(players, loggedUser) {
 
         const stacks = [createCoinStack(), createCoinStack(), createCoinStack()];
 
-        if (entry.score === 0) {
+        if (Number(entry.score) === 0) {
             const noCoinDiv = document.createElement('div');
             noCoinDiv.className = 'noCoins text-light small';
-            noCoinDiv.innerText = 'No coins';
+            noCoinDiv.innerText = 'Zero coins';
             stacks[1].element.appendChild(noCoinDiv);
         } else {
-            const coinCount = Math.max(1, Math.round((entry.score / maxScore) * MAX_COINS));
+            const coinCount = Math.max(1, Math.round((Number(entry.score) / maxScore) * MAX_COINS));
 
             for (let c = 0; c < coinCount; c++) {
                 const coin = document.createElement('img');

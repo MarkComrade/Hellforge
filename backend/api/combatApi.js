@@ -122,7 +122,7 @@ router.post('/start', requireLogin, async (req, res) => {
         const combat = new CombatSession({
             dungeonType,
             dungeonLevel,
-            playerMaxHp: Number(dungeon.currentHP) || 100,
+            playerMaxHp: Number(dungeon.maxHP) || 100,
             playerCurrentHp: Number(dungeon.currentHP) || 100,
             playerId,
             equipmentSnapshot
@@ -231,6 +231,7 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
             }
             dungeonData.stats.enemiesKilled += combat.enemies.length;
             dungeonData.stats.goldCollected += reward.gold || 0;
+            dungeonData.currentHP = combat.player.hp; // persist remaining HP into the dungeon session
 
             req.session.dungeonData = dungeonData;
         }

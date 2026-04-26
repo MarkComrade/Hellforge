@@ -2,7 +2,7 @@ const getMethodFetch = (url) => {
     return fetch(url)
         .then((response) => {
             if (!response.ok) {
-                throw new Error(`Hiba: ${response.status}`);
+                throw new Error(`error: ${response.status}`);
             }
             return response.json();
         })
@@ -10,7 +10,7 @@ const getMethodFetch = (url) => {
             return data;
         })
         .catch((error) => {
-            throw new Error(`Hiba történt: ${error.message}`);
+            throw new Error(`error: ${error.message}`);
         });
 };
 const postFetchForm = async (url, formData) => {
@@ -62,10 +62,10 @@ const deleteFetch = async (url, data) => {
         });
 
         if (!response.ok) {
-            throw new Error('hiba' + response.statusText + '(' + response.status + ')');
+            throw new Error('error: ' + response.statusText + '(' + response.status + ')');
         }
         return await response.json();
     } catch (error) {
-        throw new Error('hiba: ' + error.message);
+        throw new Error('error: ' + error.message);
     }
 };
