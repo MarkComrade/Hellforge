@@ -112,7 +112,7 @@ function generatePiles(players, loggedUser) {
         // Player score
         const scoreDiv = document.createElement('div');
         scoreDiv.className = 'playerScore text-light';
-        scoreDiv.innerText = `${entry.score}p`;
+        scoreDiv.innerText = `${entry.score}g`;
 
         // Coin stacks (3 columns for visual spread)
         const coinStackRow = document.createElement('div');

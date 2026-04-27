@@ -566,8 +566,9 @@ function resolveEnemyCards(session) {
         if (enemy.hp <= 0) continue;
 
         const cards = selectTurnCards(enemy);
-        for (const card of cards) {
-            if (!session.isActive()) return;
+        let j = 0;
+        while (j < cards.length && session.isActive() && enemy.hp > 0) {
+            const card = cards[j++];
             session.appendLog({
                 type: 'enemy',
                 message: `${enemy.archetype || 'Enemy'} uses ${card.name}.`

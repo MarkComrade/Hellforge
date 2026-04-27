@@ -175,7 +175,10 @@ function createEnemyPanel(enemy) {
     if (isDead) {
         const skull = document.createElement('div');
         skull.className = 'combat-skull';
-        skull.textContent = '\u2620\uFE0F';
+        const skullImg = document.createElement('img');
+        skullImg.src = '../textures/characters/enemy_dead.png';
+        skullImg.alt = 'Skull';
+        skull.appendChild(skullImg);
         spriteBox.appendChild(skull);
     }
 
@@ -249,17 +252,26 @@ function createEffectsRow(entity) {
         });
 
     (entity.statuses || []).forEach((s) => {
-        const val = s.stacks != null ? s.stacks : s.turns != null ? s.turns + 't' : '';
-        effects.push({ icon: getStatusIcon(s.type), label: val, tooltip: getStatusLabel(s) });
+        let label,
+            label2 = null;
+        if (s.stacks != null) {
+            label = s.stacks;
+        } else if (s.turns != null) {
+            label = `${s.turns}t`;
+            if (s.pct != null) label2 = `${s.pct}%`;
+        } else {
+            label = '';
+        }
+        effects.push({ icon: getStatusIcon(s.type), label, label2, tooltip: getStatusLabel(s) });
     });
 
     const row = document.createElement('div');
     row.className = 'combat-effects-row';
     if (!effects.length) return row;
 
-    effects.forEach(({ icon, label, tooltip }) => {
+    effects.forEach(({ icon, label, label2, tooltip }) => {
         const badge = document.createElement('div');
-        badge.className = 'combat-effect-badge';
+        badge.className = 'combat-effect-badge' + (label2 ? ' combat-effect-badge--dual' : '');
         badge.dataset.tooltip = tooltip;
 
         if (icon) {
@@ -273,8 +285,16 @@ function createEffectsRow(entity) {
         }
 
         const span = document.createElement('span');
+        span.className = 'badge-turns';
         span.textContent = label;
         badge.appendChild(span);
+
+        if (label2) {
+            const span2 = document.createElement('span');
+            span2.className = 'badge-pct';
+            span2.textContent = label2;
+            badge.appendChild(span2);
+        }
 
         row.appendChild(badge);
     });
@@ -310,7 +330,10 @@ function getStatusLabel(status) {
     };
     const name = names[status.type] || status.type;
     if (status.stacks != null) return `${name} (${status.stacks} stacks)`;
-    if (status.turns != null) return `${name} (${status.turns} turns)`;
+    if (status.turns != null && status.pct != null)
+        return `${name} (${status.pct}% for ${status.turns} turn${status.turns !== 1 ? 's' : ''})`;
+    if (status.turns != null)
+        return `${name} (${status.turns} turn${status.turns !== 1 ? 's' : ''})`;
     return name;
 }
 

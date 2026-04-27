@@ -160,13 +160,18 @@ body.in-combat #ui {
 
 .combat-skull {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -55%);
-    font-size: clamp(32px, 8vh, 80px);
-    opacity: 0.85;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
-    text-shadow: 0 0 1vh #000;
+}
+
+.combat-skull img {
+    width: clamp(56px, 14vh, 130px);
+    height: auto;
+    opacity: 0.92;
+    filter: drop-shadow(0 0 6px #000) drop-shadow(0 0 12px rgba(200, 0, 0, 0.55));
 }
 
 .combat-hp-wrapper {
@@ -245,6 +250,24 @@ body.in-combat #ui {
     font-size: clamp(7px, 0.95vh, 12px);
     color: #e8e8e8;
     line-height: 1;
+}
+
+.combat-effect-badge--dual {
+    width: clamp(30px, 4.4vh, 54px);
+}
+
+.badge-turns {
+    font-size: clamp(7px, 0.95vh, 12px);
+    color: #e8e8e8;
+    line-height: 1;
+}
+
+.badge-pct {
+    font-size: clamp(6px, 0.85vh, 11px);
+    color: #fbbf24;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
 }
 
 .combat-effect-badge[data-tooltip]::after {
