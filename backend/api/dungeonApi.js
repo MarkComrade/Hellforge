@@ -172,7 +172,7 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
 
             enrichEvent(Event);
         } else if (
-            result.roomType === 'loot' &&
+            (result.roomType === 'loot' || result.roomType === 'combat') &&
             Number.isInteger(playerId) &&
             playerId > 0 &&
             req.dungeon.roomLoot?.[targetKey] &&

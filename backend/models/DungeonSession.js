@@ -141,7 +141,8 @@ class DungeonSession {
             position: { x: this.playerX, y: this.playerY },
             roomType: this.map[key].roomType,
             doors: this._getAdjacentDoors(),
-            visited: this.visitedRooms.has(key)
+            visited: this.visitedRooms.has(key),
+            cleared: this.map[key].cleared === true
         };
     }
 

@@ -73,7 +73,7 @@ const ENEMY_POOL = {
         },
         {
             id: 'crypt_guard',
-            name: 'C',
+            name: 'Crypt Guard',
             img_path: '/textures/characters/crypt_guard.png',
             baseHp: 28,
             hpPerLevel: 5,
