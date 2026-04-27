@@ -73,7 +73,7 @@ const ENEMY_POOL = {
         },
         {
             id: 'crypt_guard',
-            name: 'Crypt Guard',
+            name: 'C',
             img_path: '/textures/characters/crypt_guard.png',
             baseHp: 28,
             hpPerLevel: 5,
@@ -155,7 +155,7 @@ const ENEMY_POOL = {
         },
         {
             id: 'lich',
-            name: 'Lich',
+            name: 'ArcLich',
             img_path: '/textures/characters/crypt_lich.png',
             baseHp: 26,
             hpPerLevel: 4,
@@ -307,7 +307,7 @@ const ENEMY_POOL = {
         },
         {
             id: 'mummy',
-            name: 'Mummy',
+            name: 'Awoken Mummy',
             img_path: '/textures/characters/labyrinth_mummy.png',
             baseHp: 72,
             hpPerLevel: 11,
@@ -507,7 +507,7 @@ const ENEMY_POOL = {
     gates_of_hell: [
         {
             id: 'demon',
-            name: 'Demon',
+            name: 'Infernal Demon',
             img_path: '/textures/characters/gates_of_hell_demon.png',
             baseHp: 95,
             hpPerLevel: 15,

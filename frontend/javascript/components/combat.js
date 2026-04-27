@@ -10,32 +10,6 @@ const NAV_IDS = ['navigateUp', 'navigateRight', 'navigateDown', 'navigateLeft'];
 const COMBAT_ELEMENT_IDS = ['combat-log', 'combat-player', 'combat-enemies', 'combat-cards'];
 const BLOCKED_ICON_IDS = ['openSettings', 'openInventory', 'abandonDungeon'];
 
-const SCATTER_POSITIONS = [
-    [{ top: '28vh', right: '24vw' }],
-    [
-        { top: '16vh', right: '18vw' },
-        { top: '46vh', right: '28vw' }
-    ],
-    [
-        { top: '12vh', right: '20vw' },
-        { top: '44vh', right: '30vw' },
-        { top: '28vh', right: '14vw' }
-    ],
-    [
-        { top: '10vh', right: '16vw' },
-        { top: '34vh', right: '28vw' },
-        { top: '14vh', right: '32vw' },
-        { top: '40vh', right: '14vw' }
-    ],
-    [
-        { top: '8vh', right: '15vw' },
-        { top: '28vh', right: '30vw' },
-        { top: '48vh', right: '20vw' },
-        { top: '16vh', right: '24vw' },
-        { top: '38vh', right: '14vw' }
-    ]
-];
-
 function startCombat(token, initialState) {
     selectedCardIndex = null;
     selectedEnemyIndex = null;
@@ -160,17 +134,8 @@ function createEnemySection() {
     section.id = 'combat-enemies';
 
     const enemies = combatState.enemies || [];
-    const positionGroup =
-        SCATTER_POSITIONS[Math.min(enemies.length, SCATTER_POSITIONS.length) - 1] ||
-        SCATTER_POSITIONS[0];
-
-    enemies.forEach((enemy, enemyPositionIndex) => {
-        const panel = createEnemyPanel(enemy);
-        const position =
-            positionGroup[enemyPositionIndex] || positionGroup[positionGroup.length - 1];
-        panel.style.top = position.top;
-        panel.style.right = position.right;
-        section.appendChild(panel);
+    enemies.forEach((enemy) => {
+        section.appendChild(createEnemyPanel(enemy));
     });
 
     return section;
