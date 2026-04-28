@@ -91,14 +91,11 @@ async function registerUser(username, password) {
             for (const gear of starterGear) {
                 const sourceType = gear.armor_id ? 'armor' : 'weapon';
                 const sourceId = gear.armor_id || gear.weapon_id;
-                const subType =
-                    gear.slot === 'helmet'
-                        ? 'Helmet'
-                        : gear.slot === 'armor'
-                          ? 'Armor'
-                          : gear.slot === 'melee'
-                            ? 'Melee'
-                            : 'Ranged';
+                let subType;
+                if (gear.slot === 'helmet') subType = 'Helmet';
+                else if (gear.slot === 'armor') subType = 'Armor';
+                else if (gear.slot === 'melee') subType = 'Melee';
+                else subType = 'Ranged';
                 const starterCards = pickCardsForItem(subType, 1);
                 const instanceId = await createItemInstance(
                     connection,
