@@ -62,7 +62,7 @@ router.get('/leaderboard', async (request, response) => {
     } catch (error) {
         console.error('Leaderboard error:', error); // Debug
         response.status(500).json({
-            message: 'leadboardadatok nem sikerult lekerni',
+            message: 'error fetching leaderboard data',
             error: error.message
         });
     }

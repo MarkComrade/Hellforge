@@ -53,9 +53,10 @@ async function Menu() {
 
     buttons.forEach(({ text, onClick }, index) => {
         const isLoginRelated = text === 'Login' || text === 'Register' || text === 'Admin';
+        const isPublic = text === 'Leaderboard';
 
         if (isAdmin && text !== 'Admin' && text !== 'Logout') return;
-        if (!isAdmin && !isLoggedIn && !isLoginRelated) return;
+        if (!isAdmin && !isLoggedIn && !isLoginRelated && !isPublic) return;
         if (!isAdmin && isLoggedIn && isLoginRelated) return;
 
         const button = document.createElement('input');

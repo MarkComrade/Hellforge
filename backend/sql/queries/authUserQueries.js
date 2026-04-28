@@ -156,20 +156,14 @@ async function loginAdmin(username, password) {
 async function selectleadboard() {
     const query = `
         SELECT u.name,
-               COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0) AS score
+               COALESCE(ps.total, 0) AS score
         FROM user u
-        LEFT JOIN (
-            SELECT playerId, SUM(gold_amount) AS total
-            FROM player_loadout
-            WHERE gold_amount IS NOT NULL
-            GROUP BY playerId
-        ) AS loadout_gold ON u.userId = loadout_gold.playerId
         LEFT JOIN (
             SELECT playerId, SUM(gold) AS total
             FROM player_stash
             WHERE armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
             GROUP BY playerId
-        ) AS stash_gold ON u.userId = stash_gold.playerId
+        ) AS ps ON u.userId = ps.playerId
         ORDER BY score DESC
         LIMIT 10
     `;
@@ -180,19 +174,13 @@ async function selectleadboard() {
 async function getUserRankAndScore(username) {
     const query = `
         SELECT u.name,
-               COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0) AS score,
+               COALESCE(ps.total, 0) AS score,
                (
                    SELECT COUNT(*) + 1
                    FROM (
                        SELECT u2.userId,
-                              COALESCE(lg2.total, 0) + COALESCE(sg2.total, 0) AS g
+                              COALESCE(sg2.total, 0) AS g
                        FROM user u2
-                       LEFT JOIN (
-                           SELECT playerId, SUM(gold_amount) AS total
-                           FROM player_loadout
-                           WHERE gold_amount IS NOT NULL
-                           GROUP BY playerId
-                       ) AS lg2 ON u2.userId = lg2.playerId
                        LEFT JOIN (
                            SELECT playerId, SUM(gold) AS total
                            FROM player_stash
@@ -200,21 +188,15 @@ async function getUserRankAndScore(username) {
                            GROUP BY playerId
                        ) AS sg2 ON u2.userId = sg2.playerId
                    ) AS totals
-                   WHERE totals.g > COALESCE(loadout_gold.total, 0) + COALESCE(stash_gold.total, 0)
+                   WHERE totals.g > COALESCE(ps.total, 0)
                ) AS \`rank\`
         FROM user u
-        LEFT JOIN (
-            SELECT playerId, SUM(gold_amount) AS total
-            FROM player_loadout
-            WHERE gold_amount IS NOT NULL
-            GROUP BY playerId
-        ) AS loadout_gold ON u.userId = loadout_gold.playerId
         LEFT JOIN (
             SELECT playerId, SUM(gold) AS total
             FROM player_stash
             WHERE armor_id IS NULL AND weapon_id IS NULL AND misc_item_id IS NULL
             GROUP BY playerId
-        ) AS stash_gold ON u.userId = stash_gold.playerId
+        ) AS ps ON u.userId = ps.playerId
         WHERE u.name = ?
     `;
     const [rows] = await pool.execute(query, [username]);

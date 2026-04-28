@@ -68,6 +68,7 @@ body.in-combat #ui {
 
 .combat-character-info {
     display: flex;
+    flex-wrap: nowrap;
     flex-direction: column;
     align-items: center;
     gap: 0.3vh;
@@ -102,13 +103,22 @@ body.in-combat #ui {
 
 #combat-enemies {
     position: fixed;
-    inset: 0;
+    top: 15vh;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 150;
     pointer-events: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2vw;
+    flex-wrap: nowrap;
+    max-width: 70vw;
 }
 
 .combat-enemy {
-    position: fixed;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -150,31 +160,37 @@ body.in-combat #ui {
 
 .combat-skull {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -55%);
-    font-size: clamp(32px, 8vh, 80px);
-    opacity: 0.85;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
-    text-shadow: 0 0 1vh #000;
+}
+
+.combat-skull img {
+    width: clamp(56px, 14vh, 130px);
+    height: auto;
+    opacity: 0.92;
+    filter: drop-shadow(0 0 6px #000) drop-shadow(0 0 12px rgba(200, 0, 0, 0.55));
 }
 
 .combat-hp-wrapper {
-    width: 100%;
-    max-width: 20vh;
+    width: clamp(90px, 18vh, 220px);
+    min-width: 90px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 0.2vh;
 }
 .combat-hp-track {
     width: 100%;
-    height: 1.8vh;
+    height: clamp(12px, 1.4vh, 20px);
     background: #1a1a1a;
-    border: 0.15vh solid rgb(220, 40, 40);
-    border-radius: 0.3vh;
+    border: 1px solid rgb(220, 40, 40);
+    border-radius: 3px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 .combat-hp-fill {
     height: 100%;
@@ -183,13 +199,16 @@ body.in-combat #ui {
 }
 .combat-hp-text {
     position: absolute;
+    width: 100%;
     inset: 0;
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    font-size: 1.15vh;
+    font-size: clamp(9px, 1.15vh, 13px);
     color: #fff;
-    text-shadow: 0 0 0.3vh #000;
+    text-shadow: 0 0 2px #000;
+    white-space: nowrap;
 }
 .combat-block-badge {
     font-size: 1.2vh;
@@ -231,6 +250,24 @@ body.in-combat #ui {
     font-size: clamp(7px, 0.95vh, 12px);
     color: #e8e8e8;
     line-height: 1;
+}
+
+.combat-effect-badge--dual {
+    width: clamp(30px, 4.4vh, 54px);
+}
+
+.badge-turns {
+    font-size: clamp(7px, 0.95vh, 12px);
+    color: #e8e8e8;
+    line-height: 1;
+}
+
+.badge-pct {
+    font-size: clamp(6px, 0.85vh, 11px);
+    color: #fbbf24;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
 }
 
 .combat-effect-badge[data-tooltip]::after {
@@ -634,52 +671,4 @@ body.in-combat #ui {
     pointer-events: none !important;
     opacity: 0.25 !important;
     filter: grayscale(0.7) !important;
-}
-
-@media (max-width: 900px) {
-    #combat-log {
-        width: 50vw;
-    }
-    #combat-enemies {
-        right: 3vw;
-    }
-    #combat-player {
-        left: 6vw;
-    }
-    #combat-cards {
-        width: 50vw;
-    }
-    .combat-card {
-        width: clamp(90px, 14vw, 150px);
-    }
-}
-
-@media (max-width: 640px) {
-    #combat-player {
-        display: none;
-    }
-    #combat-enemies {
-        right: 2vw;
-    }
-    #combat-log {
-        width: 60vw;
-    }
-    #combat-cards {
-        width: 64vw;
-    }
-    .combat-card {
-        width: clamp(80px, 18vw, 130px);
-    }
-}
-
-@media (max-height: 500px) {
-    #combat-log {
-        max-height: 10vh;
-    }
-    #combat-enemies {
-        top: 45%;
-    }
-    .combat-card {
-        width: clamp(70px, 10vw, 120px);
-    }
 }

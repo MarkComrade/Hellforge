@@ -8,7 +8,7 @@ const DungeonSession = require('../models/DungeonSession.js');
 const { generateEnemy, generateEnemyGroup, rollEnemyCount } = require('../services/enemyPool.js');
 const { buildDeckFromEquipment, getCardById } = require('../services/cardPool.js');
 const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
-const { generateFinalLoot } = require('../services/lootAlgorithm.js');
+const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
 const { clearLoadoutAndResetGear } = require('../sql/queries/inventoryQueries.js');
 const database = require('../sql/queries/inventoryQueries.js');
 const { requireLogin } = require('./middleware');
@@ -212,18 +212,22 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         }
 
         const dungeonData = req.session.dungeonData;
-        const dungeonType = normalizeDungeonType(dungeonData?.dungeonName);
-        const dungeonLevel = Number(dungeonData?.dungeonLevel) || 1;
         const playerId = Number(req.session.userId);
+        const key = dungeonData ? `${dungeonData.playerX},${dungeonData.playerY}` : null;
 
-        const loot = await generateFinalLoot(playerId, dungeonType, dungeonLevel);
-        const reward = loot.success
-            ? { gold: loot.gold || 0, item: loot.item || null }
-            : { gold: 0, item: null };
+        // resolveDungeonRoomLoot handles generation, inventory check, and room storage if full
+        const loot = dungeonData ? await resolveDungeonRoomLoot(dungeonData, key, playerId) : null;
+        const reward = loot
+            ? {
+                  gold: loot.gold || 0,
+                  item: loot.item || null,
+                  inventoryFull: loot.inventoryFull || false,
+                  storedInRoom: loot.storedInRoom || false
+              }
+            : { gold: 0, item: null, inventoryFull: false, storedInRoom: false };
 
         // Mark the combat room cleared so the dungeon knows not to re-trigger it
         if (dungeonData) {
-            const key = `${dungeonData.playerX},${dungeonData.playerY}`;
             if (dungeonData.map[key]) dungeonData.map[key].cleared = true;
 
             if (!dungeonData.stats) {
@@ -231,7 +235,7 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
             }
             dungeonData.stats.enemiesKilled += combat.enemies.length;
             dungeonData.stats.goldCollected += reward.gold || 0;
-            dungeonData.currentHP = combat.player.hp; // persist remaining HP into the dungeon session
+            dungeonData.currentHP = combat.player.hp;
 
             req.session.dungeonData = dungeonData;
         }
