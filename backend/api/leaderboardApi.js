@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../sql/queries/authUserQueries.js');
+const database = require('../sql/queries/leaderboardQueries.js');
 
 router.get('/', async (request, response) => {
     console.log('Leaderboard endpoint called');
