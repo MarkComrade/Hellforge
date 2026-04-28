@@ -32,8 +32,6 @@ router.get('/', (request, response) => {
 
 //!API endpoints
 app.use('/', router);
-const endpoints = require('./api/api.js');
-app.use('/api', endpoints);
 const login = require('./api/loginAuthApi.js');
 app.use('/api/loginAuthApi', login);
 const adminActions = require('./api/adminActions.js');
@@ -46,6 +44,8 @@ const combat = require('./api/combatApi.js'); // server-authoritative combat rou
 app.use('/api/combat', combat);
 const events = require('./api/eventApi.js');
 app.use('/api/events', events);
+const leaderboard = require('./api/leaderboardApi.js');
+app.use('/api/leaderboard', leaderboard);
 
 //!Szerver futtatása
 app.use(express.static(path.join(__dirname, '../frontend'))); //?frontend mappa tartalmának betöltése az oldal működéséhez
