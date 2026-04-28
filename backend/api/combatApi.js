@@ -110,7 +110,7 @@ router.post('/start', requireLogin, async (req, res) => {
             0
         );
         if (totalCards === 0) {
-            equipmentSnapshot.melee_cards = [1, 2, 3, 4, 5]
+            equipmentSnapshot.melee_cards = [1, 2, 3, 4]
                 .map((id) => getCardById(id))
                 .filter(Boolean);
         }
@@ -288,3 +288,4 @@ router.post('/death', requireLogin, requireCombat, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.normalizeDungeonType = normalizeDungeonType;

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const database = require('../sql/database.js');
 const fs = require('fs/promises');
-const { requireAdmin } = require('./middleware');
+const { requireAdmin } = require('../middleware');
 
 // All admin endpoints require an active admin session.
 router.use(requireAdmin);

@@ -4,7 +4,7 @@
     "description": "Template project",
     "main": "server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "qunit",
         "start": "node server.js",
         "db:up": "cd ..&& docker-compose up -d",
         "myadmin:up": "cd ..&& docker-compose up -d phpmyadmin",
@@ -14,7 +14,8 @@
     "author": "Kardos Krisztián",
     "license": "ISC",
     "devDependencies": {
-        "nodemon": "^3.1.10"
+        "nodemon": "^3.1.10",
+        "qunit": "^2.25.0"
     },
     "dependencies": {
         "bcrypt": "^6.0.0",
