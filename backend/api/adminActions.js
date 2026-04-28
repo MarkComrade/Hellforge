@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../sql/database.js');
+const { getAllUsers } = require('../sql/queries/authUserQueries.js');
+const {
+    deleteUser,
+    getUserInventory,
+    getAllArmors,
+    getAllWeapons,
+    updateUserInventory
+} = require('../sql/queries/adminQueries.js');
+const { getTotalGold, adminSetStashGold } = require('../sql/queries/inventoryQueries.js');
 const fs = require('fs/promises');
 const { requireAdmin } = require('./middleware');
 
@@ -32,7 +40,7 @@ router.get('/test', (request, response) => {
 
 router.get('/getAllUsers', async (request, response) => {
     try {
-        const result = await database.getAllUsers();
+        const result = await getAllUsers();
         response.status(200).json({
             message: 'A Users successfully retrieved.',
             results: result
@@ -56,7 +64,7 @@ router.post('/deleteUser/:userId', async (request, response) => {
         }
 
         // Get username first for deletion (database.deleteUser expects username)
-        const inventory = await database.getUserInventory(userId);
+        const inventory = await getUserInventory(userId);
         if (!inventory) {
             return response.status(404).json({
                 message: 'User not found.',
@@ -64,7 +72,7 @@ router.post('/deleteUser/:userId', async (request, response) => {
             });
         }
 
-        const result = await database.deleteUser(inventory.username);
+        const result = await deleteUser(inventory.username);
         response.status(200).json({
             message: 'User successfully deleted.',
             success: true,
@@ -81,7 +89,7 @@ router.post('/deleteUser/:userId', async (request, response) => {
 router.get('/getUserGold/:userId', async (request, response) => {
     try {
         const userId = request.params.userId;
-        const result = await database.getTotalGold(userId);
+        const result = await getTotalGold(userId);
         if (!result.success) {
             return response.status(500).json({ message: result.message });
         }
@@ -105,7 +113,7 @@ router.post('/setUserStashGold/:userId', async (request, response) => {
                 .json({ message: 'Gold value is required.', success: false });
         }
 
-        const result = await database.adminSetStashGold(userId, gold);
+        const result = await adminSetStashGold(userId, gold);
         response.status(result.success ? 200 : 400).json(result);
     } catch (error) {
         response.status(500).json({ message: 'Error setting gold.', success: false });
@@ -115,7 +123,7 @@ router.post('/setUserStashGold/:userId', async (request, response) => {
 router.get('/getUserInventory/:userId', async (request, response) => {
     try {
         const userId = request.params.userId;
-        const inventory = await database.getUserInventory(userId);
+        const inventory = await getUserInventory(userId);
 
         if (!inventory) {
             return response.status(404).json({
@@ -137,7 +145,7 @@ router.get('/getUserInventory/:userId', async (request, response) => {
 
 router.get('/getAllArmors', async (request, response) => {
     try {
-        const armors = await database.getAllArmors();
+        const armors = await getAllArmors();
         response.status(200).json({
             message: 'Armors successfully retrieved.',
             armors: armors
@@ -152,7 +160,7 @@ router.get('/getAllArmors', async (request, response) => {
 
 router.get('/getAllWeapons', async (request, response) => {
     try {
-        const weapons = await database.getAllWeapons();
+        const weapons = await getAllWeapons();
         response.status(200).json({
             message: 'Weapons successfully retrieved.',
             weapons: weapons
@@ -176,7 +184,7 @@ router.post('/updateUserInventory/:userId', upload.none(), async (request, respo
             });
         }
 
-        await database.updateUserInventory(userId, {
+        await updateUserInventory(userId, {
             helmet: parseInt(helmet),
             armor: parseInt(armor),
             melee: parseInt(melee),
