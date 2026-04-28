@@ -5,8 +5,12 @@ const { findNextAvailableId } = require('../core/idHelpers.js');
 const { createItemInstance } = require('../core/itemInstanceHelpers.js');
 
 const SALT_ROUNDS = 12;
-const MAX_PASSWORD_LENGTH = 128;
-const MAX_USERNAME_LENGTH = 30;
+const MAX_PASSWORD_LENGTH = 15;
+const MIN_PASSWORD_LENGTH = 6;
+const MAX_USERNAME_LENGTH = 15;
+const MIN_USERNAME_LENGTH = 3;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,128}$/;
 
 async function selectall() {
     const [rows] = await pool.query('SELECT * FROM user');
@@ -46,33 +50,22 @@ async function registerUser(username, password) {
         if (!username || !password) {
             return { success: false, message: 'Missing username or password' };
         }
-        if (
-            typeof username !== 'string' ||
-            username.length < 1 ||
-            username.length > MAX_USERNAME_LENGTH
-        ) {
+        if (typeof username !== 'string' || !USERNAME_REGEX.test(username)) {
             return {
                 success: false,
-                message: `Username must be between 1 and ${MAX_USERNAME_LENGTH} characters long`
+                message: `Username must be ${MIN_USERNAME_LENGTH}–${MAX_USERNAME_LENGTH} characters: letters, numbers, or underscores only.`
             };
         }
-        if (typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
+        if (typeof password !== 'string' || !PASSWORD_REGEX.test(password)) {
             return {
                 success: false,
-                message: `Password must be at most ${MAX_PASSWORD_LENGTH} characters long`
+                message: `Password must be ${MIN_PASSWORD_LENGTH}–${MAX_PASSWORD_LENGTH} characters and include at least one letter and one number.`
             };
         }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length > 0) {
             return { success: false, message: 'User already exists' };
-        }
-
-        if (password.length < 5) {
-            return {
-                success: false,
-                message: 'Password must be at least 5 characters long'
-            };
         }
 
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);

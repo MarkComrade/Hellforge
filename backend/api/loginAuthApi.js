@@ -27,10 +27,27 @@ const authLimiter = rateLimit({
     message: { success: false, message: 'Too many attempts, please try again later.' }
 });
 
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,15}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
+
+function validateCredentials(username, password) {
+    if (typeof username !== 'string' || !USERNAME_REGEX.test(username)) {
+        return 'Username must be 3–15 characters: letters, numbers, or underscores only.';
+    }
+    if (typeof password !== 'string' || !PASSWORD_REGEX.test(password)) {
+        return 'Password must be 6–15 characters and include at least one letter and one number.';
+    }
+    return null;
+}
+
 //!Endpoints:
 
 router.post('/loginUser', authLimiter, async (request, response) => {
     const { username, password } = request.body;
+    const validationError = validateCredentials(username, password);
+    if (validationError) {
+        return response.status(400).json({ success: false, message: validationError });
+    }
     try {
         const result = await database.loginUser(username, password);
 
@@ -47,6 +64,10 @@ router.post('/loginUser', authLimiter, async (request, response) => {
 
 router.post('/registerUser', authLimiter, async (request, response) => {
     const { username, password } = request.body;
+    const validationError = validateCredentials(username, password);
+    if (validationError) {
+        return response.status(400).json({ success: false, message: validationError });
+    }
     try {
         const result = await database.registerUser(username, password);
         if (result.success) {

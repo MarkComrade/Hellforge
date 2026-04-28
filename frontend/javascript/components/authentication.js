@@ -84,7 +84,7 @@ async function Login() {
     const buttonContainer = document.querySelector('.authButtonRow');
 
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-    const passwordRegex = /^.{6,128}$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,128}$/;
 
     let loginButton = document.createElement('input');
     loginButton.setAttribute('type', 'button');
@@ -97,13 +97,16 @@ async function Login() {
 
         if (!usernameRegex.test(username)) {
             toast(
-                'Username must be 3–20 characters: letters, numbers, or underscores only.',
+                'Username must be 3–15 characters: letters, numbers, or underscores only.',
                 'error'
             );
             return;
         }
         if (!passwordRegex.test(password)) {
-            toast('Password must be between 6 and 128 characters.', 'error');
+            toast(
+                'Password must be 6–15 characters and include at least one letter and one number.',
+                'error'
+            );
             return;
         }
 
@@ -146,7 +149,7 @@ async function Register() {
     generateBootStrapGrid(1, 1, 12, 'authButtonRow');
     const buttonContainer = document.querySelector('.authButtonRow');
 
-    const usernameRegex = /^[a-zA-Z0-9_]{3,12}$/;
+    const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
 
     let registerButton = document.createElement('input');
@@ -161,7 +164,7 @@ async function Register() {
 
         if (!usernameRegex.test(username)) {
             toast(
-                'Username must be 3–12 characters: letters, numbers, or underscores only.',
+                'Username must be 3–15 characters: letters, numbers, or underscores only.',
                 'error'
             );
             return;
