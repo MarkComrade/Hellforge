@@ -416,14 +416,14 @@
 
 .itemCardRow {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25vh;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0;
     width: 100%;
     border: 0.15vh solid rgba(160, 30, 30, 0.95);
     background-color: rgba(16, 10, 10, 0.95);
     color: rgb(220, 220, 220);
-    padding: 0.9vh 1.1vh;
+    padding: 0;
     cursor: pointer;
     text-align: left;
 }
@@ -431,6 +431,25 @@
 .itemCardRow:hover {
     border-color: rgba(220, 40, 40, 1);
     background-color: rgba(34, 12, 12, 0.98);
+}
+
+.itemCardRowLeft {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3vh;
+    flex: 0 0 44%;
+    padding: 0.9vh 1.1vh;
+}
+
+.itemCardRowRight {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25vh;
+    flex: 1 1 0;
+    padding: 0.9vh 1.1vh;
+    border-left: 0.15vh solid rgba(160, 30, 30, 0.5);
 }
 
 .itemCardRowTitle {
@@ -441,9 +460,15 @@
 
 .itemCardRowMeta {
     color: rgb(206, 166, 166);
-    font-size: 1.34vh;
+    font-size: 1.24vh;
     letter-spacing: 0.05vh;
     text-transform: uppercase;
+}
+
+.itemCardRowEffect {
+    color: rgb(212, 212, 212);
+    font-size: 1.42vh;
+    line-height: 1.35;
 }
 
 .itemCardRowEffects {
