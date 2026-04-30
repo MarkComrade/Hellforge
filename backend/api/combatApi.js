@@ -156,10 +156,10 @@ router.get('/state', requireLogin, requireCombat, (req, res) => {
 // ── POST /api/combat/play-card ────────────────────────────────────────────────
 router.post('/play-card', requireLogin, requireCombat, (req, res) => {
     try {
-        // SECURITY: cardIndex must be an integer 0–4 — reject anything else
+        // SECURITY: cardIndex must be an integer 0–3 — reject anything else
         const cardIndex = Number(req.body.cardIndex);
-        if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 4) {
-            return res.status(400).json({ success: false, message: 'cardIndex must be 0–4' });
+        if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 3) {
+            return res.status(400).json({ success: false, message: 'cardIndex must be 0–3' });
         }
 
         let targetIndex = 0;

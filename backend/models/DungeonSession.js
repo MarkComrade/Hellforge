@@ -3,7 +3,7 @@ const crypto = require('crypto');
 // Server-side dungeon state — holds the map, player position, and HP for one dungeon run.
 // The entire game state lives here so the client can't cheat by modifying local variables.
 class DungeonSession {
-    constructor(dungeonName, dungeonLevel = 21) {
+    constructor(dungeonName, dungeonLevel = 1) {
         this.sessionToken = crypto.randomUUID(); // unique token to link client requests to this session
         this.dungeonName = dungeonName;
         this.dungeonLevel = dungeonLevel;

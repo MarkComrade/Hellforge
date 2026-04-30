@@ -1,4 +1,4 @@
-const DEFAULT_GOLD_IMG = '../textures/items/coing.png';
+const DEFAULT_GOLD_IMG = '../textures/items/coin.png';
 const DEFAULT_LOOT_IMG = '../textures/misc/placeholderloot.png';
 const LOOT_POPUP_ID = 'loot-popup';
 const EVENT_DIALOGUE_POPUP_ID = 'event-dialogue-popup';

@@ -43,7 +43,7 @@ async function checkGearRequirement(playerId, dungeonName) {
 // Simple per-session rate limiter for moves (prevents speedhack scripts)
 const MOVE_COOLDOWN_MS = 150; // minimum ms between moves
 const lastMoveTime = new Map(); // sessionId → timestamp
-const GOLD_IMG_PATH = '../textures/items/coing.png';
+const GOLD_IMG_PATH = '../textures/items/coin.png';
 const MAX_DUNGEON_LEVEL = 20;
 
 // ───── Middleware ─────

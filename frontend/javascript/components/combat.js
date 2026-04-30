@@ -246,7 +246,7 @@ function createEffectsRow(entity) {
         });
     if ((entity.strength || 0) > 0)
         effects.push({
-            icon: '../textures/effects/effects_strenght.png',
+            icon: '../textures/effects/effects_strength.png',
             label: entity.strength,
             tooltip: `Strength \u2014 increases damage dealt (${entity.strength})`
         });
@@ -305,9 +305,9 @@ function createEffectsRow(entity) {
 function getStatusIcon(type) {
     const icons = {
         block: '../textures/effects/effects_block.png',
-        strength: '../textures/effects/effects_strenght.png',
+        strength: '../textures/effects/effects_strength.png',
         regen: '../textures/effects/effects_regen.png',
-        vulnerable: '../textures/effects/effects_vulnerable%20.png',
+        vulnerable: '../textures/effects/effects_vulnerable.png',
         cleanse: '../textures/effects/effects_cleanse.png',
         deflect: '../textures/effects/effects_deflect.png',
         bleed: '../textures/effects/effects_blood.png',
@@ -507,9 +507,9 @@ const EFFECT_ICONS = {
     backfire: null,
     bleed: '../textures/effects/effects_blood.png',
     scorch: '../textures/effects/effects_scorch.png',
-    strength: '../textures/effects/effects_strenght.png',
+    strength: '../textures/effects/effects_strength.png',
     regen: '../textures/effects/effects_regen.png',
-    vulnerable: '../textures/effects/effects_vulnerable%20.png',
+    vulnerable: '../textures/effects/effects_vulnerable.png',
     deflect: '../textures/effects/effects_deflect.png',
     cleanse: '../textures/effects/effects_cleanse.png',
     lifesteal: '../textures/effects/effects_life_steal.png'
