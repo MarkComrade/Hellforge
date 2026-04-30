@@ -1,6 +1,6 @@
 let leaderboardAbortController = null;
 
-const COIN_TEXTURE = '../textures/items/coing.png';
+const COIN_TEXTURE = '../textures/items/coin.png';
 const MAX_COINS = 150;
 const COIN_SPACING = 0.38;
 const COIN_ANIMATION_DELAY = 35; // ms delay between each coin appearing

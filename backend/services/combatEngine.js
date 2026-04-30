@@ -583,6 +583,7 @@ function resolveEnemyCards(session) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 module.exports = {
+    applyDamage,
     resolveCard,
     endPlayerTurn
 };

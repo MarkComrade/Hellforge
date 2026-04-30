@@ -110,7 +110,7 @@ router.post('/start', requireLogin, async (req, res) => {
             0
         );
         if (totalCards === 0) {
-            equipmentSnapshot.melee_cards = [1, 2, 3, 4, 5]
+            equipmentSnapshot.melee_cards = [1, 2, 3, 4]
                 .map((id) => getCardById(id))
                 .filter(Boolean);
         }
@@ -156,10 +156,10 @@ router.get('/state', requireLogin, requireCombat, (req, res) => {
 // ── POST /api/combat/play-card ────────────────────────────────────────────────
 router.post('/play-card', requireLogin, requireCombat, (req, res) => {
     try {
-        // SECURITY: cardIndex must be an integer 0–4 — reject anything else
+        // SECURITY: cardIndex must be an integer 0–3 — reject anything else
         const cardIndex = Number(req.body.cardIndex);
-        if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 4) {
-            return res.status(400).json({ success: false, message: 'cardIndex must be 0–4' });
+        if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 3) {
+            return res.status(400).json({ success: false, message: 'cardIndex must be 0–3' });
         }
 
         let targetIndex = 0;
@@ -212,11 +212,12 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         }
 
         const dungeonData = req.session.dungeonData;
+        const dungeon = dungeonData ? DungeonSession.fromJSON(dungeonData) : null;
         const playerId = Number(req.session.userId);
-        const key = dungeonData ? `${dungeonData.playerX},${dungeonData.playerY}` : null;
+        const key = dungeon ? `${dungeon.playerX},${dungeon.playerY}` : null;
 
         // resolveDungeonRoomLoot handles generation, inventory check, and room storage if full
-        const loot = dungeonData ? await resolveDungeonRoomLoot(dungeonData, key, playerId) : null;
+        const loot = dungeon ? await resolveDungeonRoomLoot(dungeon, key, playerId) : null;
         const reward = loot
             ? {
                   gold: loot.gold || 0,
@@ -227,17 +228,17 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
             : { gold: 0, item: null, inventoryFull: false, storedInRoom: false };
 
         // Mark the combat room cleared so the dungeon knows not to re-trigger it
-        if (dungeonData) {
-            if (dungeonData.map[key]) dungeonData.map[key].cleared = true;
+        if (dungeon) {
+            if (dungeon.map[key]) dungeon.map[key].cleared = true;
 
-            if (!dungeonData.stats) {
-                dungeonData.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
+            if (!dungeon.stats) {
+                dungeon.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
             }
-            dungeonData.stats.enemiesKilled += combat.enemies.length;
-            dungeonData.stats.goldCollected += reward.gold || 0;
-            dungeonData.currentHP = combat.player.hp;
+            dungeon.stats.enemiesKilled += combat.enemies.length;
+            dungeon.stats.goldCollected += reward.gold || 0;
+            dungeon.currentHP = combat.player.hp;
 
-            req.session.dungeonData = dungeonData;
+            req.session.dungeonData = dungeon.toJSON();
         }
 
         delete req.session.combatData;
@@ -288,3 +289,4 @@ router.post('/death', requireLogin, requireCombat, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.normalizeDungeonType = normalizeDungeonType;

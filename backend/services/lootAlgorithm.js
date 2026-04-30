@@ -17,7 +17,7 @@ const types = {
     laboratory: 3,
     gates_of_hell: 4
 };
-const GOLD_IMG_PATH = '../textures/items/coing.png';
+const GOLD_IMG_PATH = '../textures/items/coin.png';
 
 function normalizeDungeonKey(dungeonName) {
     return String(dungeonName || '')

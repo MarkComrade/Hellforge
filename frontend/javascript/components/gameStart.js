@@ -48,7 +48,6 @@ async function StartGame() {
     backButton.setAttribute('type', 'button');
     backButton.setAttribute('value', 'Back to Menu');
     backButton.setAttribute('class', 'menuButton');
-    backButton.addEventListener('click', Menu);
 
     let homeButton = document.createElement('input');
     homeButton.setAttribute('type', 'button');

@@ -73,20 +73,28 @@ function formatCardEffectsForDisplay(effects) {
         return 'No effects';
     }
 
+    const LABELS = {
+        damage: (v) => `Damage: ${v}`,
+        block: (v) => `Block: ${v} — absorbs damage this turn`,
+        bleed: (v) => `Bleed: ${v}/turn — stacks`,
+        scorch: (v) => `Scorch: ${v}/turn — stacks`,
+        extraPlays: (v) => `Extra Plays: +${v}`,
+        strength: (v) => `Strength: +${v} — flat damage increase`,
+        backfire: (v) => `Self Damage: ${v}`,
+        healing: (v) => `Heal: ${v} HP`,
+        regen: (v) => `Regen: ${v} HP/turn — stacks`,
+        cleanse: () => `Cleanse — removes negative effects`,
+        deflect: (v) =>
+            `Deflect: ${v?.pct ?? v}% for ${v?.turns ?? 1} turn${(v?.turns ?? 1) > 1 ? 's' : ''} — reflects damage taken`,
+        lifesteal: (v) =>
+            `Lifesteal: ${v?.pct ?? v}% for ${v?.turns ?? 1} turn${(v?.turns ?? 1) > 1 ? 's' : ''}`,
+        vulnerable: (v) =>
+            `Vulnerable: ${v?.pct ?? v}% for ${v?.turns ?? 1} turn${(v?.turns ?? 1) > 1 ? 's' : ''} — target takes more damage`
+    };
+
     return Object.entries(effects)
-        .map(([key, value]) => {
-            const label = key
-                .replace(/([A-Z])/g, ' $1')
-                .replace(/^./, (char) => char.toUpperCase());
-            if (value && typeof value === 'object') {
-                const nested = Object.entries(value)
-                    .map(([nestedKey, nestedValue]) => `${nestedKey}: ${nestedValue}`)
-                    .join(', ');
-                return `${label} (${nested})`;
-            }
-            return `${label}: ${value}`;
-        })
-        .join(' | ');
+        .map(([key, value]) => (LABELS[key] ? LABELS[key](value) : `${key}: ${value}`))
+        .join('\n');
 }
 
 function closeItemCardsPopup() {
@@ -135,21 +143,49 @@ function showItemCardsPopup(itemName, cards) {
             cardRow.setAttribute('type', 'button');
             cardRow.setAttribute('class', 'itemCardRow');
 
+            // ── Left column: identity ──
+            const left = document.createElement('div');
+            left.setAttribute('class', 'itemCardRowLeft');
+
             const cardTitle = document.createElement('span');
             cardTitle.setAttribute('class', 'itemCardRowTitle');
-            const exhaustSuffix = card.exhaust ? ' [Exhaust]' : '';
-            cardTitle.textContent = `${card.name}${exhaustSuffix}`;
-            cardRow.appendChild(cardTitle);
+            cardTitle.textContent = card.name;
+            left.appendChild(cardTitle);
 
             const cardMeta = document.createElement('span');
             cardMeta.setAttribute('class', 'itemCardRowMeta');
-            cardMeta.textContent = `Tier ${card.tier} ${card.type}`;
-            cardRow.appendChild(cardMeta);
+            cardMeta.textContent = `Tier ${card.tier} · ${card.type}`;
+            left.appendChild(cardMeta);
 
-            const cardEffects = document.createElement('span');
-            cardEffects.setAttribute('class', 'itemCardRowEffects');
-            cardEffects.textContent = formatCardEffectsForDisplay(card.effects);
-            cardRow.appendChild(cardEffects);
+            const targetLabel = card.targetType
+                ? `Target: ${card.targetType}` +
+                  (card.affectedTargets > 1 ? ` (${card.affectedTargets})` : '')
+                : 'Target: single';
+            const cardTarget = document.createElement('span');
+            cardTarget.setAttribute('class', 'itemCardRowMeta');
+            cardTarget.textContent = targetLabel;
+            left.appendChild(cardTarget);
+
+            const cardExhaust = document.createElement('span');
+            cardExhaust.setAttribute('class', 'itemCardRowMeta');
+            cardExhaust.textContent = card.exhaust ? 'Exhaust: Yes' : 'Exhaust: No';
+            left.appendChild(cardExhaust);
+
+            cardRow.appendChild(left);
+
+            // ── Right column: effects ──
+            const right = document.createElement('div');
+            right.setAttribute('class', 'itemCardRowRight');
+
+            const effectLines = formatCardEffectsForDisplay(card.effects).split('\n');
+            effectLines.forEach((line) => {
+                const el = document.createElement('span');
+                el.setAttribute('class', 'itemCardRowEffect');
+                el.textContent = line;
+                right.appendChild(el);
+            });
+
+            cardRow.appendChild(right);
 
             cardRow.addEventListener('click', closeItemCardsPopup);
             body.appendChild(cardRow);
