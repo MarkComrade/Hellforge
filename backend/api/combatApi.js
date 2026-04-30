@@ -212,11 +212,12 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         }
 
         const dungeonData = req.session.dungeonData;
+        const dungeon = dungeonData ? DungeonSession.fromJSON(dungeonData) : null;
         const playerId = Number(req.session.userId);
-        const key = dungeonData ? `${dungeonData.playerX},${dungeonData.playerY}` : null;
+        const key = dungeon ? `${dungeon.playerX},${dungeon.playerY}` : null;
 
         // resolveDungeonRoomLoot handles generation, inventory check, and room storage if full
-        const loot = dungeonData ? await resolveDungeonRoomLoot(dungeonData, key, playerId) : null;
+        const loot = dungeon ? await resolveDungeonRoomLoot(dungeon, key, playerId) : null;
         const reward = loot
             ? {
                   gold: loot.gold || 0,
@@ -227,17 +228,17 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
             : { gold: 0, item: null, inventoryFull: false, storedInRoom: false };
 
         // Mark the combat room cleared so the dungeon knows not to re-trigger it
-        if (dungeonData) {
-            if (dungeonData.map[key]) dungeonData.map[key].cleared = true;
+        if (dungeon) {
+            if (dungeon.map[key]) dungeon.map[key].cleared = true;
 
-            if (!dungeonData.stats) {
-                dungeonData.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
+            if (!dungeon.stats) {
+                dungeon.stats = { enemiesKilled: 0, floorsCleared: 0, goldCollected: 0 };
             }
-            dungeonData.stats.enemiesKilled += combat.enemies.length;
-            dungeonData.stats.goldCollected += reward.gold || 0;
-            dungeonData.currentHP = combat.player.hp;
+            dungeon.stats.enemiesKilled += combat.enemies.length;
+            dungeon.stats.goldCollected += reward.gold || 0;
+            dungeon.currentHP = combat.player.hp;
 
-            req.session.dungeonData = dungeonData;
+            req.session.dungeonData = dungeon.toJSON();
         }
 
         delete req.session.combatData;

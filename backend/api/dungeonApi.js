@@ -40,9 +40,6 @@ async function checkGearRequirement(playerId, dungeonName) {
     return { allowed: true };
 }
 
-// Simple per-session rate limiter for moves (prevents speedhack scripts)
-const MOVE_COOLDOWN_MS = 150; // minimum ms between moves
-const lastMoveTime = new Map(); // sessionId → timestamp
 const GOLD_IMG_PATH = '../textures/items/coin.png';
 const MAX_DUNGEON_LEVEL = 20;
 
@@ -137,14 +134,6 @@ router.post('/move', requireLogin, requireDungeon, async (req, res) => {
         const targetKey = `${targetX},${targetY}`;
         const targetRoom = req.dungeon.map[targetKey];
         const wasVisited = !!targetRoom?.visited;
-
-        // SECURITY: rate limit — prevent automated scripts from traversing instantly
-        const sessionId = req.sessionID;
-        const now = Date.now();
-        if (lastMoveTime.has(sessionId) && now - lastMoveTime.get(sessionId) < MOVE_COOLDOWN_MS) {
-            return res.status(429).json({ success: false, message: 'Moving too fast' });
-        }
-        lastMoveTime.set(sessionId, now);
 
         // Server validates: only cardinal moves, only to existing rooms
         const result = req.dungeon.movePlayer(ndx, ndy);

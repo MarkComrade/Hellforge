@@ -49,8 +49,7 @@ class CombatSession {
             maxHp: 0,
             block: 0,
             strength: 0,
-            statuses: [],
-            currentIntent: null
+            statuses: []
         };
 
         this.enemies = [];
@@ -103,7 +102,6 @@ class CombatSession {
             block: Number(enemyData.block || 0),
             strength: Number(enemyData.strength || 0),
             statuses: Array.isArray(enemyData.statuses) ? enemyData.statuses : [],
-            currentIntent: enemyData.currentIntent || null,
             cards: Array.isArray(enemyData.cards) ? enemyData.cards : [],
             cardsPerTurn: enemyData.cardsPerTurn || { min: 1, max: 2 }
         };
@@ -128,7 +126,6 @@ class CombatSession {
                 block: Number(e.block || 0),
                 strength: Number(e.strength || 0),
                 statuses: Array.isArray(e.statuses) ? e.statuses : [],
-                currentIntent: e.currentIntent || null,
                 cards: Array.isArray(e.cards) ? e.cards : [],
                 cardsPerTurn: e.cardsPerTurn || { min: 1, max: 2 }
             };
@@ -147,7 +144,6 @@ class CombatSession {
                       block: 0,
                       strength: 0,
                       statuses: [],
-                      currentIntent: null,
                       cards: [],
                       cardsPerTurn: { min: 1, max: 2 }
                   };
@@ -400,7 +396,6 @@ class CombatSession {
             block: 0,
             strength: 0,
             statuses: [],
-            currentIntent: null,
             cards: [],
             cardsPerTurn: { min: 1, max: 2 }
         };
