@@ -99,15 +99,15 @@ const CURSED_TRAP_CARD_POOL = [
 
 function generateEventType() {
     const roll = Math.random();
-    if (roll < 0.2) {
+    if (roll < 0.3) {
         return 'trade';
     }
 
-    if (roll < 0.3) {
+    if (roll < 0.4) {
         return 'loot';
     }
 
-    if (roll < 0.8) {
+    if (roll < 0.7) {
         return 'trap';
     }
 

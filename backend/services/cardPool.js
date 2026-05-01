@@ -2159,7 +2159,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1, vulnerable: { pct: 0, turns: 0 } }
+            effects: { extraPlays: 1, vulnerable: { pct: 10, turns: 1 } }
         },
         {
             id: 415,
@@ -3124,7 +3124,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1, strength: 1 }
+            effects: { extraPlays: 1, strength: 3 }
         },
         {
             id: 152,

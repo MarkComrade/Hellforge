@@ -167,6 +167,35 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
     const attackerLabel = isPlayerCard ? 'You' : attacker.archetype || 'Enemy';
     const defenderLabel = isPlayerCard ? defender.archetype || 'Enemy' : 'You';
 
+    // ── strength (applies before damage so it affects this card's hit) ───────
+    if (effects.strength && isPlayerCard) {
+        attacker.strength += effects.strength;
+        session.appendLog({
+            type: 'player',
+            message: `You gain ${effects.strength} strength this turn.`
+        });
+    }
+
+    // ── vulnerable on defender (applies before damage so this card benefits) ─
+    if (effects.vulnerable) {
+        const { pct, turns } = effects.vulnerable;
+        upsertTurnStatus(defender.statuses, 'vulnerable', pct, turns);
+        session.appendLog({
+            type: isPlayerCard ? 'player' : 'enemy',
+            message: `${defenderLabel} ${isPlayerCard ? 'is' : 'are'} vulnerable (+${pct}% dmg) for ${turns} turn(s).`
+        });
+    }
+
+    // ── lifesteal (applies before damage so this card's hit lifesteals too) ───
+    if (effects.lifesteal) {
+        const { pct, turns } = effects.lifesteal;
+        upsertTurnStatus(attacker.statuses, 'lifesteal', pct, turns);
+        session.appendLog({
+            type: isPlayerCard ? 'player' : 'enemy',
+            message: `${attackerLabel} gain${isPlayerCard ? '' : 's'} lifesteal (${pct}%) for ${turns} turn(s).`
+        });
+    }
+
     // ── damage ───────────────────────────────────────────────────────────────
     if (effects.damage) {
         const base = effects.damage + (attacker.strength || 0);
@@ -268,26 +297,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         });
     }
 
-    // ── vulnerable on defender ───────────────────────────────────────────────
-    if (effects.vulnerable) {
-        const { pct, turns } = effects.vulnerable;
-        upsertTurnStatus(defender.statuses, 'vulnerable', pct, turns);
-        session.appendLog({
-            type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} ${isPlayerCard ? 'is' : 'are'} vulnerable (+${pct}% dmg) for ${turns} turn(s).`
-        });
-    }
-
-    // ── lifesteal (player card only — grants status before next hit) ─────────
-    if (effects.lifesteal) {
-        const { pct, turns } = effects.lifesteal;
-        upsertTurnStatus(attacker.statuses, 'lifesteal', pct, turns);
-        session.appendLog({
-            type: isPlayerCard ? 'player' : 'enemy',
-            message: `${attackerLabel} gain${isPlayerCard ? '' : 's'} lifesteal (${pct}%) for ${turns} turn(s).`
-        });
-    }
-
     // ── healing (attacker heals directly) ────────────────────────────────────
     if (effects.healing) {
         setAttackerHp(attacker.hp + effects.healing);
@@ -314,15 +323,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         session.appendLog({
             type: 'player',
             message: `You gain ${effects.extraPlays} extra card play(s) this turn.`
-        });
-    }
-
-    // ── strength (player cards only — current turn bonus) ────────────────────
-    if (effects.strength && isPlayerCard) {
-        attacker.strength += effects.strength;
-        session.appendLog({
-            type: 'player',
-            message: `You gain ${effects.strength} strength this turn.`
         });
     }
 
@@ -372,6 +372,20 @@ function tickDots(session, target, isPlayer, enemyIndex) {
     const label = isPlayer ? 'You' : target.archetype || 'Enemy';
     const tickDmg = calcDotDamage(session, target);
 
+    // Regen ticks first — may save the player before DoT damage resolves
+    if (isPlayer) {
+        for (const s of target.statuses) {
+            if (s.type === 'regen' && s.stacks > 0) {
+                setHp(target.hp + s.stacks);
+                session.appendLog({
+                    type: 'status',
+                    message: `Regen restores ${s.stacks} HP. (stack stays until removed)`
+                });
+            }
+        }
+    }
+
+    // Bleed / scorch tick
     for (const s of target.statuses) {
         if (!session.isActive()) return;
 
@@ -382,14 +396,6 @@ function tickDots(session, target, isPlayer, enemyIndex) {
                 message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage. (${s.stacks - 1} turn${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
             });
             s.stacks -= 1;
-        }
-
-        if (s.type === 'regen' && s.stacks > 0 && isPlayer) {
-            setHp(target.hp + s.stacks);
-            session.appendLog({
-                type: 'status',
-                message: `Regen restores ${s.stacks} HP. (stack stays until removed)`
-            });
         }
     }
 }

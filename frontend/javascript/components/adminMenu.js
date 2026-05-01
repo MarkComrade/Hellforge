@@ -2,7 +2,7 @@ async function Admin() {
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
         if (session.isAdmin) {
-            adminTools();
+            renderUserManagement();
             return;
         }
     } catch (error) {
@@ -111,7 +111,7 @@ function renderAdminLogin() {
         try {
             const result = await postFetch('/api/loginAuthApi/loginAdmin', { username, password });
             if (result.success) {
-                adminTools();
+                renderUserManagement();
             } else {
                 toast(result.message, 'hiba');
             }
@@ -119,32 +119,6 @@ function renderAdminLogin() {
             toast('An error occurred while logging in as admin', 'error');
             console.error('Admin login error:', error);
         }
-    });
-
-    generateBackToMenu();
-}
-
-async function adminTools() {
-    clearBody();
-
-    generateBootStrapGrid(1, 1, 12, 'adminToolsTitle');
-    const menuTitle = document.createElement('h1');
-    menuTitle.setAttribute('class', 'menuTitle adminMenu');
-    menuTitle.textContent = 'Admin Tools';
-    document.querySelector('.adminToolsTitle').appendChild(menuTitle);
-
-    const buttons = [{ text: 'Manage Users', onClick: renderUserManagement }];
-
-    generateBootStrapGrid(buttons.length + 1, 1, 12, 'adminToolsButtons');
-    const rows = document.querySelectorAll('.adminToolsButtons');
-
-    buttons.forEach(({ text, onClick }, i) => {
-        const button = document.createElement('input');
-        button.setAttribute('type', 'button');
-        button.setAttribute('value', text);
-        button.setAttribute('class', 'menuButton');
-        button.addEventListener('click', onClick);
-        rows[i].appendChild(button);
     });
 
     generateBackToMenu();
@@ -333,7 +307,7 @@ async function renderUserManagement() {
         console.error('Error loading users:', error);
     }
 
-    generateBackToAdminTools();
+    generateBackToMenu();
 }
 
 async function displayUserInventory(userId) {
