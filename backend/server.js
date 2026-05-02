@@ -10,10 +10,6 @@ const path = require('path');
 const app = express();
 const router = express.Router();
 
-if (!process.env.SESSION_SECRET) {
-    throw new Error('SESSION_SECRET environment variable is not set.');
-}
-
 const ip = process.env.SERVER_IP || '127.0.0.1';
 const port = parseInt(process.env.SERVER_PORT) || 3000;
 

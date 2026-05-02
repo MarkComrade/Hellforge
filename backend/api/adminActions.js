@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer();
 const { getAllUsers } = require('../sql/queries/authUserQueries.js');
 const {
     deleteUser,
@@ -100,7 +102,7 @@ router.get('/getAllWeapons', async (req, res) => {
     }
 });
 
-router.post('/updateUserInventory/:userId', async (req, res) => {
+router.post('/updateUserInventory/:userId', upload.none(), async (req, res) => {
     try {
         const { helmet, armor, melee, ranged } = req.body || {};
         if (!helmet || !armor || !melee || !ranged) {

@@ -19,7 +19,7 @@ function validateCredentials(username, password) {
         return 'Username must be 3–15 characters: letters, numbers, or underscores only.';
     }
     if (typeof password !== 'string' || !PASSWORD_REGEX.test(password)) {
-        return 'Password must be 6–15 characters and include at least one letter and one number.';
+        return 'Password must be 3–15 characters and include at least one letter and one number.';
     }
     return null;
 }
