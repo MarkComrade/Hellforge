@@ -2,22 +2,6 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const database = require('../sql/queries/authUserQueries.js');
-const fs = require('fs/promises');
-
-//!Multer
-const multer = require('multer'); //?npm install multer
-const path = require('path');
-
-const storage = multer.diskStorage({
-    destination: (request, file, callback) => {
-        callback(null, path.join(__dirname, '../uploads'));
-    },
-    filename: (request, file, callback) => {
-        callback(null, Date.now() + '-' + file.originalname); //?egyedi név: dátum - file eredeti neve
-    }
-});
-
-const upload = multer({ storage: storage });
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -42,90 +26,93 @@ function validateCredentials(username, password) {
 
 //!Endpoints:
 
-router.post('/loginUser', authLimiter, async (request, response) => {
-    const { username, password } = request.body;
+router.post('/loginUser', authLimiter, async (req, res) => {
+    const { username, password } = req.body;
     const validationError = validateCredentials(username, password);
     if (validationError) {
-        return response.status(400).json({ success: false, message: validationError });
+        return res.status(400).json({ success: false, message: validationError });
     }
     try {
         const result = await database.loginUser(username, password);
-
         if (result.success) {
-            request.session.isLoggedIn = true;
-            request.session.userId = result.userId;
-            request.session.userName = username;
+            req.session.isLoggedIn = true;
+            req.session.userId = result.userId;
+            req.session.userName = username;
         }
-        response.json(result);
+        res.status(result.success ? 200 : 401).json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'server error' });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-router.post('/registerUser', authLimiter, async (request, response) => {
-    const { username, password } = request.body;
+router.post('/registerUser', authLimiter, async (req, res) => {
+    const { username, password } = req.body;
     const validationError = validateCredentials(username, password);
     if (validationError) {
-        return response.status(400).json({ success: false, message: validationError });
+        return res.status(400).json({ success: false, message: validationError });
     }
     try {
         const result = await database.registerUser(username, password);
         if (result.success) {
-            request.session.isLoggedIn = true;
-            request.session.userId = result.userId;
-            request.session.userName = username;
+            req.session.isLoggedIn = true;
+            req.session.userId = result.userId;
+            req.session.userName = username;
         }
-        response.json(result);
+        res.status(result.success ? 200 : 409).json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'server error' });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-router.post('/logout', (request, response) => {
-    request.session.destroy((err) => {
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
         if (err) {
-            response.status(500).json({ success: false, message: 'server error' });
+            res.status(500).json({ success: false, message: 'Server error' });
         } else {
-            response.json({ success: true, message: 'successful logout' });
+            res.json({ success: true, message: 'Successful logout' });
         }
     });
 });
 
-router.post('/guest', (request, response) => {
-    request.session.isLoggedIn = false;
-    request.session.userName = 'Guest';
-    response.json({ success: true, userName: 'Guest' });
+router.post('/guest', (req, res) => {
+    req.session.isLoggedIn = false;
+    req.session.userName = 'Guest';
+    res.json({ success: true, userName: 'Guest' });
 });
 
-router.post('/loginAdmin', authLimiter, async (request, response) => {
-    const { username, password } = request.body;
+router.post('/loginAdmin', authLimiter, async (req, res) => {
+    const { username, password } = req.body;
+    const validationError = validateCredentials(username, password);
+    if (validationError) {
+        return res.status(400).json({ success: false, message: validationError });
+    }
     try {
         const result = await database.loginAdmin(username, password);
         if (result.success) {
-            request.session.isLoggedIn = true;
-            request.session.isAdmin = true;
-            request.session.adminId = result.userId;
-            request.session.adminName = username;
+            req.session.isLoggedIn = true;
+            req.session.isAdmin = true;
+            req.session.adminId = result.adminId;
+            req.session.adminName = username;
         }
-        response.json(result);
+        res.status(result.success ? 200 : 401).json(result);
     } catch (error) {
-        response.status(500).json({ success: false, message: 'server error' });
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-router.get('/session', (request, response) => {
-    if (request.session.isLoggedIn) {
-        response.json({
+router.get('/session', (req, res) => {
+    if (req.session.isLoggedIn) {
+        res.json({
             isLoggedIn: true,
-            isAdmin: request.session.isAdmin || false,
-            userId: request.session.userId,
-            userName: request.session.userName
+            isAdmin: req.session.isAdmin || false,
+            userId: req.session.userId,
+            userName: req.session.userName
         });
     } else {
-        response.json({
+        res.json({
             isLoggedIn: false,
             isAdmin: false,
-            userName: request.session.userName || ''
+            userName: req.session.userName || ''
         });
     }
 });

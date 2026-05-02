@@ -9,197 +9,120 @@ const {
     updateUserInventory
 } = require('../sql/queries/adminQueries.js');
 const { getTotalGold, adminSetStashGold } = require('../sql/queries/inventoryQueries.js');
-const fs = require('fs/promises');
 const { requireAdmin } = require('./middleware');
 
 // All admin endpoints require an active admin session.
 router.use(requireAdmin);
 
-//!Multer
-const multer = require('multer'); //?npm install multer
-const path = require('path');
+// TODO: In the future, this should add user to ban list instead of hard delete
+router.post('/deleteUser/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required.' });
+        }
 
-const storage = multer.diskStorage({
-    destination: (request, file, callback) => {
-        callback(null, path.join(__dirname, '../uploads'));
-    },
-    filename: (request, file, callback) => {
-        callback(null, Date.now() + '-' + file.originalname); //?egyedi név: dátum - file eredeti neve
+        const inventory = await getUserInventory(userId);
+        if (!inventory) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        await deleteUser(inventory.username);
+        res.status(200).json({ success: true, message: 'User successfully deleted.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error deleting user.' });
     }
 });
 
-const upload = multer({ storage });
-
-//!Endpoints:
-//?GET /api/test
-router.get('/test', (request, response) => {
-    response.status(200).json({
-        message: 'Ez a végpont működik.'
-    });
-});
-
-router.get('/getAllUsers', async (request, response) => {
+router.get('/getAllUsers', async (req, res) => {
     try {
         const result = await getAllUsers();
-        response.status(200).json({
-            message: 'A Users successfully retrieved.',
-            results: result
-        });
+        res.status(200).json({ success: true, results: result });
     } catch (error) {
-        response.status(500).json({
-            message: 'this endpoint is not working.'
-        });
-    }
-});
-// TODO: In the future, this should add user to ban list instead of hard delete
-router.post('/deleteUser/:userId', async (request, response) => {
-    try {
-        const userId = request.params.userId;
-
-        if (!userId) {
-            return response.status(400).json({
-                message: 'User ID is required.',
-                success: false
-            });
-        }
-
-        // Get username first for deletion (database.deleteUser expects username)
-        const inventory = await getUserInventory(userId);
-        if (!inventory) {
-            return response.status(404).json({
-                message: 'User not found.',
-                success: false
-            });
-        }
-
-        const result = await deleteUser(inventory.username);
-        response.status(200).json({
-            message: 'User successfully deleted.',
-            success: true,
-            results: result
-        });
-    } catch (error) {
-        response.status(500).json({
-            message: 'Error deleting user: ' + error.message,
-            success: false
-        });
+        res.status(500).json({ success: false, message: 'Error retrieving users.' });
     }
 });
 
-router.get('/getUserGold/:userId', async (request, response) => {
+router.get('/getUserGold/:userId', async (req, res) => {
     try {
-        const userId = request.params.userId;
-        const result = await getTotalGold(userId);
+        const result = await getTotalGold(req.params.userId);
         if (!result.success) {
-            return response.status(500).json({ message: result.message });
+            return res.status(500).json({ success: false, message: result.message });
         }
-        response.status(200).json({
-            message: 'Gold retrieved.',
-            stashGold: result.gold.stash
-        });
+        res.status(200).json({ success: true, stashGold: result.gold.stash });
     } catch (error) {
-        response.status(500).json({ message: 'Error retrieving gold.', error: error.message });
+        res.status(500).json({ success: false, message: 'Error retrieving gold.' });
     }
 });
 
-router.post('/setUserStashGold/:userId', async (request, response) => {
+router.post('/setUserStashGold/:userId', async (req, res) => {
     try {
-        const userId = request.params.userId;
-        const { gold } = request.body;
-
+        const { gold } = req.body;
         if (gold === undefined || gold === null || gold === '') {
-            return response
-                .status(400)
-                .json({ message: 'Gold value is required.', success: false });
+            return res.status(400).json({ success: false, message: 'Gold value is required.' });
         }
-
-        const result = await adminSetStashGold(userId, gold);
-        response.status(result.success ? 200 : 400).json(result);
+        const result = await adminSetStashGold(req.params.userId, gold);
+        res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
-        response.status(500).json({ message: 'Error setting gold.', success: false });
+        res.status(500).json({ success: false, message: 'Error setting gold.' });
     }
 });
 
-router.get('/getUserInventory/:userId', async (request, response) => {
+router.get('/getUserInventory/:userId', async (req, res) => {
     try {
-        const userId = request.params.userId;
-        const inventory = await getUserInventory(userId);
-
+        const inventory = await getUserInventory(req.params.userId);
         if (!inventory) {
-            return response.status(404).json({
-                message: 'User or inventory not found.'
-            });
+            return res
+                .status(404)
+                .json({ success: false, message: 'User or inventory not found.' });
         }
-
-        response.status(200).json({
-            message: 'Inventory successfully retrieved.',
-            inventory: inventory
-        });
+        res.status(200).json({ success: true, inventory });
     } catch (error) {
-        response.status(500).json({
-            message: 'Error retrieving inventory.',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error retrieving inventory.' });
     }
 });
 
-router.get('/getAllArmors', async (request, response) => {
+router.get('/getAllArmors', async (req, res) => {
     try {
         const armors = await getAllArmors();
-        response.status(200).json({
-            message: 'Armors successfully retrieved.',
-            armors: armors
-        });
+        res.status(200).json({ success: true, armors });
     } catch (error) {
-        response.status(500).json({
-            message: 'Error retrieving armors.',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error retrieving armors.' });
     }
 });
 
-router.get('/getAllWeapons', async (request, response) => {
+router.get('/getAllWeapons', async (req, res) => {
     try {
         const weapons = await getAllWeapons();
-        response.status(200).json({
-            message: 'Weapons successfully retrieved.',
-            weapons: weapons
-        });
+        res.status(200).json({ success: true, weapons });
     } catch (error) {
-        response.status(500).json({
-            message: 'Error retrieving weapons.',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error retrieving weapons.' });
     }
 });
 
-router.post('/updateUserInventory/:userId', upload.none(), async (request, response) => {
+router.post('/updateUserInventory/:userId', async (req, res) => {
     try {
-        const userId = request.params.userId;
-        const { helmet, armor, melee, ranged } = request.body;
-
+        const { helmet, armor, melee, ranged } = req.body || {};
         if (!helmet || !armor || !melee || !ranged) {
-            return response.status(400).json({
-                message: 'All inventory fields are required.'
-            });
+            return res
+                .status(400)
+                .json({ success: false, message: 'All inventory fields are required.' });
         }
-
-        await updateUserInventory(userId, {
+        const parsed = {
             helmet: parseInt(helmet),
             armor: parseInt(armor),
             melee: parseInt(melee),
             ranged: parseInt(ranged)
-        });
-
-        response.status(200).json({
-            message: 'Inventory successfully updated.',
-            success: true
-        });
+        };
+        if (Object.values(parsed).some(isNaN)) {
+            return res
+                .status(400)
+                .json({ success: false, message: 'All inventory fields must be valid integers.' });
+        }
+        await updateUserInventory(req.params.userId, parsed);
+        res.status(200).json({ success: true, message: 'Inventory successfully updated.' });
     } catch (error) {
-        response.status(500).json({
-            message: 'Error updating inventory.',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Error updating inventory.' });
     }
 });
 

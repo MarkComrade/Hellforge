@@ -273,14 +273,13 @@ async function renderUserManagement() {
             }
 
             try {
-                const formData = new FormData();
-                formData.append('helmet', helmet);
-                formData.append('armor', armor);
-                formData.append('melee', melee);
-                formData.append('ranged', ranged);
-
                 const [equipResponse, goldResponse] = await Promise.all([
-                    postFetchForm(`/api/adminActions/updateUserInventory/${userId}`, formData),
+                    postFetch(`/api/adminActions/updateUserInventory/${userId}`, {
+                        helmet,
+                        armor,
+                        melee,
+                        ranged
+                    }),
                     postFetch(`/api/adminActions/setUserStashGold/${userId}`, { gold: goldParsed })
                 ]);
 

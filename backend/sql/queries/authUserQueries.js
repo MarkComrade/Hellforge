@@ -9,13 +9,8 @@ const MAX_PASSWORD_LENGTH = 15;
 const MIN_PASSWORD_LENGTH = 6;
 const MAX_USERNAME_LENGTH = 15;
 const MIN_USERNAME_LENGTH = 3;
-const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
-const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,128}$/;
-
-async function selectall() {
-    const [rows] = await pool.query('SELECT * FROM user');
-    return rows;
-}
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,15}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
 
 async function loginUser(username, password) {
     try {
@@ -157,7 +152,6 @@ async function getAllUsers() {
 }
 
 module.exports = {
-    selectall,
     loginUser,
     registerUser,
     loginAdmin,

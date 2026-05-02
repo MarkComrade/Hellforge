@@ -9,8 +9,8 @@ const { generateEnemy, generateEnemyGroup, rollEnemyCount } = require('../servic
 const { buildDeckFromEquipment, getCardById } = require('../services/cardPool.js');
 const { resolveCard, endPlayerTurn } = require('../services/combatEngine.js');
 const { resolveDungeonRoomLoot } = require('../services/lootAlgorithm.js');
-const { clearLoadoutAndResetGear } = require('../sql/queries/inventoryQueries.js');
 const database = require('../sql/queries/inventoryQueries.js');
+const { clearLoadoutAndResetGear } = database;
 const { requireLogin } = require('./middleware');
 
 function normalizeDungeonType(name) {
@@ -258,8 +258,6 @@ router.post('/death', requireLogin, requireCombat, async (req, res) => {
         }
 
         const playerId = Number(req.session.userId);
-        console.log(`[death] Processing death penalty for player ${playerId}`);
-
         const stats = req.session.dungeonData?.stats || {
             enemiesKilled: 0,
             floorsCleared: 0,
@@ -273,8 +271,6 @@ router.post('/death', requireLogin, requireCombat, async (req, res) => {
                 playerId,
                 penaltyResult.message
             );
-        } else {
-            console.log(`[death] Loadout cleared and gear reset for player ${playerId}`);
         }
 
         delete req.session.combatData;
