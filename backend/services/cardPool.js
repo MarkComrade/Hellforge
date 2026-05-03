@@ -2157,7 +2157,7 @@
             tier: 2,
             type: 'ranged',
             exhaust: false,
-            targetType: 'self',
+            targetType: 'single',
             affectedTargets: 1,
             effects: { extraPlays: 1, vulnerable: { pct: 10, turns: 1 } }
         },

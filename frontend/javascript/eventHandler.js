@@ -660,6 +660,7 @@ function createTradeEventOverlay(tradeEvent) {
                 const boughtName = selectedItem.name;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
                 toast(`Bought ${boughtName}! (-${spentGold} gold)`, 'success');
+                updateGold({ gold: { loadout: result.remainingGold } });
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
@@ -761,6 +762,7 @@ async function renderShop() {
                 const boughtName = selectedItem.name;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
                 toast(`Bought ${boughtName}! (-${spentGold} gold)`, 'success');
+                updateGold({ gold: { loadout: result.remainingGold } });
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);

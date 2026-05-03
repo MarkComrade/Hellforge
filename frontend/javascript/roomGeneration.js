@@ -275,6 +275,7 @@ function roomEventHandler(room, dungeon, dungeonLevel, result) {
             break;
         case 'combat': {
             if (result.cleared || room.dataset.cleared === 'true') {
+                toast('Room already cleared.', 'info', 1800);
                 if (result.Event && result.Event.success) {
                     room.dataset.hasStoredLoot = result.Event.storedInRoom ? 'true' : 'false';
                     room.dataset.lootItemImg =

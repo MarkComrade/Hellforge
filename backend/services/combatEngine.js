@@ -169,7 +169,11 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         ? (hp) => session.setEnemyHp(hp, enemyIndex)
         : (hp) => session.setPlayerHp(hp);
     const attackerLabel = isPlayerCard ? 'You' : attacker.archetype || 'Enemy';
-    const defenderLabel = isPlayerCard ? defender.archetype || 'Enemy' : 'You';
+    const defenderLabel = isPlayerCard
+        ? defender === session.player
+            ? 'You'
+            : defender.archetype || 'Enemy'
+        : 'You';
 
     // ── strength (applies before damage so it affects this card's hit) ───────
     if (effects.strength && isPlayerCard) {
