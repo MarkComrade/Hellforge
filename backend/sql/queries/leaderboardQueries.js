@@ -1,6 +1,6 @@
 const { pool } = require('../core/connection.js');
 
-async function selectleadboard() {
+async function selectLeaderboard() {
     const query = `
         SELECT u.name,
                COALESCE(ps.total, 0) AS score
@@ -50,4 +50,4 @@ async function getUserRankAndScore(username) {
     return rows[0];
 }
 
-module.exports = { selectleadboard, getUserRankAndScore };
+module.exports = { selectLeaderboard, getUserRankAndScore };

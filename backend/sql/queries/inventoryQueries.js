@@ -682,8 +682,8 @@ async function curseRandomItemCard(playerId, cursedCardPool) {
     }
 }
 
-async function applyGoldTrapLoss(playerId, amountToLose) {
-    const normalizedAmount = Math.max(0, Math.floor(Number(amountToLose) || 0));
+async function applyGoldTrapLoss(playerId, lossPercent) {
+    const normalizedPercent = Math.min(100, Math.max(0, Math.floor(Number(lossPercent) || 0)));
 
     const connection = await pool.getConnection();
     try {
@@ -698,7 +698,7 @@ async function applyGoldTrapLoss(playerId, amountToLose) {
         );
 
         const totalGold = goldRows.reduce((sum, row) => sum + Number(row.gold_amount || 0), 0);
-        if (totalGold <= 0 || normalizedAmount <= 0) {
+        if (totalGold <= 0 || normalizedPercent <= 0) {
             await connection.rollback();
             return {
                 success: false,
@@ -708,7 +708,7 @@ async function applyGoldTrapLoss(playerId, amountToLose) {
             };
         }
 
-        let safeAmountToLose = normalizedAmount;
+        let safeAmountToLose = Math.floor((totalGold * normalizedPercent) / 100);
         if (safeAmountToLose < 1) {
             safeAmountToLose = 1;
         }
@@ -749,6 +749,7 @@ async function applyGoldTrapLoss(playerId, amountToLose) {
             success: true,
             message: 'Gold removed by trap.',
             lostGold: safeAmountToLose,
+            lossPercent: normalizedPercent,
             remainingGold: Number(remainingRows[0].gold || 0)
         };
     } catch (error) {

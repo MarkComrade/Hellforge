@@ -23,6 +23,9 @@ function startCombat(token, initialState) {
 function enterCombatMode() {
     document.body.classList.add('in-combat');
 
+    // Remove any ground-loot pickup button left over from a previous room
+    document.getElementById('lootRoomPickupButton')?.remove();
+
     const topRight = document.querySelector('#ui .top-right');
     if (topRight) topRight.style.display = 'none';
 

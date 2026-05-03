@@ -5,11 +5,7 @@ const {
     insertIntoLoadout,
     upgradeWeakestGearDB
 } = require('../sql/queries/shopQueries.js');
-const {
-    getLoadout,
-    getLoadoutCount,
-    addGoldToInventory
-} = require('../sql/queries/inventoryQueries.js');
+const { getLoadoutCount, addGoldToInventory } = require('../sql/queries/inventoryQueries.js');
 const { pickCardsForItem } = require('../services/cardPool.js');
 const types = {
     crypt: 1,
@@ -53,10 +49,10 @@ function clampTier(tier, dungeon) {
     const hardCap = caps[dungeon];
 
     if (Math.random() < 0.01) {
-        return Math.min(tier, 6);
+        return Math.max(1, Math.min(tier, 6));
     }
 
-    return Math.min(tier, hardCap);
+    return Math.max(1, Math.min(tier, hardCap));
 }
 
 async function getRandomItem(tier) {
@@ -191,8 +187,6 @@ async function generateAndInsertLoot(playerId, dungeon, level) {
             goldImgPath: GOLD_IMG_PATH
         };
 
-        console.log('[LootPayload]', payload);
-
         return payload;
     } catch (error) {
         console.error(error);
@@ -214,32 +208,6 @@ function shouldDropItem(dungeon, level) {
     dropChance = Math.min(Math.max(dropChance, 0.05), 0.95);
 
     return Math.random() < dropChance;
-}
-
-async function getAverageGearTier(playerId) {
-    const result = await getLoadout(playerId);
-
-    if (!result?.success) {
-        throw new Error(result?.message || 'Failed to get loadout');
-    }
-    let avgGearTier = 0;
-    let itemCount = 0;
-    result.loadout.forEach((element) => {
-        if (element.armor_tier != null) {
-            avgGearTier += Number(element.armor_tier);
-            itemCount++;
-        }
-        if (element.weapon_tier != null) {
-            avgGearTier += Number(element.weapon_tier);
-            itemCount++;
-        }
-    });
-
-    if (itemCount > 0) {
-        avgGearTier /= itemCount;
-    }
-
-    return avgGearTier;
 }
 
 function generateGoldReward(dungeon, level) {

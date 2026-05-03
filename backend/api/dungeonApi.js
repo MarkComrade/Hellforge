@@ -7,7 +7,8 @@ const { eventManager, CURSED_TRAP_CARD_POOL } = require('../services/eventGenera
 const {
     getEquippedGearTiers,
     applyAbandonPenalty,
-    curseRandomItemCard
+    curseRandomItemCard,
+    clearLoadoutAndResetGear
 } = require('../sql/queries/inventoryQueries.js');
 
 const VALID_DUNGEONS = ['Laboratory', 'Crypt', 'Labyrinth', 'Gates of Hell'];
@@ -41,7 +42,6 @@ async function checkGearRequirement(playerId, dungeonName) {
 }
 
 const GOLD_IMG_PATH = '../textures/items/coin.png';
-const MAX_DUNGEON_LEVEL = 20;
 
 // ───── Middleware ─────
 // These functions run BEFORE the actual route handler.
@@ -194,13 +194,6 @@ router.post('/next-level', requireLogin, requireDungeon, (req, res) => {
             return res.status(400).json({ success: false, message: 'Not on exit room' });
         }
 
-        if (dungeon.dungeonLevel >= MAX_DUNGEON_LEVEL) {
-            return res.status(400).json({
-                success: false,
-                message: `Maximum dungeon level reached (${MAX_DUNGEON_LEVEL})`
-            });
-        }
-
         // Generate a brand-new map for the next level.
         // We create a fresh DungeonSession (which runs generateMap() in its constructor),
         // then copy over the session token and HP so the run feels continuous.
@@ -312,6 +305,48 @@ router.post('/pickup-room-loot', requireLogin, requireDungeon, async (req, res) 
         res.json(result);
     } catch (error) {
         console.error('Pickup error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// ── POST /api/dungeon/forfeit ─────────────────────────────────────────────────
+// Called automatically on page load when the client detects the HTTP session
+// still has an active dungeon (meaning the player refreshed mid-run).
+// No dungeon session token required — the HTTP cookie is the only guard needed.
+// Wipes loadout as punishment, then clears both dungeon and combat sessions.
+router.post('/forfeit', requireLogin, async (req, res) => {
+    try {
+        if (!req.session.dungeonData) {
+            return res.json({ success: false, message: 'No active dungeon to forfeit' });
+        }
+
+        const playerId = Number(req.session.userId);
+        if (!Number.isInteger(playerId) || playerId <= 0) {
+            return res.status(401).json({ success: false, message: 'Invalid player session' });
+        }
+
+        const stats = req.session.dungeonData?.stats || {
+            enemiesKilled: 0,
+            floorsCleared: 0,
+            goldCollected: 0
+        };
+
+        const penaltyResult = await clearLoadoutAndResetGear(playerId);
+        if (!penaltyResult.success) {
+            console.error(
+                'forfeit: clearLoadoutAndResetGear failed for player',
+                playerId,
+                penaltyResult.message
+            );
+        }
+
+        delete req.session.dungeonData;
+        delete req.session.combatData;
+        delete req.session.combatToken;
+
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error('Forfeit error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });

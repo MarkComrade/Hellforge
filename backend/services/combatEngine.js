@@ -9,9 +9,9 @@
 //   Player plays cards  →  resolveCard(session, cardIndex)  (once per card)
 //   Player ends turn    →  endPlayerTurn(session)
 //     1. Tick player DoTs (bleed / scorch)
-//     2. Decrement player turn-based statuses (vulnerable / lifesteal)
-//     3. Tick enemy DoTs — enemies killed here skip their attack
-//     4. Enemy selects & executes cards  →  resolveEnemyCards(session)
+//     2. Tick enemy DoTs — enemies killed here skip their attack
+//     3. Enemy selects & executes cards  →  resolveEnemyCards(session)
+//     4. Decrement player turn-based statuses (vulnerable / lifesteal / deflect)
 //     5. Decrement enemy turn-based statuses
 //     6. Advance turn, startPlayerTurn() (resets player block + strength)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -60,17 +60,21 @@ function pruneStatuses(statuses) {
 // DoT damage formula
 //
 // Each bleed or scorch tick deals:
-//   floor(target.maxHp * 0.05)  +  player's total attack multiplier
+//   attackMultiplier (melee + ranged sum) + floor(target.maxHp * 0.05)
 //
 // attackMultiplier is pre-summed from equipped melee + ranged attack_multiplier
 // and stored in session.player.equipmentSnapshot.attackMultiplier when combat
-// starts. Defaults to 5 if not present.
+// starts. Defaults to 1 if not present.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function calcDotDamage(session, target) {
-    const atkMult = Number(session.player.equipmentSnapshot?.attackMultiplier || 5);
+function calcDotDamage(session, target, isPlayer) {
+    let atkMult = 1;
+    if (isPlayer) {
+        atkMult = Number(session.player.equipmentSnapshot?.attackMultiplier || 1);
+    }
+
     const pctDmg = Math.floor(target.maxHp * 0.05);
-    return Math.max(1, atkMult + pctDmg);
+    return Math.max(1, Math.floor(atkMult + pctDmg));
 }
 
 // Detonate all bleed stacks on a target immediately at 50% of their tick value.
@@ -79,12 +83,12 @@ function detonateBleed(session, target, isPlayer, enemyIndex) {
     const bleed = findStatus(target.statuses, 'bleed');
     if (!bleed || bleed.stacks <= 0) return;
 
-    const tickDmg = calcDotDamage(session, target);
+    const tickDmg = calcDotDamage(session, target, isPlayer);
     const totalDmg = Math.floor(tickDmg * bleed.stacks * 0.5);
-    const setHp = isPlayer
+    const setHp = !isPlayer
         ? (hp) => session.setPlayerHp(hp)
         : (hp) => session.setEnemyHp(hp, enemyIndex);
-    const targetLabel = isPlayer ? 'You' : target.archetype || 'Enemy';
+    const targetLabel = !isPlayer ? 'You' : target.archetype || 'Enemy';
 
     // Remove bleed first
     const idx = target.statuses.indexOf(bleed);
@@ -94,7 +98,7 @@ function detonateBleed(session, target, isPlayer, enemyIndex) {
         setHp(target.hp - totalDmg);
         session.appendLog({
             type: 'status',
-            message: `Scorch ignites ${targetLabel}'s bleed — ${totalDmg} instant damage (${bleed.stacks} stacks detonated at 50%).`
+            message: `Scorch ignites ${targetLabel}'s bleed — ${totalDmg} instant damage [${tickDmg} tick × ${bleed.stacks} stacks × 50%].`
         });
     }
 }
@@ -103,12 +107,12 @@ function detonateScorch(session, target, isPlayer, enemyIndex) {
     const scorch = findStatus(target.statuses, 'scorch');
     if (!scorch || scorch.stacks <= 0) return;
 
-    const tickDmg = calcDotDamage(session, target);
+    const tickDmg = calcDotDamage(session, target, isPlayer);
     const totalDmg = Math.floor(tickDmg * scorch.stacks * 0.5);
-    const setHp = isPlayer
+    const setHp = !isPlayer
         ? (hp) => session.setPlayerHp(hp)
         : (hp) => session.setEnemyHp(hp, enemyIndex);
-    const targetLabel = isPlayer ? 'You' : target.archetype || 'Enemy';
+    const targetLabel = !isPlayer ? 'You' : target.archetype || 'Enemy';
 
     const idx = target.statuses.indexOf(scorch);
     target.statuses.splice(idx, 1);
@@ -117,7 +121,7 @@ function detonateScorch(session, target, isPlayer, enemyIndex) {
         setHp(target.hp - totalDmg);
         session.appendLog({
             type: 'status',
-            message: `Bleed extinguishes ${targetLabel}'s scorch — ${totalDmg} instant damage (${scorch.stacks} stacks detonated at 50%).`
+            message: `Bleed extinguishes ${targetLabel}'s scorch — ${totalDmg} instant damage [${tickDmg} tick × ${scorch.stacks} stacks × 50%].`
         });
     }
 }
@@ -200,20 +204,45 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
     if (effects.damage) {
         const base = effects.damage + (attacker.strength || 0);
         const snap = session.player.equipmentSnapshot;
-        // Scale outgoing player card damage by weapon attack multiplier
+        // Scale outgoing player card damage by weapon attack multiplier.
+        // Formula: max(1, (gearSum / 2) ^ 0.55)
+        //   T1 gear (sum 2.0) → 1.00×  T4 gear (sum 4.2) → 1.53×
+        //   T2 gear (sum 2.4) → 1.11×  T5 gear (sum 5.4) → 1.76×
+        //   T3 gear (sum 3.2) → 1.32×  T6 gear (sum 6.8) → 1.98×
         let weaponMult = 1;
         if (isPlayerCard) {
-            if (cardType === 'melee') weaponMult = Number(snap?.meleeMultiplier || 1);
-            else if (cardType === 'ranged') weaponMult = Number(snap?.rangedMultiplier || 1);
+            const gearSum = Number(snap?.attackMultiplier || 2);
+            weaponMult = Math.max(1, Math.pow(gearSum / 2, 0.55));
         }
         // Reduce incoming enemy damage by player's combined armor defense
         const defenseMult = !isPlayerCard ? Math.max(1, Number(snap?.defenseMultiplier || 1)) : 1;
-        const scaled = Math.floor((base * weaponMult * getVulnMultiplier(defender)) / defenseMult);
+        const vulnMult = getVulnMultiplier(defender);
+        const scaled = Math.floor((base * weaponMult * vulnMult) / defenseMult);
         const { damageTaken, blocked } = applyDamage(defender, scaled, true);
 
         setDefenderHp(defender.hp - damageTaken);
         // Capture post-hit player HP for frontend HP bar sync on enemy attacks
         const postHitPlayerHp = !isPlayerCard ? defender.hp : undefined;
+
+        // Build human-readable math breakdown for the combat log
+        let formulaStr;
+        if (isPlayerCard) {
+            const baseStr =
+                (attacker.strength || 0) > 0
+                    ? `(${effects.damage} + ${attacker.strength} str)`
+                    : `${effects.damage}`;
+            const parts = [baseStr];
+            if (weaponMult !== 1) parts.push(`× ${weaponMult.toFixed(2)} atk`);
+            if (vulnMult !== 1) parts.push(`× ${vulnMult.toFixed(2)} vuln`);
+            formulaStr = parts.join(' ') + ` = ${scaled}`;
+        } else {
+            const parts = [`${effects.damage}`];
+            if (vulnMult !== 1) parts.push(`× ${vulnMult.toFixed(2)} vuln`);
+            if (defenseMult > 1) parts.push(`÷ ${defenseMult.toFixed(2)} def`);
+            formulaStr = parts.join(' ') + ` = ${scaled}`;
+        }
+        const blockNote = blocked > 0 ? `, ${blocked} blocked` : '';
+        const mathStr = ` [${formulaStr}${blockNote}]`;
 
         // deflect — if player is taking damage and has deflect status, reflect % back
         if (!isPlayerCard && (damageTaken > 0 || blocked > 0)) {
@@ -229,7 +258,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
                     session.setEnemyHp(reflectTarget.hp - reflDmg, enemyIndex);
                     session.appendLog({
                         type: 'player',
-                        message: `Deflect reflects ${reflDmg} damage back at ${attackerLabel}.`
+                        message: `Deflect reflects ${reflDmg} damage back at ${attackerLabel} [${deflect.pct}% of ${damageTaken + blocked} total].`
                     });
                 }
                 if (!session.isActive()) return;
@@ -244,14 +273,14 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
                 setAttackerHp(attacker.hp + heal);
                 session.appendLog({
                     type: 'lifesteal',
-                    message: `${attackerLabel} lifesteals ${heal} HP.`
+                    message: `${attackerLabel} lifesteals ${heal} HP [${damageTaken} dealt × ${ls.pct}%].`
                 });
             }
         }
 
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} ${isPlayerCard ? 'takes' : 'take'} ${damageTaken} damage${blocked > 0 ? ` (${blocked} blocked)` : ''}.`,
+            message: `${defenderLabel} ${isPlayerCard ? 'takes' : 'take'} ${damageTaken} damage${mathStr}.`,
             meta: {
                 damageTaken,
                 blocked,
@@ -274,26 +303,28 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
     // ── bleed on defender — detonates scorch if present ────────────────────
     if (effects.bleed) {
         if (findStatus(defender.statuses, 'scorch')) {
-            detonateScorch(session, defender, !isPlayerCard, isPlayerCard ? enemyIndex : -1);
+            detonateScorch(session, defender, isPlayerCard, isPlayerCard ? enemyIndex : -1);
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'bleed', effects.bleed);
+        const bleedTickPreview = calcDotDamage(session, defender, isPlayerCard);
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.bleed} bleed (${effects.bleed} turn${effects.bleed > 1 ? 's' : ''}).`
+            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.bleed} bleed [~${bleedTickPreview} dmg/tick, ${effects.bleed} tick${effects.bleed > 1 ? 's' : ''}].`
         });
     }
 
     // ── scorch on defender — detonates bleed if present ──────────────────────
     if (effects.scorch) {
         if (findStatus(defender.statuses, 'bleed')) {
-            detonateBleed(session, defender, !isPlayerCard, isPlayerCard ? enemyIndex : -1);
+            detonateBleed(session, defender, isPlayerCard, isPlayerCard ? enemyIndex : -1);
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'scorch', effects.scorch);
+        const scorchTickPreview = calcDotDamage(session, defender, isPlayerCard);
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.scorch} scorch (${effects.scorch} turn${effects.scorch > 1 ? 's' : ''}).`
+            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.scorch} scorch [~${scorchTickPreview} dmg/tick, ${effects.scorch} tick${effects.scorch > 1 ? 's' : ''}].`
         });
     }
 
@@ -364,16 +395,21 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Tick bleed and scorch on a target — unblockable, stacks -1 per tick.
-// Damage per tick = player's attackMultiplier + 5% of target's maxHp.
+// Damage per tick = attackMultiplier (melee + ranged sum) + floor(5% of target.maxHp)
 function tickDots(session, target, isPlayer, enemyIndex) {
-    const setHp = isPlayer
+    const setHp = !isPlayer
         ? (hp) => session.setPlayerHp(hp)
         : (hp) => session.setEnemyHp(hp, enemyIndex);
-    const label = isPlayer ? 'You' : target.archetype || 'Enemy';
-    const tickDmg = calcDotDamage(session, target);
+    const label = !isPlayer ? 'You' : target.archetype || 'Enemy';
+    const tickDmg = calcDotDamage(session, target, isPlayer);
+    const atkMultDisplay = isPlayer
+        ? Number(session.player.equipmentSnapshot?.attackMultiplier || 1)
+        : 1;
+    const pctDmgDisplay = Math.floor(target.maxHp * 0.05);
 
     // Regen ticks first — may save the player before DoT damage resolves
-    if (isPlayer) {
+    // !isPlayer means target IS the player (enemy is the attacker)
+    if (!isPlayer) {
         for (const s of target.statuses) {
             if (s.type === 'regen' && s.stacks > 0) {
                 setHp(target.hp + s.stacks);
@@ -393,7 +429,7 @@ function tickDots(session, target, isPlayer, enemyIndex) {
             setHp(target.hp - tickDmg);
             session.appendLog({
                 type: 'status',
-                message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage. (${s.stacks - 1} turn${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
+                message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage [${atkMultDisplay} atk + ${pctDmgDisplay} (5% of ${target.maxHp} HP)]. (${s.stacks - 1} tick${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
             });
             s.stacks -= 1;
         }
@@ -529,26 +565,27 @@ function resolveCard(session, cardIndex, targetIndex) {
 function endPlayerTurn(session) {
     if (!session.isActive()) return;
 
-    // 1. Player DoTs tick
-    tickDots(session, session.player, true, -1);
+    // 1. Player DoTs tick (enemy is the attacker — isPlayer=false)
+    tickDots(session, session.player, false, -1);
     if (!session.isActive()) return;
 
-    // 2. Player turn-based statuses decrement
-    tickTurnStatuses(session.player);
-
-    // 3. Enemy DoTs tick — enemies killed here skip their attack this turn
+    // 2. Enemy DoTs tick — enemies killed here skip their attack this turn
     session.startEnemyTurn(); // resets block + strength for all enemies
     for (const enemy of session.enemies) {
         if (!session.isActive()) return;
         if (enemy.hp > 0) {
-            tickDots(session, enemy, false, enemy.index);
+            tickDots(session, enemy, true, enemy.index);
         }
     }
     if (!session.isActive()) return;
 
-    // 4. Enemy turn — each surviving enemy selects and executes cards
+    // 3. Enemy turn — each surviving enemy selects and executes cards
     resolveEnemyCards(session);
     if (!session.isActive()) return;
+
+    // 4. Player turn-based statuses decrement (after enemy attacks so deflect/lifesteal
+    //    remain active for the full duration they were applied)
+    tickTurnStatuses(session.player);
 
     // 5. Enemy turn-based statuses decrement (each surviving enemy)
     for (const enemy of session.enemies) {

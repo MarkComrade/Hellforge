@@ -5,171 +5,133 @@ const database = {
     ...require('../sql/queries/authUserQueries.js'),
     ...require('../sql/queries/shopQueries.js')
 };
-const { generateAndInsertLoot } = require('../services/lootAlgorithm.js');
 const { withAdjustedPrice, getMaxAllowedPrice } = require('../services/pricing.js');
-const fs = require('fs/promises');
 const DungeonSession = require('../models/DungeonSession.js');
 
-function getDungeonFromSession(request) {
-    if (!request.session?.dungeonData) {
+function getDungeonFromSession(req) {
+    if (!req.session?.dungeonData) {
         return null;
     }
-
-    return DungeonSession.fromJSON(request.session.dungeonData);
+    return DungeonSession.fromJSON(req.session.dungeonData);
 }
 
-//!Endpoints:
-//?GET /api/test
-router.get('/test', (request, response) => {
-    response.status(200).json({
-        message: 'Ez a végpont működik.'
-    });
-});
-
-//?GET /api/testsql
-router.get('/testsql', async (request, response) => {
-    console.log('SQL teszt végpont meghívva');
+router.get('/shop-items', requireLogin, async (req, res) => {
     try {
-        const selectall = await database.selectall();
-        response.status(200).json({
-            message: 'Ez a végpont működik.',
-            results: selectall
-        });
-    } catch (error) {
-        response.status(500).json({
-            message: 'Ez a végpont nem működik.'
-        });
-    }
-});
-router.get('/shop-items', requireLogin, async (request, response) => {
-    try {
-        const dungeon = getDungeonFromSession(request);
+        const dungeon = getDungeonFromSession(req);
         if (!dungeon) {
-            return response.status(200).json({ success: false, message: 'Not in a dungeon.' });
+            return res.status(400).json({ success: false, message: 'Not in a dungeon.' });
         }
 
-        const roomKey = dungeon.playerX + ',' + dungeon.playerY;
+        const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
         const currentRoom = dungeon.map[roomKey];
         if (!currentRoom || currentRoom.roomType !== 'shop') {
-            return response.status(200).json({ success: false, message: 'Not in a shop room.' });
+            return res.status(400).json({ success: false, message: 'Not in a shop room.' });
         }
 
         // Return cached stock if this shop room was already visited
         if (dungeon.shopStock[roomKey]) {
-            return response.status(200).json({
-                success: true,
-                items: dungeon.shopStock[roomKey]
-            });
+            return res.status(200).json({ success: true, items: dungeon.shopStock[roomKey] });
         }
 
-        let rawCount = Number.parseInt(request.query.count, 10);
+        let rawCount = Number.parseInt(req.query.count, 10);
         let count = 5;
-        if (Number.isInteger(rawCount) && rawCount > 0) {
+        if (Number.isInteger(rawCount) && rawCount > 0 && rawCount <= 10) {
             count = rawCount;
         }
 
         const items = await database.getRandomShopItems(count);
-
         const pricedItems = items.map((item) =>
             withAdjustedPrice(item, dungeon.dungeonName, dungeon.dungeonLevel)
         );
 
         // Cache the generated stock in the dungeon session
         dungeon.shopStock[roomKey] = pricedItems;
-        request.session.dungeonData = dungeon.toJSON();
+        req.session.dungeonData = dungeon.toJSON();
 
-        response.status(200).json({
-            success: true,
-            items: pricedItems
-        });
+        res.status(200).json({ success: true, items: pricedItems });
     } catch (error) {
-        response.status(500).json({
-            success: false,
-            message: 'Failed to fetch shop items.'
-        });
+        res.status(500).json({ success: false, message: 'Failed to fetch shop items.' });
     }
 });
 
-router.post('/buy-item', requireLogin, async (request, response) => {
-    const { itemId, category, adjustedPrice } = request.body;
-    const playerId = request.session?.userId;
+router.post('/buy-item', requireLogin, async (req, res) => {
+    const { itemId, category, adjustedPrice } = req.body;
 
-    if (!playerId) {
-        return response.status(401).json({ success: false, message: 'Not authenticated.' });
+    const parsedItemId = Number.parseInt(itemId, 10);
+    if (!Number.isInteger(parsedItemId) || parsedItemId <= 0) {
+        return res.status(400).json({ success: false, message: 'Invalid itemId.' });
     }
 
-    if (!itemId || !category || adjustedPrice == null) {
-        return response.status(400).json({
+    if (!category || adjustedPrice == null) {
+        return res.status(400).json({
             success: false,
             message: 'Missing required fields: itemId, category, adjustedPrice.'
         });
     }
 
     if (category !== 'weapon' && category !== 'armor') {
-        return response.status(400).json({ success: false, message: 'Invalid item category.' });
+        return res.status(400).json({ success: false, message: 'Invalid item category.' });
     }
 
     let parsedPrice = Number(adjustedPrice);
     if (!Number.isInteger(parsedPrice) || parsedPrice < 1) {
-        return response.status(400).json({ success: false, message: 'Invalid price value.' });
+        return res.status(400).json({ success: false, message: 'Invalid price value.' });
     }
 
-    const dungeon = getDungeonFromSession(request);
+    const dungeon = getDungeonFromSession(req);
     if (!dungeon) {
-        return response
+        return res
             .status(400)
             .json({ success: false, message: 'You must be in a dungeon to purchase items.' });
     }
-    const shopKey = dungeon.playerX + ',' + dungeon.playerY;
-    const shopRoom = dungeon.map[shopKey];
-    const isShopRoom = shopRoom?.roomType === 'shop';
+
+    const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
+    const currentRoom = dungeon.map[roomKey];
+    const isShopRoom = currentRoom?.roomType === 'shop';
     const isTradeRoom =
-        shopRoom?.roomType === 'event' &&
-        Array.isArray(dungeon.shopStock[shopKey]) &&
-        dungeon.shopStock[shopKey].length > 0;
+        currentRoom?.roomType === 'event' &&
+        Array.isArray(dungeon.shopStock[roomKey]) &&
+        dungeon.shopStock[roomKey].length > 0;
+
     if (!isShopRoom && !isTradeRoom) {
-        return response.status(400).json({
+        return res.status(400).json({
             success: false,
             message: 'You must be in a shop or trade event room to purchase items.'
         });
     }
 
+    // Resolve the stock entry once — reused for the sold-check, price-lock, and mark-as-sold.
+    // If the item is not in the cached shop stock at all, reject — prevents buying arbitrary
+    // items at a manipulated price by crafting a request with a real itemId but no stock entry.
+    let stockItem = null;
+    const stock = dungeon.shopStock[roomKey];
+    if (stock) {
+        for (const entry of stock) {
+            if (String(entry.itemId) === String(parsedItemId) && entry.category === category) {
+                stockItem = entry;
+                break;
+            }
+        }
+    }
+
+    if (!stockItem) {
+        return res
+            .status(404)
+            .json({ success: false, message: 'Item not available in this shop.' });
+    }
+
+    if (stockItem?.sold) {
+        return res.status(409).json({ success: false, message: 'Item already purchased.' });
+    }
+
     try {
-        const itemInfo = await database.getItemBaseInfo(itemId, category);
+        const itemInfo = await database.getItemBaseInfo(parsedItemId, category);
         if (!itemInfo) {
-            return response.status(200).json({ success: false, message: 'Item not found.' });
+            return res.status(404).json({ success: false, message: 'Item not found.' });
         }
 
-        // dungeon is already resolved above
-
-        // Check if item was already bought from this room stock and lock the price to the cached offer.
-        {
-            const roomKey = dungeon.playerX + ',' + dungeon.playerY;
-            let stock = dungeon.shopStock[roomKey];
-            if (stock) {
-                let matchedStockItem = null;
-                for (let i = 0; i < stock.length; i++) {
-                    if (
-                        String(stock[i].itemId) === String(itemId) &&
-                        stock[i].category === category
-                    ) {
-                        matchedStockItem = stock[i];
-                        break;
-                    }
-                }
-
-                if (matchedStockItem) {
-                    if (matchedStockItem.sold) {
-                        return response
-                            .status(200)
-                            .json({ success: false, message: 'Item already purchased.' });
-                    }
-
-                    parsedPrice = Number(
-                        matchedStockItem.adjustedPrice ?? matchedStockItem.price ?? parsedPrice
-                    );
-                }
-            }
+        if (stockItem) {
+            parsedPrice = Number(stockItem.adjustedPrice ?? stockItem.price ?? parsedPrice);
         }
 
         const maxAllowedPrice = getMaxAllowedPrice(
@@ -181,90 +143,73 @@ router.post('/buy-item', requireLogin, async (request, response) => {
         if (parsedPrice > maxAllowedPrice) {
             parsedPrice = maxAllowedPrice;
         }
-        const serverPrice = parsedPrice;
+
+        if (stockItem) {
+            // Mark sold and persist to session BEFORE the DB call.
+            // Because Node.js is single-threaded, this synchronous write completes before any
+            // other concurrent request can read the session — eliminating the duplicate-buy
+            // race condition where two simultaneous requests both see sold=false.
+            stockItem.sold = true;
+            req.session.dungeonData = dungeon.toJSON();
+        }
 
         const result = await database.purchaseItemToLoadout(
-            playerId,
-            itemId,
+            req.session.userId,
+            parsedItemId,
             category,
-            serverPrice
+            parsedPrice
         );
 
         if (!result.success) {
-            return response.status(200).json({ success: false, message: result.message });
-        }
-
-        // Mark item as sold in cached shop stock
-        {
-            const roomKey = dungeon.playerX + ',' + dungeon.playerY;
-            if (dungeon.shopStock[roomKey]) {
-                let stock = dungeon.shopStock[roomKey];
-                for (let i = 0; i < stock.length; i++) {
-                    if (
-                        String(stock[i].itemId) === String(itemId) &&
-                        stock[i].category === category
-                    ) {
-                        stock[i].sold = true;
-                        break;
-                    }
-                }
-                request.session.dungeonData = dungeon.toJSON();
+            // Revert the sold flag if the DB purchase failed (e.g. insufficient gold)
+            if (stockItem) {
+                stockItem.sold = false;
+                req.session.dungeonData = dungeon.toJSON();
             }
+            return res.status(400).json({ success: false, message: result.message });
         }
 
-        return response.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Purchase successful.',
             remainingGold: result.remainingGold
         });
     } catch (error) {
         console.error('Buy-item error:', error);
-        return response
-            .status(500)
-            .json({ success: false, message: 'Server error during purchase.' });
+        return res.status(500).json({ success: false, message: 'Server error during purchase.' });
     }
 });
 
-router.post('/sell-item', requireLogin, async (request, response) => {
-    const playerId = request.session?.userId;
-
-    if (!playerId) {
-        return response.status(200).json({ success: false, message: 'Not authenticated.' });
+router.post('/sell-item', requireLogin, async (req, res) => {
+    const { loadoutId } = req.body;
+    const parsedLoadoutId = Number.parseInt(loadoutId, 10);
+    if (!Number.isInteger(parsedLoadoutId) || parsedLoadoutId <= 0) {
+        return res.status(400).json({ success: false, message: 'Invalid loadoutId.' });
     }
 
-    const { loadoutId } = request.body;
-    if (!loadoutId) {
-        return response.status(200).json({
-            success: false,
-            message: 'Missing required field: loadoutId.'
-        });
-    }
-
-    const dungeon = getDungeonFromSession(request);
+    const dungeon = getDungeonFromSession(req);
     if (!dungeon) {
-        return response.status(200).json({
-            success: false,
-            message: 'You must be in a dungeon to sell items.'
-        });
+        return res
+            .status(400)
+            .json({ success: false, message: 'You must be in a dungeon to sell items.' });
     }
 
-    const currentKey = dungeon.playerX + ',' + dungeon.playerY;
-    const currentRoom = dungeon.map[currentKey];
+    const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
+    const currentRoom = dungeon.map[roomKey];
     if (!currentRoom || currentRoom.roomType !== 'shop') {
-        return response.status(200).json({
-            success: false,
-            message: 'You must be in a shop room to sell items.'
-        });
+        return res
+            .status(400)
+            .json({ success: false, message: 'You must be in a shop room to sell items.' });
     }
 
     try {
-        const result = await database.sellItemFromLoadout(playerId, loadoutId);
+        const result = await database.sellItemFromLoadout(req.session.userId, parsedLoadoutId);
 
         if (!result.success) {
-            return response.status(200).json({ success: false, message: result.message });
+            return res.status(400).json({ success: false, message: result.message });
         }
 
-        return response.status(200).json({
+        return res.status(200).json({
             success: true,
             message: result.message,
             soldFor: result.soldFor,
@@ -273,10 +218,7 @@ router.post('/sell-item', requireLogin, async (request, response) => {
         });
     } catch (error) {
         console.error('Sell-item error:', error);
-        return response.status(500).json({
-            success: false,
-            message: 'Server error during sale.'
-        });
+        return res.status(500).json({ success: false, message: 'Server error during sale.' });
     }
 });
 

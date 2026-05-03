@@ -96,10 +96,9 @@ class DungeonSession {
 
         // ─── Fill the rest with combat / event / loot in round-robin order ───
 
-        let typeIdx = 0;
         for (const key of unassigned) {
             if (!grid[key].roomType) {
-                let roll = Math.random();
+                const roll = Math.random();
                 if (roll < 0.6) {
                     grid[key].roomType = 'combat';
                 } else if (roll < 0.8) {
@@ -108,7 +107,6 @@ class DungeonSession {
                     grid[key].roomType = 'loot';
                 }
                 grid[key].cleared = false;
-                typeIdx++;
             }
         }
 
