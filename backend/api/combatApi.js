@@ -78,7 +78,7 @@ router.post('/start', requireLogin, async (req, res) => {
             ranged_cards: [],
             helmet_cards: [],
             armor_cards: [],
-            attackMultiplier: 1,
+            attackMultiplier: 5,
             meleeMultiplier: 1,
             rangedMultiplier: 1,
             defenseMultiplier: 1

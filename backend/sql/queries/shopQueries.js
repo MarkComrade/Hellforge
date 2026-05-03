@@ -275,7 +275,7 @@ async function sellItemFromLoadout(playerId, loadoutId) {
         await connection.beginTransaction();
 
         const [loadoutRows] = await connection.query(
-            'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ? AND equipped = 0',
+            'SELECT * FROM player_loadout WHERE loadoutId = ? AND playerId = ? AND equipped = 0 FOR UPDATE',
             [loadoutId, playerId]
         );
         if (loadoutRows.length === 0) {

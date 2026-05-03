@@ -35,7 +35,7 @@ router.get('/shop-items', requireLogin, async (req, res) => {
 
         let rawCount = Number.parseInt(req.query.count, 10);
         let count = 5;
-        if (Number.isInteger(rawCount) && rawCount > 0) {
+        if (Number.isInteger(rawCount) && rawCount > 0 && rawCount <= 10) {
             count = rawCount;
         }
 
@@ -57,7 +57,12 @@ router.get('/shop-items', requireLogin, async (req, res) => {
 router.post('/buy-item', requireLogin, async (req, res) => {
     const { itemId, category, adjustedPrice } = req.body;
 
-    if (!itemId || !category || adjustedPrice == null) {
+    const parsedItemId = Number.parseInt(itemId, 10);
+    if (!Number.isInteger(parsedItemId) || parsedItemId <= 0) {
+        return res.status(400).json({ success: false, message: 'Invalid itemId.' });
+    }
+
+    if (!category || adjustedPrice == null) {
         return res.status(400).json({
             success: false,
             message: 'Missing required fields: itemId, category, adjustedPrice.'
@@ -75,7 +80,9 @@ router.post('/buy-item', requireLogin, async (req, res) => {
 
     const dungeon = getDungeonFromSession(req);
     if (!dungeon) {
-        return res.status(400).json({ success: false, message: 'You must be in a dungeon to purchase items.' });
+        return res
+            .status(400)
+            .json({ success: false, message: 'You must be in a dungeon to purchase items.' });
     }
 
     const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
@@ -94,15 +101,23 @@ router.post('/buy-item', requireLogin, async (req, res) => {
     }
 
     // Resolve the stock entry once — reused for the sold-check, price-lock, and mark-as-sold.
+    // If the item is not in the cached shop stock at all, reject — prevents buying arbitrary
+    // items at a manipulated price by crafting a request with a real itemId but no stock entry.
     let stockItem = null;
     const stock = dungeon.shopStock[roomKey];
     if (stock) {
         for (const entry of stock) {
-            if (String(entry.itemId) === String(itemId) && entry.category === category) {
+            if (String(entry.itemId) === String(parsedItemId) && entry.category === category) {
                 stockItem = entry;
                 break;
             }
         }
+    }
+
+    if (!stockItem) {
+        return res
+            .status(404)
+            .json({ success: false, message: 'Item not available in this shop.' });
     }
 
     if (stockItem?.sold) {
@@ -110,7 +125,7 @@ router.post('/buy-item', requireLogin, async (req, res) => {
     }
 
     try {
-        const itemInfo = await database.getItemBaseInfo(itemId, category);
+        const itemInfo = await database.getItemBaseInfo(parsedItemId, category);
         if (!itemInfo) {
             return res.status(404).json({ success: false, message: 'Item not found.' });
         }
@@ -129,20 +144,29 @@ router.post('/buy-item', requireLogin, async (req, res) => {
             parsedPrice = maxAllowedPrice;
         }
 
+        if (stockItem) {
+            // Mark sold and persist to session BEFORE the DB call.
+            // Because Node.js is single-threaded, this synchronous write completes before any
+            // other concurrent request can read the session — eliminating the duplicate-buy
+            // race condition where two simultaneous requests both see sold=false.
+            stockItem.sold = true;
+            req.session.dungeonData = dungeon.toJSON();
+        }
+
         const result = await database.purchaseItemToLoadout(
             req.session.userId,
-            itemId,
+            parsedItemId,
             category,
             parsedPrice
         );
 
         if (!result.success) {
+            // Revert the sold flag if the DB purchase failed (e.g. insufficient gold)
+            if (stockItem) {
+                stockItem.sold = false;
+                req.session.dungeonData = dungeon.toJSON();
+            }
             return res.status(400).json({ success: false, message: result.message });
-        }
-
-        if (stockItem) {
-            stockItem.sold = true;
-            req.session.dungeonData = dungeon.toJSON();
         }
 
         return res.status(200).json({
@@ -158,23 +182,28 @@ router.post('/buy-item', requireLogin, async (req, res) => {
 
 router.post('/sell-item', requireLogin, async (req, res) => {
     const { loadoutId } = req.body;
-    if (!loadoutId) {
-        return res.status(400).json({ success: false, message: 'Missing required field: loadoutId.' });
+    const parsedLoadoutId = Number.parseInt(loadoutId, 10);
+    if (!Number.isInteger(parsedLoadoutId) || parsedLoadoutId <= 0) {
+        return res.status(400).json({ success: false, message: 'Invalid loadoutId.' });
     }
 
     const dungeon = getDungeonFromSession(req);
     if (!dungeon) {
-        return res.status(400).json({ success: false, message: 'You must be in a dungeon to sell items.' });
+        return res
+            .status(400)
+            .json({ success: false, message: 'You must be in a dungeon to sell items.' });
     }
 
     const roomKey = `${dungeon.playerX},${dungeon.playerY}`;
     const currentRoom = dungeon.map[roomKey];
     if (!currentRoom || currentRoom.roomType !== 'shop') {
-        return res.status(400).json({ success: false, message: 'You must be in a shop room to sell items.' });
+        return res
+            .status(400)
+            .json({ success: false, message: 'You must be in a shop room to sell items.' });
     }
 
     try {
-        const result = await database.sellItemFromLoadout(req.session.userId, loadoutId);
+        const result = await database.sellItemFromLoadout(req.session.userId, parsedLoadoutId);
 
         if (!result.success) {
             return res.status(400).json({ success: false, message: result.message });
