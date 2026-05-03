@@ -3,40 +3,32 @@ const { getBaseTier, normalizeDungeonKey } = require('./lootAlgorithm.js');
 const DEFAULT_MARKUP_MIN = 0.8;
 const DEFAULT_MARKUP_MAX = 1.2;
 
-function clampTierDiff(tierDiff) {
-    if (tierDiff < -3) return -3;
-    if (tierDiff > 3) return 3;
-    return tierDiff;
-}
-
 function getTierDiff(itemTier, dungeonName, dungeonLevel) {
-    const dungeonKey = normalizeDungeonKey(dungeonName);
-    const dungeonTier = getBaseTier(dungeonKey, dungeonLevel);
-    const rawDiff = Number(itemTier || 0) - dungeonTier;
-    return clampTierDiff(rawDiff);
+    const dungeonTier = getBaseTier(normalizeDungeonKey(dungeonName), dungeonLevel);
+    let diff = Number(itemTier || 0) - dungeonTier;
+    if (diff < -3) diff = -3;
+    if (diff > 3) diff = 3;
+    return diff;
 }
 
 function calculateAdjustedPrice(basePrice, itemTier, dungeonName, dungeonLevel, options = {}) {
-    const markupMin = Number.isFinite(options.markupMin) ? options.markupMin : DEFAULT_MARKUP_MIN;
-    const markupMax = Number.isFinite(options.markupMax) ? options.markupMax : DEFAULT_MARKUP_MAX;
-    const safeBasePrice = Math.max(1, Number(basePrice) || 0);
+    const markupMin = options.markupMin || DEFAULT_MARKUP_MIN;
+    const markupMax = options.markupMax || DEFAULT_MARKUP_MAX;
+    const price = Math.max(1, Number(basePrice) || 0);
 
-    const tierDiff = getTierDiff(itemTier, dungeonName, dungeonLevel);
-    const tierMultiplier = 1 + tierDiff * 0.25;
-    const randomMarkup = markupMin + Math.random() * (markupMax - markupMin);
-    const adjustedPrice = Math.max(1, Math.round(safeBasePrice * tierMultiplier * randomMarkup));
+    const tierMultiplier = 1 + getTierDiff(itemTier, dungeonName, dungeonLevel) * 0.25;
+    const markup = markupMin + Math.random() * (markupMax - markupMin);
 
-    return adjustedPrice;
+    return Math.max(1, Math.round(price * tierMultiplier * markup));
 }
 
 function getMaxAllowedPrice(basePrice, itemTier, dungeonName, dungeonLevel, options = {}) {
-    const markupMax = Number.isFinite(options.markupMax) ? options.markupMax : DEFAULT_MARKUP_MAX;
-    const safeBasePrice = Math.max(1, Number(basePrice) || 0);
+    const markupMax = options.markupMax || DEFAULT_MARKUP_MAX;
+    const price = Math.max(1, Number(basePrice) || 0);
 
-    const tierDiff = getTierDiff(itemTier, dungeonName, dungeonLevel);
-    const tierMultiplier = 1 + tierDiff * 0.25;
+    const tierMultiplier = 1 + getTierDiff(itemTier, dungeonName, dungeonLevel) * 0.25;
 
-    return Math.max(1, Math.round(safeBasePrice * tierMultiplier * markupMax));
+    return Math.max(1, Math.round(price * tierMultiplier * markupMax));
 }
 
 function withAdjustedPrice(item, dungeonName, dungeonLevel, options = {}) {
