@@ -140,6 +140,7 @@ function eventLootPopup(lootEvent) {
                     if (currentRoom) {
                         currentRoom.dataset.hasStoredLoot = result.storedInRoom ? 'true' : 'false';
                     }
+                    toast(`${lootEvent.item?.name ?? 'Item'} picked up!`, 'success');
                     closeEventPopup(popup);
                 } else {
                     pickupBtn.disabled = false;
@@ -266,6 +267,8 @@ function createFrontendEvent(eventPayload) {
 }
 
 async function outRoom(room, dungeon, dungeonLevel) {
+    toast('The exit is within reach...', 'info', 2500);
+
     const trapdoorTextures = {
         Laboratory: '../textures/rooms/trapdoor_laboratory.png',
         Crypt: '../textures/rooms/trapdoor_crypt.png',
@@ -654,8 +657,9 @@ function createTradeEventOverlay(tradeEvent) {
 
             if (result && result.success) {
                 const spentGold = selectedItem.adjustedPrice ?? selectedItem.price;
+                const boughtName = selectedItem.name;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
-                toast(`-${spentGold} gold`, 'info');
+                toast(`Bought ${boughtName}! (-${spentGold} gold)`, 'success');
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
@@ -754,8 +758,9 @@ async function renderShop() {
 
             if (result && result.success) {
                 const spentGold = selectedItem.adjustedPrice ?? selectedItem.price;
+                const boughtName = selectedItem.name;
                 setStatus(`Purchased! Gold remaining: ${result.remainingGold}`, 'success');
-                toast(`-${spentGold} gold`, 'info');
+                toast(`Bought ${boughtName}! (-${spentGold} gold)`, 'success');
                 markSold(String(selectedItem.itemId), selectedItem.category);
                 selectedItem = null;
                 setItem(null);
