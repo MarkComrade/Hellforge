@@ -314,16 +314,13 @@ router.post('/pickup-room-loot', requireLogin, requireDungeon, async (req, res) 
 // still has an active dungeon (meaning the player refreshed mid-run).
 // No dungeon session token required — the HTTP cookie is the only guard needed.
 // Wipes loadout as punishment, then clears both dungeon and combat sessions.
-router.post('/forfeit', requireLogin, async (req, res) => {
+router.post('/forfeit', async (req, res) => {
     try {
         if (!req.session.dungeonData) {
             return res.json({ success: false, message: 'No active dungeon to forfeit' });
         }
 
         const playerId = Number(req.session.userId);
-        if (!Number.isInteger(playerId) || playerId <= 0) {
-            return res.status(401).json({ success: false, message: 'Invalid player session' });
-        }
 
         const stats = req.session.dungeonData?.stats || {
             enemiesKilled: 0,
