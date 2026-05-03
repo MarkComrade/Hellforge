@@ -6,7 +6,6 @@ const { generateFinalLoot } = require('./lootAlgorithm.js');
 const { withAdjustedPrice } = require('./pricing.js');
 
 const DUNGEON_FALLBACK = 'crypt';
-const MAX_LEVEL = 20;
 const SHOP_MARKUP_MIN = 0.8;
 const SHOP_MARKUP_MAX = 1.2;
 const TRADE_DISCOUNT_MIN = 0.1;
@@ -133,7 +132,7 @@ function sanitizeLevel(dungeonLevel) {
         return 1;
     }
 
-    return Math.min(Math.max(parsed, 1), MAX_LEVEL);
+    return Math.max(parsed, 1);
 }
 
 function randomFromArray(values) {
@@ -394,24 +393,11 @@ async function resolveTrapEvent(playerID) {
     }
 
     if (trapRoll < 2 / 3) {
-        const totalGoldResult = await database.getTotalGold(safePlayerId);
-        const totalGold =
-            (Number(totalGoldResult?.gold?.stash) || 0) +
-            (Number(totalGoldResult?.gold?.loadout) || 0);
-
         const lossPercent =
             TRAP_GOLD_LOSS_MIN +
             Math.floor(Math.random() * (TRAP_GOLD_LOSS_MAX - TRAP_GOLD_LOSS_MIN + 1));
 
-        let amountToLose = Math.floor((totalGold * lossPercent) / 100);
-        if (amountToLose < 1 && totalGold > 0) {
-            amountToLose = 1;
-        }
-        if (amountToLose > totalGold) {
-            amountToLose = totalGold;
-        }
-
-        const goldResult = await database.applyGoldTrapLoss(safePlayerId, amountToLose);
+        const goldResult = await database.applyGoldTrapLoss(safePlayerId, lossPercent);
 
         if (!goldResult.success || Number(goldResult.lostGold || 0) <= 0) {
             return createSimpleEventPayload(
@@ -424,7 +410,7 @@ async function resolveTrapEvent(playerID) {
         return createSimpleEventPayload(
             'trap',
             'Coin Siphon',
-            `Hidden claws skim ${lossPercent}% of your gold (${goldResult.lostGold} lost).`
+            `Hidden claws skim ${goldResult.lossPercent}% of your gold (${goldResult.lostGold} lost).`
         );
     }
 

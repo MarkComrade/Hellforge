@@ -5,11 +5,20 @@ const { findNextAvailableId } = require('../core/idHelpers.js');
 const { createItemInstance } = require('../core/itemInstanceHelpers.js');
 
 const SALT_ROUNDS = 12;
+const MAX_PASSWORD_LENGTH = 15;
+const MIN_PASSWORD_LENGTH = 6;
+const MAX_USERNAME_LENGTH = 15;
+const MIN_USERNAME_LENGTH = 3;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,15}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
 
 async function loginUser(username, password) {
     try {
         if (!username || !password) {
             return { success: false, message: 'Missing username or password' };
+        }
+        if (typeof password !== 'string' || password.length > MAX_PASSWORD_LENGTH) {
+            return { success: false, message: 'Incorrect password' };
         }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
@@ -36,7 +45,18 @@ async function registerUser(username, password) {
         if (!username || !password) {
             return { success: false, message: 'Missing username or password' };
         }
-
+        if (typeof username !== 'string' || !USERNAME_REGEX.test(username)) {
+            return {
+                success: false,
+                message: `Username must be ${MIN_USERNAME_LENGTH}–${MAX_USERNAME_LENGTH} characters: letters, numbers, or underscores only.`
+            };
+        }
+        if (typeof password !== 'string' || !PASSWORD_REGEX.test(password)) {
+            return {
+                success: false,
+                message: `Password must be ${MIN_PASSWORD_LENGTH}–${MAX_PASSWORD_LENGTH} characters and include at least one letter and one number.`
+            };
+        }
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length > 0) {

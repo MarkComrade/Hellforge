@@ -41,7 +41,6 @@ async function checkGearRequirement(playerId, dungeonName) {
 }
 
 const GOLD_IMG_PATH = '../textures/items/coin.png';
-const MAX_DUNGEON_LEVEL = 20;
 
 // ───── Middleware ─────
 // These functions run BEFORE the actual route handler.
@@ -192,13 +191,6 @@ router.post('/next-level', requireLogin, requireDungeon, (req, res) => {
         // Reject if player isn't on the exit room — prevents skipping via modified requests
         if (!currentRoom || currentRoom.roomType !== 'out') {
             return res.status(400).json({ success: false, message: 'Not on exit room' });
-        }
-
-        if (dungeon.dungeonLevel >= MAX_DUNGEON_LEVEL) {
-            return res.status(400).json({
-                success: false,
-                message: `Maximum dungeon level reached (${MAX_DUNGEON_LEVEL})`
-            });
         }
 
         // Generate a brand-new map for the next level.

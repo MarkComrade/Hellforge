@@ -49,10 +49,10 @@ function clampTier(tier, dungeon) {
     const hardCap = caps[dungeon];
 
     if (Math.random() < 0.01) {
-        return Math.min(tier, 6);
+        return Math.max(1, Math.min(tier, 6));
     }
 
-    return Math.min(tier, hardCap);
+    return Math.max(1, Math.min(tier, hardCap));
 }
 
 async function getRandomItem(tier) {
