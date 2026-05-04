@@ -98,7 +98,7 @@ function detonateBleed(session, target, isPlayer, enemyIndex) {
         setHp(target.hp - totalDmg);
         session.appendLog({
             type: 'status',
-            message: `Scorch ignites ${targetLabel}'s bleed — ${totalDmg} instant damage [${tickDmg} tick × ${bleed.stacks} stacks × 50%].`
+            message: `${targetLabel} receives ${totalDmg} damage from scorch detonation.`
         });
     }
 }
@@ -121,7 +121,7 @@ function detonateScorch(session, target, isPlayer, enemyIndex) {
         setHp(target.hp - totalDmg);
         session.appendLog({
             type: 'status',
-            message: `Bleed extinguishes ${targetLabel}'s scorch — ${totalDmg} instant damage [${tickDmg} tick × ${scorch.stacks} stacks × 50%].`
+            message: `${targetLabel} receives ${totalDmg} damage from bleed detonation.`
         });
     }
 }
@@ -228,26 +228,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         // Capture post-hit player HP for frontend HP bar sync on enemy attacks
         const postHitPlayerHp = !isPlayerCard ? defender.hp : undefined;
 
-        // Build human-readable math breakdown for the combat log
-        let formulaStr;
-        if (isPlayerCard) {
-            const baseStr =
-                (attacker.strength || 0) > 0
-                    ? `(${effects.damage} + ${attacker.strength} str)`
-                    : `${effects.damage}`;
-            const parts = [baseStr];
-            if (weaponMult !== 1) parts.push(`× ${weaponMult.toFixed(2)} atk`);
-            if (vulnMult !== 1) parts.push(`× ${vulnMult.toFixed(2)} vuln`);
-            formulaStr = parts.join(' ') + ` = ${scaled}`;
-        } else {
-            const parts = [`${effects.damage}`];
-            if (vulnMult !== 1) parts.push(`× ${vulnMult.toFixed(2)} vuln`);
-            if (defenseMult > 1) parts.push(`÷ ${defenseMult.toFixed(2)} def`);
-            formulaStr = parts.join(' ') + ` = ${scaled}`;
-        }
-        const blockNote = blocked > 0 ? `, ${blocked} blocked` : '';
-        const mathStr = ` [${formulaStr}${blockNote}]`;
-
         // deflect — if player is taking damage and has deflect status, reflect % back
         if (!isPlayerCard && (damageTaken > 0 || blocked > 0)) {
             const deflect = findStatus(session.player.statuses, 'deflect');
@@ -262,7 +242,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
                     session.setEnemyHp(reflectTarget.hp - reflDmg, enemyIndex);
                     session.appendLog({
                         type: 'player',
-                        message: `Deflect reflects ${reflDmg} damage back at ${attackerLabel} [${deflect.pct}% of ${damageTaken + blocked} total].`
+                        message: `Deflect reflects ${reflDmg} damage back at ${attackerLabel}.`
                     });
                 }
                 if (!session.isActive()) return;
@@ -277,14 +257,15 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
                 setAttackerHp(attacker.hp + heal);
                 session.appendLog({
                     type: 'lifesteal',
-                    message: `${attackerLabel} lifesteals ${heal} HP [${damageTaken} dealt × ${ls.pct}%].`
+                    message: `${attackerLabel} lifesteals ${heal} HP.`
                 });
             }
         }
 
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} ${isPlayerCard ? 'takes' : 'take'} ${damageTaken} damage${mathStr}.`,
+            message: `${defenderLabel} ${isPlayerCard ? 'takes' : 'take'} ${damageTaken} damage${blocked > 0 ? ` (${blocked} blocked)` : ''}.`,
+
             meta: {
                 damageTaken,
                 blocked,
@@ -300,7 +281,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         attacker.block += effects.block;
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${attackerLabel} gain${isPlayerCard ? '' : 's'} ${effects.block} block. (Total: ${attacker.block})`
+            message: `${attackerLabel} gain${isPlayerCard ? '' : 's'} ${effects.block} block.`
         });
     }
 
@@ -311,10 +292,9 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'bleed', effects.bleed);
-        const bleedTickPreview = calcDotDamage(session, defender, isPlayerCard);
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.bleed} bleed [~${bleedTickPreview} dmg/tick, ${effects.bleed} tick${effects.bleed > 1 ? 's' : ''}].`
+            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.bleed} bleed.`
         });
     }
 
@@ -325,10 +305,9 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             if (!session.isActive()) return;
         }
         upsertStackStatus(defender.statuses, 'scorch', effects.scorch);
-        const scorchTickPreview = calcDotDamage(session, defender, isPlayerCard);
         session.appendLog({
             type: isPlayerCard ? 'player' : 'enemy',
-            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.scorch} scorch [~${scorchTickPreview} dmg/tick, ${effects.scorch} tick${effects.scorch > 1 ? 's' : ''}].`
+            message: `${defenderLabel} receive${isPlayerCard ? 's' : ''} ${effects.scorch} scorch.`
         });
     }
 
@@ -406,11 +385,6 @@ function tickDots(session, target, isPlayer, enemyIndex) {
         : (hp) => session.setEnemyHp(hp, enemyIndex);
     const label = !isPlayer ? 'You' : target.archetype || 'Enemy';
     const tickDmg = calcDotDamage(session, target, isPlayer);
-    const atkMultDisplay = isPlayer
-        ? Number(session.player.equipmentSnapshot?.attackMultiplier || 1)
-        : 1;
-    const pctDmgDisplay = Math.floor(target.maxHp * 0.05);
-
     // Regen ticks first — may save the player before DoT damage resolves
     // !isPlayer means target IS the player (enemy is the attacker)
     if (!isPlayer) {
@@ -419,7 +393,7 @@ function tickDots(session, target, isPlayer, enemyIndex) {
                 setHp(target.hp + s.stacks);
                 session.appendLog({
                     type: 'status',
-                    message: `Regen restores ${s.stacks} HP. (stack stays until removed)`
+                    message: `Regen restores ${s.stacks} HP.`
                 });
             }
         }
@@ -433,7 +407,7 @@ function tickDots(session, target, isPlayer, enemyIndex) {
             setHp(target.hp - tickDmg);
             session.appendLog({
                 type: 'status',
-                message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage [${atkMultDisplay} atk + ${pctDmgDisplay} (5% of ${target.maxHp} HP)]. (${s.stacks - 1} tick${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
+                message: `${label} ${s.type === 'bleed' ? `bleed${isPlayer ? '' : 's'}` : `scorch${isPlayer ? '' : 'es'}`} for ${tickDmg} damage. (${s.stacks - 1} tick${s.stacks - 1 !== 1 ? 's' : ''} remaining)`
             });
             s.stacks -= 1;
         }
