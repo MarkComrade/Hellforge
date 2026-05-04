@@ -116,7 +116,7 @@ function renderAdminLogin() {
                 toast(result.message, 'hiba');
             }
         } catch (error) {
-            toast('An error occurred while logging in as admin', 'error');
+            toast(error.message || 'An error occurred while logging in as admin', 'error');
             console.error('Admin login error:', error);
         }
     });

@@ -951,7 +951,6 @@ function createSellGrid(loadoutItems, onSellComplete) {
     return container;
 }
 
-window.createFrontendLootPopup = eventLootPopup;
 window.eventLootPopup = eventLootPopup;
 window.createFrontendEvent = createFrontendEvent;
 window.isEventChoicePending = () => eventUiState.isChoicePending;

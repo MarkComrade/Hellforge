@@ -18,8 +18,28 @@ async function deleteUser(username) {
 
         const userId = userRows[0].userId;
 
+        // Collect all instance_ids before deleting the rows that reference them
+        const [stashInstances] = await connection.execute(
+            'SELECT instance_id FROM player_stash WHERE playerId = ? AND instance_id IS NOT NULL',
+            [userId]
+        );
+        const [loadoutInstances] = await connection.execute(
+            'SELECT instance_id FROM player_loadout WHERE playerId = ? AND instance_id IS NOT NULL',
+            [userId]
+        );
+        const instanceIds = [
+            ...stashInstances.map((r) => r.instance_id),
+            ...loadoutInstances.map((r) => r.instance_id)
+        ];
+
         await connection.execute('DELETE FROM player_stash WHERE playerId = ?', [userId]);
         await connection.execute('DELETE FROM player_loadout WHERE playerId = ?', [userId]);
+
+        // Delete instances after stash/loadout rows are gone (FK no longer blocks it).
+        // item_instance_cards are removed automatically via ON DELETE CASCADE.
+        for (const id of instanceIds) {
+            await connection.execute('DELETE FROM item_instances WHERE instanceId = ?', [id]);
+        }
 
         const [result] = await connection.execute('DELETE FROM user WHERE userId = ?', [userId]);
 
@@ -94,100 +114,61 @@ async function updateUserInventory(userId, inventoryData) {
     try {
         await connection.beginTransaction();
 
-        // helmet slot — armor table
+        // Helper: replace one equipped slot, deleting the old instance first
+        async function replaceSlot(slot, itemType, itemId, cardType, idColumn) {
+            const [itemRows] = await connection.query(
+                `SELECT tier FROM ${itemType === 'armor' ? 'armors' : 'weapons'} WHERE ${itemType === 'armor' ? 'armorId' : 'weaponId'} = ?`,
+                [itemId]
+            );
+            if (!itemRows[0]) throw new Error(`${itemType} id ${itemId} not found`);
+
+            // Fetch and delete the old instance before creating the new one
+            const [oldRows] = await connection.execute(
+                'SELECT instance_id FROM player_loadout WHERE playerId = ? AND equipped = 1 AND slot = ?',
+                [userId, slot]
+            );
+            const oldInstanceId = oldRows[0]?.instance_id ?? null;
+
+            const tier = Number(itemRows[0].tier);
+            const cards = pickCardsForItem(cardType, tier);
+            const newInstanceId = await createItemInstance(connection, itemType, itemId, cards);
+
+            const [updateResult] = await connection.execute(
+                `UPDATE player_loadout SET ${idColumn} = ?, instance_id = ? WHERE playerId = ? AND equipped = 1 AND slot = ?`,
+                [itemId, newInstanceId, userId, slot]
+            );
+            if (updateResult.affectedRows === 0)
+                throw new Error(`No equipped ${slot} row found for player ${userId}`);
+
+            // Remove old instance after FK reference is gone.
+            // item_instance_cards are removed automatically via ON DELETE CASCADE.
+            if (oldInstanceId !== null) {
+                await connection.execute('DELETE FROM item_instances WHERE instanceId = ?', [
+                    oldInstanceId
+                ]);
+            }
+        }
+
+        let affectedRows = 0;
         if (inventoryData.helmet) {
-            const [armorRows] = await connection.query(
-                'SELECT tier FROM armors WHERE armorId = ?',
-                [inventoryData.helmet]
-            );
-            if (!armorRows[0]) throw new Error(`Armor id ${inventoryData.helmet} not found`);
-            const tier = Number(armorRows[0].tier);
-            const cards = pickCardsForItem('Helmet', tier);
-            const instanceId = await createItemInstance(
-                connection,
-                'armor',
-                inventoryData.helmet,
-                cards
-            );
-            const [helmetResult] = await connection.execute(
-                'UPDATE player_loadout SET armor_id = ?, instance_id = ? WHERE playerId = ? AND equipped = 1 AND slot = ?',
-                [inventoryData.helmet, instanceId, userId, 'helmet']
-            );
-            if (helmetResult.affectedRows === 0)
-                throw new Error(`No equipped helmet row found for player ${userId}`);
+            await replaceSlot('helmet', 'armor', inventoryData.helmet, 'Helmet', 'armor_id');
+            affectedRows++;
         }
-
-        // armor slot — armor table
         if (inventoryData.armor) {
-            const [armorRows] = await connection.query(
-                'SELECT tier FROM armors WHERE armorId = ?',
-                [inventoryData.armor]
-            );
-            if (!armorRows[0]) throw new Error(`Armor id ${inventoryData.armor} not found`);
-            const tier = Number(armorRows[0].tier);
-            const cards = pickCardsForItem('Armor', tier);
-            const instanceId = await createItemInstance(
-                connection,
-                'armor',
-                inventoryData.armor,
-                cards
-            );
-            const [armorResult] = await connection.execute(
-                'UPDATE player_loadout SET armor_id = ?, instance_id = ? WHERE playerId = ? AND equipped = 1 AND slot = ?',
-                [inventoryData.armor, instanceId, userId, 'armor']
-            );
-            if (armorResult.affectedRows === 0)
-                throw new Error(`No equipped armor row found for player ${userId}`);
+            await replaceSlot('armor', 'armor', inventoryData.armor, 'Armor', 'armor_id');
+            affectedRows++;
         }
-
-        // melee slot — weapon table
         if (inventoryData.melee) {
-            const [weaponRows] = await connection.query(
-                'SELECT tier FROM weapons WHERE weaponId = ?',
-                [inventoryData.melee]
-            );
-            if (!weaponRows[0]) throw new Error(`Weapon id ${inventoryData.melee} not found`);
-            const tier = Number(weaponRows[0].tier);
-            const cards = pickCardsForItem('Melee', tier);
-            const instanceId = await createItemInstance(
-                connection,
-                'weapon',
-                inventoryData.melee,
-                cards
-            );
-            const [meleeResult] = await connection.execute(
-                'UPDATE player_loadout SET weapon_id = ?, instance_id = ? WHERE playerId = ? AND equipped = 1 AND slot = ?',
-                [inventoryData.melee, instanceId, userId, 'melee']
-            );
-            if (meleeResult.affectedRows === 0)
-                throw new Error(`No equipped melee row found for player ${userId}`);
+            await replaceSlot('melee', 'weapon', inventoryData.melee, 'Melee', 'weapon_id');
+            affectedRows++;
         }
-
-        // ranged slot — weapon table
         if (inventoryData.ranged) {
-            const [weaponRows] = await connection.query(
-                'SELECT tier FROM weapons WHERE weaponId = ?',
-                [inventoryData.ranged]
-            );
-            if (!weaponRows[0]) throw new Error(`Weapon id ${inventoryData.ranged} not found`);
-            const tier = Number(weaponRows[0].tier);
-            const cards = pickCardsForItem('Ranged', tier);
-            const instanceId = await createItemInstance(
-                connection,
-                'weapon',
-                inventoryData.ranged,
-                cards
-            );
-            const [rangedResult] = await connection.execute(
-                'UPDATE player_loadout SET weapon_id = ?, instance_id = ? WHERE playerId = ? AND equipped = 1 AND slot = ?',
-                [inventoryData.ranged, instanceId, userId, 'ranged']
-            );
-            if (rangedResult.affectedRows === 0)
-                throw new Error(`No equipped ranged row found for player ${userId}`);
+            await replaceSlot('ranged', 'weapon', inventoryData.ranged, 'Ranged', 'weapon_id');
+            affectedRows++;
         }
 
         await connection.commit();
-        return { success: true, affectedRows: 4 };
+        return { success: true, affectedRows };
     } catch (error) {
         await connection.rollback();
         console.error('updateUserInventory error:', error.message);

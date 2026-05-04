@@ -218,24 +218,3 @@ function setHP(currentHP) {
 
 // Show an overlay telling the guest they need to log in to play.
 // Auto-dismisses after 3 seconds or on click.
-
-/*
-function showGuestError() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText =
-        'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:10000;flex-direction:column;gap:2vh;';
-
-    const msg = document.createElement('p');
-    msg.textContent = 'You must be logged in to play!';
-    msg.style.cssText =
-        'color:rgb(220,40,40);font-size:3vw;text-align:center;font-family:inherit;text-shadow:-0.15vw -0.15vw 0 #000,0.15vw -0.15vw 0 #000,-0.15vw 0.15vw 0 #000,0.15vw 0.15vw 0 #000;';
-
-    overlay.appendChild(msg);
-    document.body.appendChild(overlay);
-
-    // Dismiss on click or after 3 seconds
-    const dismiss = () => overlay.remove();
-    overlay.addEventListener('click', dismiss);
-    setTimeout(dismiss, 3000);
-}
-*/

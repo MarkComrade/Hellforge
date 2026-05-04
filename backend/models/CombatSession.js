@@ -453,28 +453,6 @@ class CombatSession {
         };
     }
 
-    getPublicState() {
-        return {
-            encounterId: this.encounterId,
-            startedAt: this.startedAt,
-            endedAt: this.endedAt,
-            isResolved: this.isResolved,
-            isGameOver: this.isGameOver,
-            dungeonType: this.dungeonType,
-            dungeonLevel: this.dungeonLevel,
-            turnOwner: this.turnOwner,
-            turnNumber: this.turnNumber,
-            turnRules: this.turnRules,
-            player: this.player,
-            enemy: this.enemy,
-            enemies: this.enemies,
-            deck: this.deck,
-            combatLog: this.combatLog,
-            reward: this.reward,
-            flags: this.flags
-        };
-    }
-
     _clamp(value, min, max) {
         if (!Number.isFinite(value)) {
             return min;

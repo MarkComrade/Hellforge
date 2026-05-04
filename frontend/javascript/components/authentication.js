@@ -123,7 +123,7 @@ async function Login() {
                 toast(result.message, 'error');
             }
         } catch (error) {
-            toast('An error occurred during login.', 'error');
+            toast(error.message || 'An error occurred during login.', 'error');
             console.error(error);
         }
     });
