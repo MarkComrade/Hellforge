@@ -1,4 +1,4 @@
-//Tool to generate bootstrap grid
+
 function generateBootStrapGrid(row, col, col_md_value, className) {
     let contDiv = document.createElement('div');
     contDiv.setAttribute('class', 'container-fluid');
@@ -24,9 +24,7 @@ function generateBootStrapGrid(row, col, col_md_value, className) {
         }
     }
 
-    /*
-    ! May require further functionality
-    */
+    
 
     document.body.appendChild(contDiv);
     return contDiv;
@@ -129,7 +127,7 @@ function showItemCardsPopup(itemName, cards) {
             cardRow.setAttribute('type', 'button');
             cardRow.setAttribute('class', 'itemCardRow');
 
-            // ── Left column: identity ──
+            
             const left = document.createElement('div');
             left.setAttribute('class', 'itemCardRowLeft');
 
@@ -159,7 +157,7 @@ function showItemCardsPopup(itemName, cards) {
 
             cardRow.appendChild(left);
 
-            // ── Right column: effects ──
+            
             const right = document.createElement('div');
             right.setAttribute('class', 'itemCardRowRight');
 

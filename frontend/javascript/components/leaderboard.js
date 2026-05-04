@@ -3,16 +3,13 @@ let leaderboardAbortController = null;
 const COIN_TEXTURE = '../textures/items/coin.png';
 const MAX_COINS = 150;
 const COIN_SPACING = 0.38;
-const COIN_ANIMATION_DELAY = 35; // ms delay between each coin appearing
+const COIN_ANIMATION_DELAY = 35; 
 const COIN_STACK_CLASS =
     'coinStack d-flex flex-column align-items-center justify-content-end position-relative';
 
-/**
- * Renders the leaderboard screen with player rankings and coin pile visualizations.
- * Cancels any pending fetch from a previous call  WINDOW RESIZE
- */
+
 function LeaderBoard() {
-    // Cancel any in-flight request to prevent duplicate renders on resize
+    
     if (leaderboardAbortController) {
         leaderboardAbortController.abort();
     }
@@ -24,7 +21,7 @@ function LeaderBoard() {
     generateBackToMenu();
 }
 
-/** Creates the leaderboard page title. */
+
 function renderTitle() {
     generateBootStrapGrid(1, 1, 12);
     const title = document.createElement('div');
@@ -33,9 +30,9 @@ function renderTitle() {
     document.querySelector('.col-md-12').appendChild(title);
 }
 
-/** Fetches session info, then leaderboard data, and renders the board. */
+
 async function fetchLeaderboardData() {
-    // Get the actual logged-in username from the session
+    
     let loggedInUsername = null;
     try {
         const session = await getMethodFetch('/api/loginAuthApi/session');
@@ -60,7 +57,7 @@ async function fetchLeaderboardData() {
                 return;
             }
 
-            // If no user data returned but logged in, create a default entry with 0 score
+            
             const userData =
                 data.user ||
                 (loggedInUsername
@@ -69,7 +66,7 @@ async function fetchLeaderboardData() {
 
             if (userData) {
                 const isInTop10 = top10.some((player) => player.name === userData.name);
-                // If user isn't in top 10, show top 9 + user at the end
+                
                 const displayData = isInTop10 ? top10 : [...top10.slice(0, 9), userData];
                 generatePiles(displayData, userData);
             } else {
@@ -83,14 +80,14 @@ async function fetchLeaderboardData() {
         });
 }
 
-// Creates a single coin stack column element
+
 function createCoinStack() {
     const element = document.createElement('div');
     element.className = COIN_STACK_CLASS;
     return { element, position: 0 };
 }
 
-// Generates coin pile visualizations proportional to each player's score
+
 function generatePiles(players, loggedUser) {
     const row = document.createElement('div');
     row.className = 'row justify-content-center';
@@ -104,17 +101,17 @@ function generatePiles(players, loggedUser) {
         const entryDiv = document.createElement('div');
         entryDiv.className = 'playerCard text-center p-3 rounded col-sm-1';
 
-        // Player name
+        
         const nameDiv = document.createElement('div');
         nameDiv.className = 'playerName fw-bold mt-1';
         nameDiv.innerText = entry.name;
 
-        // Player score
+        
         const scoreDiv = document.createElement('div');
         scoreDiv.className = 'playerScore text-light';
         scoreDiv.innerText = `${entry.score}g`;
 
-        // Coin stacks (3 columns for visual spread)
+        
         const coinStackRow = document.createElement('div');
         coinStackRow.className = 'coinStackRow d-flex flex-direction-row';
 
@@ -133,7 +130,7 @@ function generatePiles(players, loggedUser) {
                 coin.className = 'coin';
                 coin.src = COIN_TEXTURE;
 
-                // Randomly distribute coins across the 3 stacks (weighted toward center)
+                
                 const roll = Math.floor(Math.random() * 7);
                 const stackIndex = roll < 2 ? 0 : roll < 5 ? 1 : 2;
                 const stack = stacks[stackIndex];
@@ -142,17 +139,17 @@ function generatePiles(players, loggedUser) {
                 stack.element.appendChild(coin);
                 stack.position++;
 
-                // Staggered fade-in animation
+                
                 setTimeout(() => coin.classList.add('coinVisible'), c * COIN_ANIMATION_DELAY);
             }
         }
 
-        // Highlight the logged-in player
+        
         if (loggedUser && entry.name === loggedUser.name) {
             nameDiv.classList.add('highlightedPlayer');
         }
 
-        // Assemble the player card
+        
         stacks.forEach((stack) => coinStackRow.appendChild(stack.element));
         entryDiv.appendChild(coinStackRow);
         entryDiv.appendChild(nameDiv);

@@ -25,7 +25,7 @@ body.ready {
     visibility: visible;
 }
 
-/* Common UI elements used across all screens */
+
 .menuTitle {
     font-size: clamp(28px, 7vw, 100px);
     color: rgb(220, 40, 40);

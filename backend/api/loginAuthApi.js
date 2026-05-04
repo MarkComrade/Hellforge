@@ -4,8 +4,8 @@ const rateLimit = require('express-rate-limit');
 const database = require('../sql/queries/authUserQueries.js');
 
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // max 20 attempts per window per IP
+    windowMs: 15 * 60 * 1000,
+    max: 20,
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, message: 'Too many attempts, please try again later.' }

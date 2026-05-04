@@ -246,7 +246,6 @@ async function generateFinalLoot(playerId, dungeon, level) {
                 return { success: false, message: 'Item generation failed.' };
             }
 
-            // Reduce gold heavily (10%–30%)
             const baseGold = generateGoldReward(dungeon, level);
             const reducedMultiplier = 0.1 + Math.random() * 0.2;
             gold = Math.floor(baseGold * reducedMultiplier);

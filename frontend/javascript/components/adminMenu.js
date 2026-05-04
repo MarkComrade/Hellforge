@@ -213,7 +213,7 @@ async function renderUserManagement() {
             const selectedOption = select.options[select.selectedIndex];
             const username = selectedOption ? selectedOption.textContent : 'this user';
 
-            // TODO: In the future, this will add user to ban list instead of deleting
+            
             const confirmed = await areYouSure(
                 `You are about to delete ${username}. This action cannot be undone and will permanently remove the user's account and inventory data. Are you sure?`,
                 'Confirm User Deletion',

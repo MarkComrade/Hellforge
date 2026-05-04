@@ -767,7 +767,7 @@ async function renderShop() {
                 selectedItem = null;
                 setItem(null);
                 updateStats(null);
-                // Refresh sell section with the newly bought item in loadout
+                
                 refreshSellSection();
             } else {
                 let errorMsg = result && result.message ? result.message : 'Purchase failed.';
@@ -783,7 +783,7 @@ async function renderShop() {
 
     shopPanel.append(grid, statsPanel, promptPanel);
 
-    // Sell section — fetch player's loadout and render sell UI
+    
     async function refreshSellSection() {
         let existingSell = shopPanel.querySelector('.shopSellSection');
         if (existingSell) existingSell.remove();

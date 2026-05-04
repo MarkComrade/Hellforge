@@ -13,10 +13,8 @@ const {
 const { getTotalGold, adminSetStashGold } = require('../sql/queries/inventoryQueries.js');
 const { requireAdmin } = require('./middleware');
 
-// All admin endpoints require an active admin session.
 router.use(requireAdmin);
 
-// TODO: In the future, this should add user to ban list instead of hard delete
 router.post('/deleteUser/:userId', async (req, res) => {
     try {
         const { userId } = req.params;

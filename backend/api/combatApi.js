@@ -20,11 +20,6 @@ function normalizeDungeonType(name) {
         .replace(/\s+/g, '_');
 }
 
-// ───── Middleware ─────
-
-// requireLogin is imported from middleware.js
-
-// Reconstructs CombatSession from the session store and validates the combat token.
 function requireCombat(req, res, next) {
     if (!req.session.combatData) {
         return res.status(400).json({ success: false, message: 'No active combat' });
@@ -41,16 +36,12 @@ function saveCombat(req) {
     req.session.combatData = req.combat.toJSON();
 }
 
-// ── POST /api/combat/start ────────────────────────────────────────────────────
-// Requires an active dungeon session with the player standing on a combat room.
-// Builds enemy + deck from DB equipment and initialises a fresh CombatSession.
 router.post('/start', requireLogin, async (req, res) => {
     try {
         if (!req.session.dungeonData) {
             return res.status(400).json({ success: false, message: 'No active dungeon' });
         }
 
-        // Validate dungeon session token — same security pattern as dungeonApi.js
         const dungeon = DungeonSession.fromJSON(req.session.dungeonData);
         const dToken = req.body.sessionToken;
         if (!dToken || dToken !== dungeon.sessionToken) {
@@ -70,9 +61,8 @@ router.post('/start', requireLogin, async (req, res) => {
 
         const dungeonType = normalizeDungeonType(dungeon.dungeonName);
         const dungeonLevel = Number(dungeon.dungeonLevel) || 1;
-        const playerId = Number(req.session.userId); // always valid — requireLogin guards this
+        const playerId = Number(req.session.userId);
 
-        // Build equipment snapshot from DB (cards + attack multiplier for DoT formula)
         let equipmentSnapshot = {
             melee_cards: [],
             ranged_cards: [],
@@ -104,7 +94,6 @@ router.post('/start', requireLogin, async (req, res) => {
             };
         }
 
-        // Fall back to fixed starter cards (IDs 1-5) if player has no equipment
         const totalCards = ['melee_cards', 'ranged_cards', 'helmet_cards', 'armor_cards'].reduce(
             (n, k) => n + (equipmentSnapshot[k] || []).length,
             0
@@ -143,7 +132,6 @@ router.post('/start', requireLogin, async (req, res) => {
     }
 });
 
-// ── GET /api/combat/state ─────────────────────────────────────────────────────
 router.get('/state', requireLogin, requireCombat, (req, res) => {
     try {
         res.json(req.combat.getClientState());
@@ -153,10 +141,8 @@ router.get('/state', requireLogin, requireCombat, (req, res) => {
     }
 });
 
-// ── POST /api/combat/play-card ────────────────────────────────────────────────
 router.post('/play-card', requireLogin, requireCombat, (req, res) => {
     try {
-        // SECURITY: cardIndex must be an integer 0–3 — reject anything else
         const cardIndex = Number(req.body.cardIndex);
         if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex > 3) {
             return res.status(400).json({ success: false, message: 'cardIndex must be 0–3' });
@@ -186,7 +172,6 @@ router.post('/play-card', requireLogin, requireCombat, (req, res) => {
     }
 });
 
-// ── POST /api/combat/end-turn ─────────────────────────────────────────────────
 router.post('/end-turn', requireLogin, requireCombat, (req, res) => {
     try {
         endPlayerTurn(req.combat);
@@ -198,9 +183,6 @@ router.post('/end-turn', requireLogin, requireCombat, (req, res) => {
     }
 });
 
-// ── POST /api/combat/claim-reward ─────────────────────────────────────────────
-// Only valid after winning (isResolved && !isGameOver). Grants loot, marks room
-// cleared in the dungeon state, then wipes the combat session.
 router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
     try {
         const combat = req.combat;
@@ -216,7 +198,6 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
         const playerId = Number(req.session.userId);
         const key = dungeon ? `${dungeon.playerX},${dungeon.playerY}` : null;
 
-        // resolveDungeonRoomLoot handles generation, inventory check, and room storage if full
         const loot = dungeon ? await resolveDungeonRoomLoot(dungeon, key, playerId) : null;
         const reward = loot
             ? {
@@ -227,7 +208,6 @@ router.post('/claim-reward', requireLogin, requireCombat, async (req, res) => {
               }
             : { gold: 0, item: null, inventoryFull: false, storedInRoom: false };
 
-        // Mark the combat room cleared so the dungeon knows not to re-trigger it
         if (dungeon) {
             if (dungeon.map[key]) dungeon.map[key].cleared = true;
 

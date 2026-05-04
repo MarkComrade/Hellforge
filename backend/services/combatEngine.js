@@ -1,28 +1,8 @@
 'use strict';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// combatEngine.js
-//
-// Stateless combat logic that mutates a CombatSession via its existing setters.
-//
-// Turn flow:
-//   Player plays cards  →  resolveCard(session, cardIndex)  (once per card)
-//   Player ends turn    →  endPlayerTurn(session)
-//     1. Tick player DoTs (bleed / scorch)
-//     2. Tick enemy DoTs — enemies killed here skip their attack
-//     3. Enemy selects & executes cards  →  resolveEnemyCards(session)
-//     4. Decrement player turn-based statuses (vulnerable / lifesteal / deflect)
-//     5. Decrement enemy turn-based statuses
-//     6. Advance turn, startPlayerTurn() (resets player block + strength)
-// ─────────────────────────────────────────────────────────────────────────────
-
 const { getCardById } = require('./cardPool.js');
 const { selectTurnCards } = require('./enemyPool.js');
 const { TURN_OWNERS } = require('../models/CombatSession.js');
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Status helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 function findStatus(statuses, type) {
     return statuses.find((s) => s.type === type) || null;
@@ -56,17 +36,6 @@ function pruneStatuses(statuses) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DoT damage formula
-//
-// Each bleed or scorch tick deals:
-//   attackMultiplier (melee + ranged sum) + floor(target.maxHp * 0.05)
-//
-// attackMultiplier is pre-summed from equipped melee + ranged attack_multiplier
-// and stored in session.player.equipmentSnapshot.attackMultiplier when combat
-// starts. Defaults to 1 if not present.
-// ─────────────────────────────────────────────────────────────────────────────
-
 function calcDotDamage(session, target, isPlayer) {
     let atkMult = 1;
     if (isPlayer) {
@@ -77,8 +46,6 @@ function calcDotDamage(session, target, isPlayer) {
     return Math.max(1, Math.floor(atkMult + pctDmg));
 }
 
-// Detonate all bleed stacks on a target immediately at 50% of their tick value.
-// Used when scorch is applied to a bleeding target, and vice-versa.
 function detonateBleed(session, target, isPlayer, enemyIndex) {
     const bleed = findStatus(target.statuses, 'bleed');
     if (!bleed || bleed.stacks <= 0) return;
@@ -90,7 +57,6 @@ function detonateBleed(session, target, isPlayer, enemyIndex) {
         : (hp) => session.setEnemyHp(hp, enemyIndex);
     const targetLabel = !isPlayer ? 'You' : target.archetype || 'Enemy';
 
-    // Remove bleed first
     const idx = target.statuses.indexOf(bleed);
     target.statuses.splice(idx, 1);
 
@@ -126,13 +92,6 @@ function detonateScorch(session, target, isPlayer, enemyIndex) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Damage helper
-//
-// Apply damage to a target object (player or enemy).
-// blockable = true  → block absorbs first, remainder hits HP
-// blockable = false → bypasses block entirely (DoT damage)
-// Returns { damageTaken, blocked }.
 function applyDamage(target, amount, blockable) {
     const raw = Math.max(0, Math.floor(amount));
     if (!blockable || target.block <= 0) {
@@ -149,17 +108,7 @@ function getVulnMultiplier(target) {
     return v ? 1 + v.pct / 100 : 1;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared effect applier (used for both player cards and enemy cards)
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Apply a card's effects object.
-//   attacker / defender — the combat session's player or enemy objects
-//   isPlayerCard        — true when the player is acting, false for enemy
-//   session             — needed for setPlayerHp / setEnemyHp so resolution fires
-//   enemyIndex          — which enemies[] slot the defender/attacker occupies
 function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyIndex, cardType) {
-    // Fallback: if no enemyIndex given, use 0
     if (enemyIndex === undefined) enemyIndex = 0;
 
     const setAttackerHp = isPlayerCard
@@ -175,7 +124,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             : defender.archetype || 'Enemy'
         : 'You';
 
-    // ── strength (applies before damage so it affects this card's hit) ───────
     if (effects.strength && isPlayerCard) {
         attacker.strength += effects.strength;
         session.appendLog({
@@ -184,7 +132,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         });
     }
 
-    // ── vulnerable on defender (applies before damage so this card benefits) ─
     if (effects.vulnerable) {
         const { pct, turns } = effects.vulnerable;
         upsertTurnStatus(defender.statuses, 'vulnerable', pct, turns);
@@ -194,7 +141,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         });
     }
 
-    // ── lifesteal (applies before damage so this card's hit lifesteals too) ───
     if (effects.lifesteal) {
         const { pct, turns } = effects.lifesteal;
         upsertTurnStatus(attacker.statuses, 'lifesteal', pct, turns);
@@ -204,31 +150,23 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
         });
     }
 
-    // ── damage ───────────────────────────────────────────────────────────────
     if (effects.damage) {
         const base = effects.damage + (attacker.strength || 0);
         const snap = session.player.equipmentSnapshot;
-        // Scale outgoing player card damage by weapon attack multiplier.
-        // Formula: max(1, (gearSum / 2) ^ 0.55)
-        //   T1 gear (sum 2.0) → 1.00×  T4 gear (sum 4.2) → 1.53×
-        //   T2 gear (sum 2.4) → 1.11×  T5 gear (sum 5.4) → 1.76×
-        //   T3 gear (sum 3.2) → 1.32×  T6 gear (sum 6.8) → 1.98×
+
         let weaponMult = 1;
         if (isPlayerCard) {
             const gearSum = Number(snap?.attackMultiplier || 2);
             weaponMult = Math.max(1, Math.pow(gearSum / 2, 0.55));
         }
-        // Reduce incoming enemy damage by player's combined armor defense
         const defenseMult = !isPlayerCard ? Math.max(1, Number(snap?.defenseMultiplier || 1)) : 1;
         const vulnMult = getVulnMultiplier(defender);
         const scaled = Math.floor((base * weaponMult * vulnMult) / defenseMult);
         const { damageTaken, blocked } = applyDamage(defender, scaled, true);
 
         setDefenderHp(defender.hp - damageTaken);
-        // Capture post-hit player HP for frontend HP bar sync on enemy attacks
         const postHitPlayerHp = !isPlayerCard ? defender.hp : undefined;
 
-        // deflect — if player is taking damage and has deflect status, reflect % back
         if (!isPlayerCard && (damageTaken > 0 || blocked > 0)) {
             const deflect = findStatus(session.player.statuses, 'deflect');
             if (deflect && deflect.pct > 0) {
@@ -236,7 +174,7 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
                     1,
                     Math.floor((damageTaken + blocked) * (deflect.pct / 100))
                 );
-                const reflectTarget = attacker; // the enemy that attacked
+                const reflectTarget = attacker;
                 const { damageTaken: reflDmg } = applyDamage(reflectTarget, reflected, false);
                 if (reflDmg > 0) {
                     session.setEnemyHp(reflectTarget.hp - reflDmg, enemyIndex);
@@ -249,7 +187,6 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
             }
         }
 
-        // lifesteal — heals attacker % of damage dealt
         const ls = findStatus(attacker.statuses, 'lifesteal');
         if (ls && damageTaken > 0) {
             const heal = Math.floor(damageTaken * (ls.pct / 100));
@@ -373,20 +310,12 @@ function applyEffects(effects, attacker, defender, isPlayerCard, session, enemyI
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Status tick helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Tick bleed and scorch on a target — unblockable, stacks -1 per tick.
-// Damage per tick = attackMultiplier (melee + ranged sum) + floor(5% of target.maxHp)
 function tickDots(session, target, isPlayer, enemyIndex) {
     const setHp = !isPlayer
         ? (hp) => session.setPlayerHp(hp)
         : (hp) => session.setEnemyHp(hp, enemyIndex);
     const label = !isPlayer ? 'You' : target.archetype || 'Enemy';
     const tickDmg = calcDotDamage(session, target, isPlayer);
-    // Regen ticks first — may save the player before DoT damage resolves
-    // !isPlayer means target IS the player (enemy is the attacker)
     if (!isPlayer) {
         for (const s of target.statuses) {
             if (s.type === 'regen' && s.stacks > 0) {
@@ -414,7 +343,6 @@ function tickDots(session, target, isPlayer, enemyIndex) {
     }
 }
 
-// Decrement turns on vulnerable / lifesteal, prune expired entries.
 function tickTurnStatuses(target) {
     for (const s of target.statuses) {
         if (s.turns !== undefined) s.turns -= 1;
@@ -422,13 +350,6 @@ function tickTurnStatuses(target) {
     pruneStatuses(target.statuses);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public — player card
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Play the card at hand[cardIndex].
-// targetIndex is the enemies[] slot the player chose (required for 'single' cards).
-// Returns { ok: true } or { ok: false, reason: string }.
 function resolveCard(session, cardIndex, targetIndex) {
     if (!session.isActive()) return { ok: false, reason: 'Combat is already resolved.' };
     if (session.turnOwner !== TURN_OWNERS.PLAYER)
@@ -441,11 +362,9 @@ function resolveCard(session, cardIndex, targetIndex) {
     const card = getCardById(cardRef.id);
     if (!card) return { ok: false, reason: `Unknown card id ${cardRef.id}.` };
 
-    // ── Resolve targets based on the card's targetType ───────────────────────
     const alive = session.getAliveEnemies();
     const tType = card.targetType || 'single';
 
-    // Self-only cards never need an enemy target
     if (tType === 'self') {
         session.removeCardFromHand(cardIndex, card.exhaust === true);
         session.registerCardPlayed();
@@ -462,12 +381,10 @@ function resolveCard(session, cardIndex, targetIndex) {
         return { ok: true };
     }
 
-    // For enemy-targeting cards, we need at least one alive enemy
     if (alive.length === 0) {
         return { ok: false, reason: 'No enemies alive to target.' };
     }
 
-    // Remove card from hand and register play before applying effects
     session.removeCardFromHand(cardIndex, card.exhaust === true);
     session.registerCardPlayed();
     session.appendLog({ type: 'player', message: `You play ${card.name}.` });
@@ -498,7 +415,6 @@ function resolveCard(session, cardIndex, targetIndex) {
             );
         }
     } else if (tType === 'all') {
-        // Hit every living enemy
         for (const enemy of alive) {
             if (!session.isActive()) break;
             applyEffects(
@@ -512,7 +428,6 @@ function resolveCard(session, cardIndex, targetIndex) {
             );
         }
     } else if (tType === 'random') {
-        // Hit N random living enemies (may hit the same one twice if fewer alive)
         const count = Number(card.affectedTargets) || 1;
         for (let i = 0; i < count; i++) {
             if (!session.isActive()) break;
@@ -534,21 +449,13 @@ function resolveCard(session, cardIndex, targetIndex) {
     return { ok: true };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public — end player turn
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Orchestrates everything that happens from "End Turn" to the start of the
-// next player turn. Exits early at any point if combat is resolved.
 function endPlayerTurn(session) {
     if (!session.isActive()) return;
 
-    // 1. Player DoTs tick (enemy is the attacker — isPlayer=false)
     tickDots(session, session.player, false, -1);
     if (!session.isActive()) return;
 
-    // 2. Enemy DoTs tick — enemies killed here skip their attack this turn
-    session.startEnemyTurn(); // resets block + strength for all enemies
+    session.startEnemyTurn();
     for (const enemy of session.enemies) {
         if (!session.isActive()) return;
         if (enemy.hp > 0) {
@@ -557,29 +464,20 @@ function endPlayerTurn(session) {
     }
     if (!session.isActive()) return;
 
-    // 3. Enemy turn — each surviving enemy selects and executes cards
     resolveEnemyCards(session);
     if (!session.isActive()) return;
 
-    // 4. Player turn-based statuses decrement (after enemy attacks so deflect/lifesteal
-    //    remain active for the full duration they were applied)
     tickTurnStatuses(session.player);
 
-    // 5. Enemy turn-based statuses decrement (each surviving enemy)
     for (const enemy of session.enemies) {
         if (enemy.hp > 0) {
             tickTurnStatuses(enemy);
         }
     }
 
-    // 6. Advance turn, start new player turn (resets player block + strength)
     session.incrementTurn();
     session.startPlayerTurn();
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Internal — enemy turn execution
-// ─────────────────────────────────────────────────────────────────────────────
 
 function resolveEnemyCards(session) {
     for (const enemy of session.enemies) {
@@ -598,10 +496,6 @@ function resolveEnemyCards(session) {
         }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Exports
-// ─────────────────────────────────────────────────────────────────────────────
 
 module.exports = {
     applyDamage,

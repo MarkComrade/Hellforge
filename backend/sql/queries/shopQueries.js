@@ -76,9 +76,6 @@ async function getRandomShopItems(limit = 5) {
             ? Math.min(Math.max(parsedLimit, 1), 12)
             : 5;
 
-        // Tier 6 (Hellish) items are extremely rare in shops — ~3% weight vs 1.0 for others.
-        // Uses the Gumbel-max trick: ORDER BY -LOG(RAND()) / weight gives correct weighted
-        // random sampling without replacement.
         const [rows] = await pool.query(
             `SELECT *
              FROM (

@@ -18,7 +18,6 @@ async function deleteUser(username) {
 
         const userId = userRows[0].userId;
 
-        // Collect all instance_ids before deleting the rows that reference them
         const [stashInstances] = await connection.execute(
             'SELECT instance_id FROM player_stash WHERE playerId = ? AND instance_id IS NOT NULL',
             [userId]
@@ -35,8 +34,6 @@ async function deleteUser(username) {
         await connection.execute('DELETE FROM player_stash WHERE playerId = ?', [userId]);
         await connection.execute('DELETE FROM player_loadout WHERE playerId = ?', [userId]);
 
-        // Delete instances after stash/loadout rows are gone (FK no longer blocks it).
-        // item_instance_cards are removed automatically via ON DELETE CASCADE.
         for (const id of instanceIds) {
             await connection.execute('DELETE FROM item_instances WHERE instanceId = ?', [id]);
         }
@@ -114,7 +111,6 @@ async function updateUserInventory(userId, inventoryData) {
     try {
         await connection.beginTransaction();
 
-        // Helper: replace one equipped slot, deleting the old instance first
         async function replaceSlot(slot, itemType, itemId, cardType, idColumn) {
             const [itemRows] = await connection.query(
                 `SELECT tier FROM ${itemType === 'armor' ? 'armors' : 'weapons'} WHERE ${itemType === 'armor' ? 'armorId' : 'weaponId'} = ?`,
@@ -122,7 +118,6 @@ async function updateUserInventory(userId, inventoryData) {
             );
             if (!itemRows[0]) throw new Error(`${itemType} id ${itemId} not found`);
 
-            // Fetch and delete the old instance before creating the new one
             const [oldRows] = await connection.execute(
                 'SELECT instance_id FROM player_loadout WHERE playerId = ? AND equipped = 1 AND slot = ?',
                 [userId, slot]
@@ -140,8 +135,6 @@ async function updateUserInventory(userId, inventoryData) {
             if (updateResult.affectedRows === 0)
                 throw new Error(`No equipped ${slot} row found for player ${userId}`);
 
-            // Remove old instance after FK reference is gone.
-            // item_instance_cards are removed automatically via ON DELETE CASCADE.
             if (oldInstanceId !== null) {
                 await connection.execute('DELETE FROM item_instances WHERE instanceId = ?', [
                     oldInstanceId

@@ -99,7 +99,7 @@
     display: none;
 }
 
-/* Shop overlay */
+
 .shopOverlay {
     position: fixed;
     top: 50%;
@@ -374,7 +374,7 @@
     padding: 1.5vh 0;
 }
 
-/* Loot popup */
+
 .lootPopup {
     position: fixed;
     bottom: 12vh;

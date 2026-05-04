@@ -1,8 +1,8 @@
-//Start game
+
 async function StartGame() {
     clearBody();
 
-    //Title
+    
     generateBootStrapGrid(1, 1, 12);
     let menuTitle = document.createElement('div');
     menuTitle.setAttribute('class', 'menuTitle startGameMenu');

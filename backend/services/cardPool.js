@@ -5979,11 +5979,6 @@ function getCardById(cardId) {
     return null;
 }
 
-// itemType is the DB subtype: 'Melee', 'Ranged', 'Helmet', or 'Armor'
-// Returns 5 unique cards from the matching pool.
-// Tier 1 always returns the same deterministic starter cards (sorted by id).
-// For tier 2+: each card independently rolls its own tier —
-//   15% one tier lower, 70% matching item tier, 15% one tier higher.
 function pickCardsForItem(itemType, tier) {
     const typeMap = { Melee: 'melee', Ranged: 'ranged', Helmet: 'helmet', Armor: 'armour' };
     const poolKey = typeMap[itemType];
@@ -5991,7 +5986,6 @@ function pickCardsForItem(itemType, tier) {
 
     const pool = CARD_POOL[poolKey];
 
-    // Tier 1 starter gear always gets the same fixed cards
     if (tier === 1) {
         const t1 = pool.filter((c) => c.tier === 1).sort((a, b) => a.id - b.id);
         return t1.slice(0, 5);
@@ -6002,39 +5996,33 @@ function pickCardsForItem(itemType, tier) {
 
     function rollCardTier() {
         const roll = Math.random();
-        // T6 equipment: 10% chance per slot to draw a legendary T7 card
         if (tier === 6) {
             if (roll < 0.1) return 7;
-            if (roll < 0.25) return 5; // 15% T5
-            return 6; // 75% T6
+            if (roll < 0.25) return 5;
+            return 6;
         }
         if (roll < 0.15) return Math.max(minTier, tier - 1);
         if (roll < 0.85) return tier;
         return Math.min(maxTier, tier + 1);
     }
 
-    // Pick 5 cards, each with its own independent tier roll.
-    // Avoid duplicates by tracking used ids.
     const picked = [];
     const usedIds = new Set();
 
     for (let i = 0; i < 5; i++) {
         const cardTier = rollCardTier();
 
-        // Candidates at the rolled tier, excluding already picked
         let candidates = pool.filter((c) => c.tier === cardTier && !usedIds.has(c.id));
 
-        // Fall back to adjacent tiers if needed
         if (candidates.length === 0) {
             candidates = pool.filter((c) => Math.abs(c.tier - cardTier) <= 1 && !usedIds.has(c.id));
         }
 
-        // Last resort: any remaining card in the pool
         if (candidates.length === 0) {
             candidates = pool.filter((c) => !usedIds.has(c.id));
         }
 
-        if (candidates.length === 0) break; // pool exhausted
+        if (candidates.length === 0) break;
 
         const card = candidates[Math.floor(Math.random() * candidates.length)];
         picked.push(card);
@@ -6046,8 +6034,6 @@ function pickCardsForItem(itemType, tier) {
 
 const CARDS_PER_TURN = 5;
 
-// Build a shuffled draw-pile from the four equipped item card arrays.
-// equipmentSnapshot must have melee_cards, ranged_cards, helmet_cards, armor_cards arrays.
 function buildDeckFromEquipment(equipmentSnapshot) {
     const cards = [
         ...(equipmentSnapshot.melee_cards || []),

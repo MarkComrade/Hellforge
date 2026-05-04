@@ -1,4 +1,4 @@
-/* Overlay and modal styles */
+
 .inventoryOverlay {
     display: flex;
     flex-direction: column;
@@ -42,7 +42,7 @@
     justify-content: center;
 }
 
-/* Stash overlay */
+
 .stashOverlay {
     display: flex;
     flex-direction: column;
@@ -209,7 +209,7 @@
     font-family: 'MedievalSharp', cursive;
 }
 
-/* Loot popup */
+
 .lootPopup {
     position: fixed;
     top: 50%;
@@ -506,7 +506,7 @@
     }
 }
 
-/* Gold transfer panel */
+
 .goldTransferPanel {
     display: flex;
     flex-direction: column;

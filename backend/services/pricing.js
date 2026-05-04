@@ -17,39 +17,45 @@ function getTierDiff(itemTier, dungeonName, dungeonLevel) {
 }
 
 function calculateAdjustedPrice(basePrice, itemTier, dungeonName, dungeonLevel, options = {}) {
-    const markupMin = Number.isFinite(options.markupMin) ? options.markupMin : DEFAULT_MARKUP_MIN;
-    const markupMax = Number.isFinite(options.markupMax) ? options.markupMax : DEFAULT_MARKUP_MAX;
-    const safeBasePrice = Math.max(1, Number(basePrice) || 0);
+    let markupMin = DEFAULT_MARKUP_MIN;
+    if (Number.isFinite(options.markupMin)) markupMin = options.markupMin;
+
+    let markupMax = DEFAULT_MARKUP_MAX;
+    if (Number.isFinite(options.markupMax)) markupMax = options.markupMax;
+
+    let safeBasePrice = Number(basePrice) || 0;
+    if (safeBasePrice < 1) safeBasePrice = 1;
 
     const tierDiff = getTierDiff(itemTier, dungeonName, dungeonLevel);
     const tierMultiplier = 1 + tierDiff * 0.25;
     const randomMarkup = markupMin + Math.random() * (markupMax - markupMin);
-    const adjustedPrice = Math.max(1, Math.round(safeBasePrice * tierMultiplier * randomMarkup));
+
+    let adjustedPrice = Math.round(safeBasePrice * tierMultiplier * randomMarkup);
+    if (adjustedPrice < 1) adjustedPrice = 1;
 
     return adjustedPrice;
 }
 
 function getMaxAllowedPrice(basePrice, itemTier, dungeonName, dungeonLevel, options = {}) {
-    const markupMax = Number.isFinite(options.markupMax) ? options.markupMax : DEFAULT_MARKUP_MAX;
-    const safeBasePrice = Math.max(1, Number(basePrice) || 0);
+    let markupMax = DEFAULT_MARKUP_MAX;
+    if (Number.isFinite(options.markupMax)) markupMax = options.markupMax;
+
+    let safeBasePrice = Number(basePrice) || 0;
+    if (safeBasePrice < 1) safeBasePrice = 1;
 
     const tierDiff = getTierDiff(itemTier, dungeonName, dungeonLevel);
     const tierMultiplier = 1 + tierDiff * 0.25;
 
-    return Math.max(1, Math.round(safeBasePrice * tierMultiplier * markupMax));
+    let result = Math.round(safeBasePrice * tierMultiplier * markupMax);
+    if (result < 1) result = 1;
+    return result;
 }
 
 function withAdjustedPrice(item, dungeonName, dungeonLevel, options = {}) {
-    return {
-        ...item,
-        adjustedPrice: calculateAdjustedPrice(
-            item?.price,
-            item?.tier,
-            dungeonName,
-            dungeonLevel,
-            options
-        )
-    };
+    const price = item ? item.price : undefined;
+    const tier = item ? item.tier : undefined;
+    const adjusted = calculateAdjustedPrice(price, tier, dungeonName, dungeonLevel, options);
+    return Object.assign({}, item, { adjustedPrice: adjusted });
 }
 
 module.exports = {

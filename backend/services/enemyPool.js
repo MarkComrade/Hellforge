@@ -671,11 +671,6 @@ const ENEMY_POOL = {
     ]
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Weighted random pick from an array of { likelihood, ... } objects.
 function pickByLikelihood(cards) {
     const total = cards.reduce((sum, c) => sum + c.likelihood, 0);
     let roll = Math.random() * total;
@@ -686,25 +681,10 @@ function pickByLikelihood(cards) {
     return cards[cards.length - 1];
 }
 
-// Scale a base stat value for the given dungeon level.
 function scaleForLevel(base, level) {
     return Math.round(base * (1 + (level - 1) * DMG_SCALE_PER_LEVEL));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Select the cards the enemy plays this turn.
-//
-// Normal HP: pick 1-3 offensive cards (non-defensive) by likelihood.
-//
-// Low HP (< LOW_HP_THRESHOLD): always play at least 2 cards —
-//   slot 1 is always a defensive card (block / heal / lifesteal),
-//   slot 2+ are offensive cards picked by likelihood.
-//   Total card count is max(2, normal random count).
-//
-// Falls back to the full pool if either sub-pool is empty.
 function selectTurnCards(enemy) {
     const isLowHp = enemy.hp / enemy.maxHp < LOW_HP_THRESHOLD;
 
@@ -723,7 +703,6 @@ function selectTurnCards(enemy) {
         return selected;
     }
 
-    // Low HP — guaranteed 1 defensive + at least 1 offensive
     const defPool = defensivePool.length > 0 ? defensivePool : enemy.cards;
     const atkPool = offensivePool.length > 0 ? offensivePool : enemy.cards;
 
@@ -735,9 +714,6 @@ function selectTurnCards(enemy) {
     return selected;
 }
 
-// Build a fully initialised enemy object ready for CombatSession.setEnemy().
-// Damage and healing are scaled to the current dungeon level; everything else
-// (block values, status stacks/turns) stays as defined in the archetype.
 function generateEnemy(dungeonType, dungeonLevel) {
     const pool = ENEMY_POOL[dungeonType] || ENEMY_POOL.crypt;
     const archetype = pool[Math.floor(Math.random() * pool.length)];
@@ -772,10 +748,6 @@ function generateEnemy(dungeonType, dungeonLevel) {
         cards: scaledCards
     };
 }
-
-// Generate a group of enemies for a multi-enemy encounter.
-// count determines how many enemies to spawn (1-5).
-// Each enemy is independently rolled from the dungeon's archetype pool.
 function generateEnemyGroup(dungeonType, dungeonLevel, count) {
     const clamped = Math.max(1, Math.min(5, Math.floor(Number(count) || 1)));
     const enemies = [];

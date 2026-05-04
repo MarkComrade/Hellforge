@@ -23,7 +23,7 @@ function startCombat(token, initialState) {
 function enterCombatMode() {
     document.body.classList.add('in-combat');
 
-    // Remove any ground-loot pickup button left over from a previous room
+    
     document.getElementById('lootRoomPickupButton')?.remove();
 
     const topRight = document.querySelector('#ui .top-right');
@@ -377,23 +377,23 @@ function createCardElement(card, cardIndex, canPlayCards) {
     if (!canPlayCards) cardElement.classList.add('card-disabled');
     if (selectedCardIndex === cardIndex) cardElement.classList.add('card-selected');
 
-    // Tier badge — circular, sits on top edge
+    
     const tierBadge = document.createElement('div');
     tierBadge.className = 'combat-card-tier-badge tier-' + (card.tier || 1);
     tierBadge.textContent = card.tier || '?';
     cardElement.appendChild(tierBadge);
 
-    // Inner wrapper
+    
     const inner = document.createElement('div');
     inner.className = 'combat-card-inner';
 
-    // Card name
+    
     const nameElement = document.createElement('div');
     nameElement.className = 'combat-card-name';
     nameElement.textContent = card.name;
     inner.appendChild(nameElement);
 
-    // Image box
+    
     const imgBox = document.createElement('div');
     imgBox.className = 'combat-card-img-box';
     const img = document.createElement('img');
@@ -406,13 +406,13 @@ function createCardElement(card, cardIndex, canPlayCards) {
     imgBox.appendChild(img);
     inner.appendChild(imgBox);
 
-    // Effects description box
+    
     const descBox = document.createElement('div');
     descBox.className = 'combat-card-desc-box';
     buildCardEffectsDOM(card.effects, descBox);
     inner.appendChild(descBox);
 
-    // Footer: type | target | exhaust
+    
     const footer = document.createElement('div');
     footer.className = 'combat-card-footer';
 
@@ -699,7 +699,7 @@ async function showEnemyActions() {
         logElement.appendChild(line);
         logElement.scrollTop = logElement.scrollHeight;
 
-        // Sync the player HP bar the moment a damage hit lands
+        
         if (entry.type === 'enemy' && entry.meta != null && entry.meta.playerHp !== undefined) {
             if (typeof setHP === 'function') setHP(entry.meta.playerHp);
         }

@@ -39,7 +39,7 @@ function openSettings() {
     body.appendChild(settingsOverlay);
 }
 
-// Abandon the dungeon — notifies the server to clear dungeon session, then shows exit screen
+
 async function abandonDungeon() {
     if (document.getElementById('combat-scene')) return;
     showAbandonConfirm(async () => {
@@ -126,5 +126,5 @@ function areYouSure(dialogue, title, refuse, approve) {
         popup.appendChild(footer);
         backdrop.appendChild(popup);
         document.body.appendChild(backdrop);
-    }); // end Promise
+    }); 
 }

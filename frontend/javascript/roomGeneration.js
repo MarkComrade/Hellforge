@@ -1,10 +1,10 @@
-// roomGeneration.js — Map rendering, navigation, and room event handling.
-// these functions only render what the server sends.
-// Uses postFetch from getPostFetch.js (check load order).
 
-// Apply the server's map onto the 9×9 DOM grid.
-// Each cell is matched by col,row to the server's "x,y" keys.
-// Cells outside the bounding box are hidden; visible cells are scaled to fit.
+
+
+
+
+
+
 function renderMap(mapData, bounds) {
     const container = document.getElementById('map');
     if (!container) return;
@@ -28,7 +28,7 @@ function renderMap(mapData, bounds) {
             cell.dataset.room = 'false';
         }
 
-        // cutOutMap logic — hide cells outside bounds
+        
         if (col < minX || col > maxX || row < minY || row > maxY) {
             cell.style.display = 'none';
         } else {
@@ -38,7 +38,7 @@ function renderMap(mapData, bounds) {
     });
 }
 
-// Render player position on the map
+
 function renderPlayerPosition(pos) {
     document
         .querySelectorAll('#map .cell[data-current="true"]')
@@ -50,7 +50,7 @@ function renderPlayerPosition(pos) {
     }
 }
 
-// Render doors based on server-provided adjacency data
+
 function renderDoors(doors, dungeon) {
     const doorTextures = {
         Laboratory: '../textures/rooms/door_laboratory.png',
@@ -63,7 +63,7 @@ function renderDoors(doors, dungeon) {
     const currentCell = document.querySelector('#map .cell[data-current="true"]');
     if (!currentCell) return;
 
-    // Remove old doors
+    
     currentCell
         .querySelectorAll('img.doorUp, img.doorRight, img.doorDown, img.doorLeft')
         .forEach((img) => img.remove());
@@ -147,7 +147,7 @@ function syncLootPickupButton(room) {
     room.appendChild(button);
 }
 
-// Set up navigation — sends move requests to server
+
 function navigateToRoom(startX, startY, dungeonLevel) {
     let body = document.getElementsByTagName('body')[0];
     const dungeon = sessionStorage.getItem('currentDungeon');
@@ -184,7 +184,7 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                     return;
                 }
 
-                // Remove old doors from previous cell
+                
                 const prevCell = document.querySelector('#map .cell[data-current="true"]');
                 if (prevCell) {
                     prevCell.dataset.current = 'false';
@@ -193,13 +193,13 @@ function navigateToRoom(startX, startY, dungeonLevel) {
                         .forEach((img) => img.remove());
                 }
 
-                // Update position from server response
+                
                 renderPlayerPosition(result.position);
                 renderDoors(result.doors, dungeon);
 
-                //console.log(`Current position: (${result.position.x}, ${result.position.y})`);
+                
 
-                // Handle room events with server-validated data
+                
                 const cell = document.querySelector('#map .cell[data-current="true"]');
                 if (cell && result.roomType) {
                     cell.dataset.roomType = result.roomType;

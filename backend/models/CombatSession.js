@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { CARDS_PER_TURN } = require('../services/cardPool.js');
 
-const HAND_SIZE = 4; // hand is always maintained at this size during combat
+const HAND_SIZE = 4;
 
 const TURN_OWNERS = {
     PLAYER: 'player',
@@ -106,12 +106,9 @@ class CombatSession {
             cardsPerTurn: enemyData.cardsPerTurn || { min: 1, max: 2 }
         };
 
-        // Wrap single enemy into the enemies array for multi-enemy compat
         this.enemies = [{ ...this.enemy, index: 0 }];
     }
 
-    // Initialise the encounter with multiple enemies at once.
-    // Each entry follows the same shape as generateEnemy() output.
     setEnemies(enemiesArray = []) {
         this.enemies = enemiesArray.map((e, i) => {
             const maxHp = Number(e.maxHp || e.hp || 0);
@@ -131,7 +128,6 @@ class CombatSession {
             };
         });
 
-        // Keep legacy this.enemy pointing at the first enemy for backward compat
         this.enemy =
             this.enemies.length > 0
                 ? this.enemies[0]
@@ -149,7 +145,6 @@ class CombatSession {
                   };
     }
 
-    // Returns only enemies that are still alive (hp > 0).
     getAliveEnemies() {
         return this.enemies.filter((e) => e.hp > 0);
     }
@@ -175,9 +170,6 @@ class CombatSession {
         this.turnNumber += 1;
     }
 
-    // Remove a card from hand by index, route it to discard or exhaust,
-    // then immediately draw one replacement to keep the hand at HAND_SIZE.
-    // Returns the removed card so the caller can apply its effects, or null if index is invalid.
     removeCardFromHand(cardIndex, exhaust = false) {
         if (cardIndex < 0 || cardIndex >= this.deck.hand.length) return null;
         const [card] = this.deck.hand.splice(cardIndex, 1);
@@ -186,26 +178,19 @@ class CombatSession {
         } else {
             this.deck.discardPile.push(card);
         }
-        this.drawCard(); // immediately refill the empty slot
+        this.drawCard();
         return card;
     }
 
-    // Fill hand up to HAND_SIZE by drawing cards one at a time.
-    // Used at combat start to deal the opening hand.
-    // During combat, drawCard() is called once per card played instead.
     refillHand() {
         while (this.deck.hand.length < HAND_SIZE) {
-            if (this.drawCard() === null) break; // draw + discard both empty
+            if (this.drawCard() === null) break;
         }
     }
 
-    // Draw one card from the draw pile into hand.
-    // If the draw pile is empty, shuffle the discard pile back into the draw pile first.
-    // Exhausted cards are never reshuffled — they stay in exhaustPile permanently.
     drawCard() {
         if (this.deck.drawPile.length === 0) {
-            if (this.deck.discardPile.length === 0) return null; // nothing left to draw
-            // Fisher-Yates shuffle of the discard pile → becomes the new draw pile
+            if (this.deck.discardPile.length === 0) return null;
             const reshuffled = [...this.deck.discardPile];
             for (let i = reshuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -219,7 +204,6 @@ class CombatSession {
         return card;
     }
 
-    // Draw n cards, stopping early if both draw and discard piles run out.
     drawCards(n) {
         const count = Math.max(0, Math.floor(Number(n) || 0));
         for (let i = 0; i < count; i++) {
@@ -231,16 +215,12 @@ class CombatSession {
         this.setTurnOwner(TURN_OWNERS.PLAYER);
         this.turnRules.cardsPlayedThisTurn = 0;
         this.turnRules.bonusCardsThisTurn = 0;
-        // Block and strength accumulated last turn expire at the start of the next player turn
         this.player.block = 0;
         this.player.strength = 0;
-        // No draw here — hand is always maintained at HAND_SIZE:
-        // one card is drawn automatically every time a card is played.
     }
 
     startEnemyTurn() {
         this.setTurnOwner(TURN_OWNERS.ENEMY);
-        // Block and strength accumulated by every enemy last turn expire now
         for (const enemy of this.enemies) {
             if (enemy.hp > 0) {
                 enemy.block = 0;
@@ -302,12 +282,10 @@ class CombatSession {
 
         target.hp = this._clamp(Number(nextHp), 0, target.maxHp);
 
-        // Keep legacy this.enemy in sync when targeting the first enemy
         if (target === this.enemies[0]) {
             this.enemy.hp = target.hp;
         }
 
-        // Combat is won when every enemy is dead
         if (this.enemies.length > 0 && this.enemies.every((e) => e.hp <= 0)) {
             this.resolveCombat({ gameOver: false });
         }
@@ -399,7 +377,6 @@ class CombatSession {
             cards: [],
             cardsPerTurn: { min: 1, max: 2 }
         };
-        // Restore the enemies array — fall back to wrapping legacy single enemy
         c.enemies =
             Array.isArray(data.enemies) && data.enemies.length > 0
                 ? data.enemies

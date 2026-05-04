@@ -28,7 +28,6 @@ router.get('/shop-items', requireLogin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Not in a shop room.' });
         }
 
-        // Return cached stock if this shop room was already visited
         if (dungeon.shopStock[roomKey]) {
             return res.status(200).json({ success: true, items: dungeon.shopStock[roomKey] });
         }
@@ -44,7 +43,6 @@ router.get('/shop-items', requireLogin, async (req, res) => {
             withAdjustedPrice(item, dungeon.dungeonName, dungeon.dungeonLevel)
         );
 
-        // Cache the generated stock in the dungeon session
         dungeon.shopStock[roomKey] = pricedItems;
         req.session.dungeonData = dungeon.toJSON();
 
@@ -100,9 +98,6 @@ router.post('/buy-item', requireLogin, async (req, res) => {
         });
     }
 
-    // Resolve the stock entry once — reused for the sold-check, price-lock, and mark-as-sold.
-    // If the item is not in the cached shop stock at all, reject — prevents buying arbitrary
-    // items at a manipulated price by crafting a request with a real itemId but no stock entry.
     let stockItem = null;
     const stock = dungeon.shopStock[roomKey];
     if (stock) {
@@ -145,10 +140,6 @@ router.post('/buy-item', requireLogin, async (req, res) => {
         }
 
         if (stockItem) {
-            // Mark sold and persist to session BEFORE the DB call.
-            // Because Node.js is single-threaded, this synchronous write completes before any
-            // other concurrent request can read the session — eliminating the duplicate-buy
-            // race condition where two simultaneous requests both see sold=false.
             stockItem.sold = true;
             req.session.dungeonData = dungeon.toJSON();
         }
@@ -161,7 +152,6 @@ router.post('/buy-item', requireLogin, async (req, res) => {
         );
 
         if (!result.success) {
-            // Revert the sold flag if the DB purchase failed (e.g. insufficient gold)
             if (stockItem) {
                 stockItem.sold = false;
                 req.session.dungeonData = dungeon.toJSON();

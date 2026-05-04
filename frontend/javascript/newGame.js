@@ -1,4 +1,4 @@
-// Dungeon background textures — maps dungeon name to its room background image
+
 const DUNGEON_BACKGROUNDS = {
     Laboratory: "url('../textures/rooms/room_laboratory.png')",
     Crypt: "url('../textures/rooms/room_crypt.png')",
@@ -6,9 +6,9 @@ const DUNGEON_BACKGROUNDS = {
     'Gates of Hell': "url('../textures/rooms/room_hell.png')"
 };
 
-// Start a new dungeon run — sets the background and asks the server to generate the map.
+
 function newGame(dungeon) {
-    // Block guests — server would reject anyway, but we show a message and skip the bg change
+    
 
     sessionStorage.setItem('currentDungeon', dungeon);
 
@@ -40,9 +40,9 @@ function newGame(dungeon) {
         });
 }
 
-// Build the level UI from server-provided data.
-// Creates the 9×9 DOM grid, then hands off to rendering functions in roomGeneration.js
-// which stamp the server's map/position/doors onto the grid cells.
+
+
+
 function newLevelFromServer(dungeon, serverData, currentHP) {
     let body = document.getElementsByTagName('body');
     body[0].style.height = '100vh';
@@ -56,7 +56,7 @@ function newLevelFromServer(dungeon, serverData, currentHP) {
     container.setAttribute('id', 'map');
     mapContainer.appendChild(container);
 
-    // Build a 9×9 grid of empty cells — renderMap() will mark which ones are actual rooms
+    
     for (let i = 0; i < 9; i++) {
         let div = document.createElement('div');
         div.setAttribute('class', 'row g-0');
@@ -75,7 +75,7 @@ function newLevelFromServer(dungeon, serverData, currentHP) {
 
     isInGame = true;
 
-    // Apply server state to the DOM — these functions live in roomGeneration.js
+    
     renderMap(serverData.map, serverData.bounds);
     renderPlayerPosition(serverData.position);
 
@@ -87,7 +87,7 @@ function newLevelFromServer(dungeon, serverData, currentHP) {
     setHP(currentHP);
 }
 
-// Build the 4-corner UI overlay (level indicator, buttons, HP bar)
+
 function createUI(dungeonLevel) {
     const body = document.body;
 
@@ -103,7 +103,7 @@ function createUI(dungeonLevel) {
 function createTopLeft(parent, dungeonLevel) {
     const box = document.createElement('div');
     box.className = 'ui-box top-left';
-    // ide kell majd js meg csak egyenlore kiirtam valamit hogy lassuk hogy nez ki
+    
     let levelNumber = dungeonLevel;
 
     const levelBox = document.createElement('div');
@@ -126,7 +126,7 @@ function createTopLeft(parent, dungeonLevel) {
 
     parent.appendChild(box);
 }
-// Top-right corner: settings, inventory, abandon buttons
+
 function createTopRight(parent) {
     const box = document.createElement('div');
     box.className = 'ui-box top-right';
@@ -138,7 +138,7 @@ function createTopRight(parent) {
 
     parent.appendChild(box);
 
-    // openInventory, openSettings, abandonDungeon are defined in gameOverlays.js
+    
     document.getElementById('openInventory').addEventListener('click', openInventory);
     document.getElementById('openSettings').addEventListener('click', openSettings);
     document.getElementById('abandonDungeon').addEventListener('click', abandonDungeon);
@@ -155,7 +155,7 @@ function createBottomLeft(parent) {
     box.setAttribute('class', 'ui-box bottom-left');
     box.setAttribute('id', 'hpBox');
 
-    /* felső sor */
+    
     const hpTop = document.createElement('div');
     hpTop.setAttribute('class', 'hp-top');
 
@@ -178,7 +178,7 @@ function createBottomLeft(parent) {
     hpTop.appendChild(hpLabel);
     hpTop.appendChild(hpText);
 
-    /* HP bar */
+    
     const hpBar = document.createElement('div');
     hpBar.setAttribute('class', 'hp-bar');
 
@@ -188,25 +188,25 @@ function createBottomLeft(parent) {
 
     hpBar.appendChild(hpFill);
 
-    /* összerakás */
+    
     box.appendChild(hpTop);
     box.appendChild(hpBar);
 
     parent.appendChild(box);
 }
-// Update the HP bar width and colour based on current HP
+
 function setHP(currentHP) {
     const maxHP = 100;
 
     const hpFill = document.getElementById('hpFill');
     const hpValue = document.getElementById('hpValue');
-    // Százalékos HP számítás nem lehet kisebb 0-nál és nagyobb mint a maxHP
+    
     const percent = Math.round(Math.max(0, Math.min(currentHP, maxHP)));
 
     hpFill.style.width = percent + '%';
     hpValue.textContent = percent;
 
-    // Színváltás alacsony HP-nál
+    
     if (percent <= 30) {
         hpFill.style.background = 'linear-gradient(to right, #ff3333, #ff7777)';
     } else if (percent <= 50) {
@@ -216,5 +216,5 @@ function setHP(currentHP) {
     }
 }
 
-// Show an overlay telling the guest they need to log in to play.
-// Auto-dismisses after 3 seconds or on click.
+
+

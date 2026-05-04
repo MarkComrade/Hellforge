@@ -1,4 +1,4 @@
-/* Menu-specific styles */
+
 .hellForgeLogo {
     display: flex;
     align-self: center;
@@ -164,17 +164,33 @@
 }
 
 .exitDungeonDiv {
-    height: 50vh;
-    width: 70vw;
+    height: auto;
+    width: 60vw;
+    max-width: 700px;
     border: 0.4vh solid #000000;
     outline: 0.2vh solid rgb(220, 40, 40);
-    margin-left: 3vw;
-    margin-right: 3vw;
+    margin-left: auto;
+    margin-right: auto;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2vh;
+    padding: 2vh 3vw;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .exitDungeonMenu {
+        height: auto;
+        width: 95vw;
+        justify-content: flex-start;
+        padding-top: 5vh;
+    }
+
+    .exitDungeonDiv {
+        width: 90vw;
+        padding: 3vw;
+    }
 }
 .menuSelect {
     font-size: 1.5vw;
