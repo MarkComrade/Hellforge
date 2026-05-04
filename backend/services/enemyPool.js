@@ -83,7 +83,7 @@ const ENEMY_POOL = {
                 {
                     name: 'Crippling Slash',
                     likelihood: 25,
-                    effects: { damage: 6, vulnerable: { pct: 20, turns: 1 } }
+                    effects: { damage: 6, vulnerable: { pct: 20, turns: 2 } }
                 },
                 { name: 'Shield Raise', likelihood: 20, effects: { block: 12 } },
                 {
@@ -166,7 +166,7 @@ const ENEMY_POOL = {
                 {
                     name: 'Soul Sap',
                     likelihood: 20,
-                    effects: { damage: 9, lifesteal: { pct: 30, turns: 1 } }
+                    effects: { damage: 9, lifesteal: { pct: 30, turns: 2 } }
                 },
                 {
                     name: 'Bone Fortress',
@@ -198,7 +198,7 @@ const ENEMY_POOL = {
                 {
                     name: 'Crippling Charge',
                     likelihood: 20,
-                    effects: { damage: 19, vulnerable: { pct: 25, turns: 1 } }
+                    effects: { damage: 19, vulnerable: { pct: 25, turns: 2 } }
                 },
                 { name: 'Thick Hide', likelihood: 15, effects: { block: 18 }, defensive: true },
                 {
@@ -300,7 +300,7 @@ const ENEMY_POOL = {
                 {
                     name: 'Blood Arrow',
                     likelihood: 10,
-                    effects: { damage: 8, lifesteal: { pct: 25, turns: 1 } },
+                    effects: { damage: 8, lifesteal: { pct: 25, turns: 2 } },
                     defensive: true
                 }
             ]
