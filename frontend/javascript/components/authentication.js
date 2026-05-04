@@ -83,8 +83,8 @@ async function Login() {
     generateBootStrapGrid(1, 1, 12, 'authButtonRow');
     const buttonContainer = document.querySelector('.authButtonRow');
 
-    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,128}$/;
+    const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,15}$/;
 
     let loginButton = document.createElement('input');
     loginButton.setAttribute('type', 'button');
@@ -194,7 +194,7 @@ async function Register() {
                 toast(result.message, 'error');
             }
         } catch (error) {
-            toast('An error occurred during registration.', 'error');
+            toast(error.message || 'An error occurred during registration.', 'error');
             console.error(error);
         }
     });

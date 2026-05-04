@@ -23,7 +23,7 @@ async function loginUser(username, password) {
         const [rows] = await pool.query('SELECT * FROM user WHERE name = ?', [username]);
 
         if (rows.length === 0) {
-            return { success: false, message: 'Username does not exist' };
+            return { success: false, message: 'Invalid username or password' };
         }
 
         const user = rows[0];
@@ -31,7 +31,7 @@ async function loginUser(username, password) {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            return { success: false, message: 'Incorrect password' };
+            return { success: false, message: 'Invalid username or password' };
         }
 
         return { success: true, userId: user.userId, message: 'Successful login' };
@@ -128,7 +128,7 @@ async function loginAdmin(username, password) {
         const [rows] = await pool.query('SELECT * FROM admin WHERE name = ?', [username]);
 
         if (rows.length === 0) {
-            return { success: false, message: 'Username does not exist' };
+            return { success: false, message: 'Invalid username or password' };
         }
 
         const admin = rows[0];
@@ -136,7 +136,7 @@ async function loginAdmin(username, password) {
         const passwordMatch = await bcrypt.compare(password, admin.password);
 
         if (!passwordMatch) {
-            return { success: false, message: 'Incorrect password' };
+            return { success: false, message: 'Invalid username or password' };
         }
 
         return { success: true, adminId: admin.adminId, message: 'Successful login' };
