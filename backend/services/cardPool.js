@@ -52,7 +52,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 2, bleed: 2 }
+            effects: { damage: 2, scorch: 2 }
         },
         {
             id: 6,
@@ -1415,7 +1415,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 2 }
+            effects: { damage: 2, vulnerable: { pct: 10, turns: 1 } }
         },
         {
             id: 62,
@@ -1455,7 +1455,7 @@
             exhaust: false,
             targetType: 'single',
             affectedTargets: 1,
-            effects: { damage: 2, block: 2 }
+            effects: { damage: 2, block: 1, scorch: 1 }
         },
         {
             id: 66,
@@ -2818,7 +2818,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1, strength: 1 }
+            effects: { extraPlays: 1, strength: 2 }
         },
         {
             id: 122,
@@ -2832,13 +2832,13 @@
         },
         {
             id: 123,
-            name: 'Squint',
+            name: 'Hunger for Knowledge',
             tier: 1,
             type: 'helmet',
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1 }
+            effects: { extraPlays: 1, lifesteal: { pct: 20, turns: 1 } }
         },
         {
             id: 124,
@@ -2848,7 +2848,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { extraPlays: 1, healing: 2 }
+            effects: { extraPlays: 1, healing: 2, regen: 1 }
         },
         {
             id: 125,
@@ -4253,7 +4253,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { healing: 2, extraPlays: 1 }
+            effects: { healing: 2, regen: 1, extraPlays: 1 }
         },
         {
             id: 184,
@@ -4263,7 +4263,7 @@
             exhaust: false,
             targetType: 'self',
             affectedTargets: 1,
-            effects: { block: 4 }
+            effects: { block: 4, deflect: { pct: 15, turns: 2 } }
         },
         {
             id: 185,
